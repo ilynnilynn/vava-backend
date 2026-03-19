@@ -5,7 +5,7 @@ import type { ProService, ProNailPackage, ServiceCategory, ServiceStyleModifier 
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { toggleService, updateServicePrice } from '@/app/(pro)/dashboard/actions'
+import { toggleService, updateServicePrice } from '@/app/pro/(auth)/dashboard/actions'
 
 // ── Types ───────────────────────────────────────────────────
 

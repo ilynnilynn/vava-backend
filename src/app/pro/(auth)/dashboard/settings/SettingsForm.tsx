@@ -4,17 +4,17 @@ import { useState, useTransition } from 'react'
 import type { Pro } from '@/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { updateSettings } from '@/app/(pro)/dashboard/actions'
+import { updateSettings } from '@/app/pro/(auth)/dashboard/actions'
 
 type Props = {
   pro: Pro
 }
 
 export function SettingsForm({ pro }: Props) {
-  const [displayName, setDisplayName] = useState(pro.display_name)
-  const [studioAddress, setStudioAddress] = useState(pro.studio_address)
-  const [igHandle, setIgHandle] = useState(pro.ig_handle)
-  const [phone, setPhone] = useState(pro.phone)
+  const [displayName, setDisplayName] = useState(pro.display_name ?? '')
+  const [studioAddress, setStudioAddress] = useState(pro.studio_address ?? '')
+  const [igHandle, setIgHandle] = useState(pro.ig_handle ?? '')
+  const [phone, setPhone] = useState(pro.phone ?? '')
   const [noShowWindow, setNoShowWindow] = useState(pro.no_show_window_minutes)
 
   const [isPending, startTransition] = useTransition()
@@ -136,10 +136,10 @@ export function SettingsForm({ pro }: Props) {
       <div className="space-y-1">
         <label className="text-sm font-medium">作品集</label>
         <p className="text-xs text-muted-foreground">
-          最少 3 張（{pro.portfolio_photos.length} 張）
+          最少 3 張（{pro.portfolio_photos?.length ?? 0} 張）
         </p>
         <div className="grid grid-cols-3 gap-2">
-          {pro.portfolio_photos.map((url, i) => (
+          {(pro.portfolio_photos ?? []).map((url, i) => (
             <div
               key={i}
               className="aspect-square rounded-lg bg-muted border overflow-hidden"

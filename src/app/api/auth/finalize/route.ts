@@ -44,17 +44,14 @@ export async function POST(req: NextRequest) {
 
       const { data: pro } = await supabase
         .from('pros')
-        .select('is_approved, submitted_at, is_suspended')
+        .select('is_approved, submitted_at, standing')
         .eq('id', supabaseUserId)
         .single()
 
-      if (!pro)             return NextResponse.json({ redirectTo: '/pro/onboarding' })
-      if (pro.is_suspended) return NextResponse.json({ redirectTo: '/pro/suspended' })
-      if (!pro.is_approved) {
-        if (pro.submitted_at) return NextResponse.json({ redirectTo: '/pro/pending' })
-        return NextResponse.json({ redirectTo: '/pro/onboarding' })
-      }
-      return NextResponse.json({ redirectTo: '/pro/dashboard' })
+      if (!pro)                          return NextResponse.json({ redirectTo: '/pro/onboarding' })
+      if (pro.standing === 'suspended')  return NextResponse.json({ redirectTo: '/pro/suspended' })
+      if (pro.submitted_at) return NextResponse.json({ redirectTo: '/pro/dashboard' })
+      return NextResponse.json({ redirectTo: '/pro/onboarding' })
 
     } else {
       await upsertUser({

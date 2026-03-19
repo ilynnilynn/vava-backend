@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Switch } from '@/components/ui/switch'
-import { toggleAccepting } from '@/app/(pro)/dashboard/actions'
+import { toggleAccepting } from '@/app/pro/(auth)/dashboard/actions'
 
 type Props = {
   initialValue: boolean

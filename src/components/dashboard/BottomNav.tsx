@@ -13,12 +13,12 @@ import {
 import { cn } from '@/lib/utils'
 
 const tabs = [
-  { href: '/dashboard', label: '首頁', icon: Home },
-  { href: '/dashboard/slots', label: '時段', icon: CalendarClock },
-  { href: '/dashboard/history', label: '紀錄', icon: ClipboardList },
-  { href: '/dashboard/services', label: '服務', icon: Scissors },
-  { href: '/dashboard/settings', label: '設定', icon: Settings },
-  { href: '/dashboard/subscription', label: '訂閱', icon: CreditCard },
+  { href: '/pro/dashboard', label: '首頁', icon: Home },
+  { href: '/pro/dashboard/slots', label: '時段', icon: CalendarClock },
+  { href: '/pro/dashboard/history', label: '紀錄', icon: ClipboardList },
+  { href: '/pro/dashboard/services', label: '服務', icon: Scissors },
+  { href: '/pro/dashboard/settings', label: '設定', icon: Settings },
+  { href: '/pro/dashboard/subscription', label: '訂閱', icon: CreditCard },
 ] as const
 
 export function BottomNav() {
@@ -29,8 +29,8 @@ export function BottomNav() {
       <div className="mx-auto flex max-w-lg items-center justify-around">
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive =
-            href === '/dashboard'
-              ? pathname === '/dashboard'
+            href === '/pro/dashboard'
+              ? pathname === '/pro/dashboard'
               : pathname.startsWith(href)
 
           return (

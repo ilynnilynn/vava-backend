@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import type { Slot } from '@/types'
 import { cn } from '@/lib/utils'
-import { addSlotAction, removeSlotAction } from '@/app/(pro)/dashboard/actions'
+import { addSlotAction, removeSlotAction } from '@/app/pro/(auth)/dashboard/actions'
 
 // ── Constants (mirrored from lib/slots — can't import server module in client)
 const SLOT_WINDOW_HOURS = 72

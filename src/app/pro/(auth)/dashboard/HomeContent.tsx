@@ -81,7 +81,7 @@ export function HomeContent({ pro, bookings }: Props) {
 
       {/* Shortcut to slots */}
       <Link
-        href="/dashboard/slots"
+        href="/pro/dashboard/slots"
         className="flex items-center gap-2 rounded-lg border p-4 text-sm font-medium hover:bg-accent transition-colors"
       >
         <CalendarClock className="h-5 w-5 text-primary" />

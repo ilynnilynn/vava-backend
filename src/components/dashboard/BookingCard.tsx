@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { Booking, BookingStatus } from '@/types'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { completeBookingAction, markNoShowAction, cancelBookingAction } from '@/app/(pro)/dashboard/actions'
+import { completeBookingAction, markNoShowAction, cancelBookingAction } from '@/app/pro/(auth)/dashboard/actions'
 
 // ── Status badge ────────────────────────────────────────────
 
