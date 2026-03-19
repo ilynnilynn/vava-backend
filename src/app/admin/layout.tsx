@@ -7,6 +7,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function AdminLayout({
   children,
@@ -18,13 +19,18 @@ export default async function AdminLayout({
 
   if (!user) redirect('/login')
 
-  const { data: userData } = await supabase
-    .from('users')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single()
+  // Check admin status:
+  // 1. JWT app_metadata (fast, works after re-login)
+  // 2. Fallback: read auth.users directly via admin API (works immediately after SQL update)
+  let isAdmin = user.app_metadata?.is_admin === true
 
-  if (!userData?.is_admin) redirect('/login')
+  if (!isAdmin) {
+    const admin = createAdminClient()
+    const { data: { user: freshUser } } = await admin.auth.admin.getUserById(user.id)
+    isAdmin = freshUser?.app_metadata?.is_admin === true
+  }
+
+  if (!isAdmin) redirect('/login')
 
   return (
     <div className="min-h-screen bg-background">

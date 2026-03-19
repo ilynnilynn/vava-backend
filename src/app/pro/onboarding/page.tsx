@@ -275,19 +275,25 @@ export default function ProOnboardingPage() {
         portfolioUrls.push(publicUrl)
       }
 
-      // ── Upload ID photo ───────────────────────────────────
+      // ── Upload ID photo (via server to bypass storage RLS) ──
       setUploadProgress('上傳證件中⋯')
       let idPhotoPath: string | null = null
 
       if (idPhotoFile) {
-        const ext = idPhotoFile.name.split('.').pop() ?? 'jpg'
-        const path = `${user.id}/front.${ext}`
+        const idForm = new FormData()
+        idForm.append('file', idPhotoFile)
 
-        const { error: idErr } = await supabase.storage
-          .from('id-photos')
-          .upload(path, idPhotoFile, { upsert: true })
+        const idRes = await fetch('/api/pro/upload-id', {
+          method: 'POST',
+          body: idForm,
+        })
 
-        if (idErr) throw new Error(`證件上傳失敗：${idErr.message}`)
+        if (!idRes.ok) {
+          const idBody = await idRes.json().catch(() => ({}))
+          throw new Error(`證件上傳失敗：${idBody.error ?? 'Unknown error'}`)
+        }
+
+        const { path } = await idRes.json()
         idPhotoPath = path
       }
 

@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const PHONE_REGEX = /^09\d{8}$/
 
@@ -53,8 +54,13 @@ export async function POST(req: NextRequest) {
   if (portfolio_urls.length < 3) return NextResponse.json({ error: '至少需要 3 張作品照' }, { status: 400 })
   if (!id_photo_path) return NextResponse.json({ error: '請上傳身分證件' }, { status: 400 })
 
-  // ── Save pros row ───────────────────────────────────────────
-  const { error: proError } = await supabase
+  // ── Save pros row (admin client — bypasses RLS) ─────────────
+  // Uses service role because the pros RLS write policy checks
+  // auth.uid() = user_id, which may be NULL for rows created
+  // before the Phase 2 user_id fix.
+  const admin = createAdminClient()
+
+  const { error: proError } = await admin
     .from('pros')
     .update({
       display_name,
@@ -65,7 +71,7 @@ export async function POST(req: NextRequest) {
       studio_address,
       nail_scope:              nail_scope ?? null,
       no_show_window_minutes,
-      portfolio_urls,
+      portfolio_photos:         portfolio_urls,
       id_photo_path:           id_photo_path ?? null,
       submitted_at:            new Date().toISOString(),
     })
@@ -85,7 +91,7 @@ export async function POST(req: NextRequest) {
       is_enabled:  true,
     }))
 
-    const { error: svcError } = await supabase
+    const { error: svcError } = await admin
       .from('pro_services')
       .upsert(serviceRows, { onConflict: 'pro_id,category_id' })
 

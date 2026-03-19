@@ -6,17 +6,31 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ApproveButton } from './ApproveButton'
+import { ImageLightbox } from './ImageLightbox'
 
 export default async function AdminProsPage() {
   const supabase = await createClient()
+  const admin = createAdminClient()
 
   const { data: pros } = await supabase
     .from('pros')
-    .select('id, display_name, phone, ig_handle, studio_address, nail_scope, portfolio_urls, submitted_at, line_user_id')
+    .select('id, display_name, phone, ig_handle, studio_address, nail_scope, portfolio_photos, submitted_at, line_user_id, id_photo_path')
     .eq('is_approved', false)
     .not('submitted_at', 'is', null)
     .order('submitted_at', { ascending: true })
+
+  // Generate signed URLs for ID photos (private bucket)
+  const idPhotoUrls: Record<string, string> = {}
+  for (const pro of pros ?? []) {
+    if (pro.id_photo_path) {
+      const { data } = await admin.storage
+        .from('id-photos')
+        .createSignedUrl(pro.id_photo_path, 60 * 60) // 1 hour
+      if (data?.signedUrl) idPhotoUrls[pro.id] = data.signedUrl
+    }
+  }
 
   const pending = pros ?? []
 
@@ -50,12 +64,12 @@ export default async function AdminProsPage() {
                 <Detail label="IG" value={pro.ig_handle ? `@${pro.ig_handle}` : '—'} />
                 <Detail label="Address" value={pro.studio_address} />
                 <Detail label="Nail scope" value={pro.nail_scope ?? '—'} />
-                <Detail label="Portfolio" value={`${pro.portfolio_urls?.length ?? 0} photos`} />
+                <Detail label="Portfolio" value={`${pro.portfolio_photos?.length ?? 0} photos`} />
               </div>
 
-              {pro.portfolio_urls && pro.portfolio_urls.length > 0 && (
+              {pro.portfolio_photos && pro.portfolio_photos.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto pb-1">
-                  {pro.portfolio_urls.slice(0, 6).map((url: string, i: number) => (
+                  {pro.portfolio_photos.slice(0, 6).map((url: string, i: number) => (
                     <img
                       key={i}
                       src={url}
@@ -63,6 +77,17 @@ export default async function AdminProsPage() {
                       className="h-20 w-20 rounded-lg object-cover shrink-0 border border-border"
                     />
                   ))}
+                </div>
+              )}
+
+              {idPhotoUrls[pro.id] && (
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">ID Photo</span>
+                  <ImageLightbox
+                    src={idPhotoUrls[pro.id]}
+                    alt="ID document"
+                    className="h-32 rounded-lg object-cover border border-border"
+                  />
                 </div>
               )}
             </div>

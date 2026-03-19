@@ -228,7 +228,6 @@ export async function upsertPro(params: {
     .upsert(
       {
         id:                params.supabaseUserId,
-        user_id:           params.supabaseUserId,
         line_user_id:      params.lineUserId,
         display_name:      params.name,
         profile_photo_url: params.pictureUrl ?? null,

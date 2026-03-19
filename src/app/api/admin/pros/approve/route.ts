@@ -19,13 +19,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: userData } = await supabase
-    .from('users')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single()
+  // Check app_metadata (matches admin layout guard)
+  let isAdmin = user.app_metadata?.is_admin === true
 
-  if (!userData?.is_admin) {
+  if (!isAdmin) {
+    const admin = createAdminClient()
+    const { data: { user: freshUser } } = await admin.auth.admin.getUserById(user.id)
+    isAdmin = freshUser?.app_metadata?.is_admin === true
+  }
+
+  if (!isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

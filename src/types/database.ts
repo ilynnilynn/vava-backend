@@ -75,7 +75,6 @@ export type User = {
 
 export type Pro = {
   id: string                       // uuid PK — set to auth.users.id on creation
-  user_id: string                  // FK → auth.users(id)
   line_user_id: string             // from LINE Login OAuth. UNIQUE.
   display_name: string             // public-facing. Triggers re-review if changed.
   phone: string                    // internal/ops only. NEVER exposed to customers.
@@ -87,8 +86,11 @@ export type Pro = {
   gender: 'male' | 'female' | 'non-binary' // not editable self-serve
   profile_photo_url: string | null // from LINE profile
   portfolio_photos: string[]       // min 3. Array of URLs.
+  id_photo_path: string | null     // Supabase Storage path for ID photo (private bucket)
   is_approved: boolean             // default false. Set true by admin.
+  is_suspended: boolean            // default false. Set by flag system.
   is_accepting: boolean            // 'Accepting Requests Now' toggle. Default false.
+  submitted_at: string | null      // set when pro submits onboarding
   subscription_status: SubscriptionStatus
   confirmed_booking_count: number  // counter. Triggers paywall at 10.
   standing: ProStanding            // computed from flags — stored for fast querying
