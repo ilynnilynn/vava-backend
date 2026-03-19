@@ -46,7 +46,7 @@ export async function getAcceptingPros(): Promise<Pro[]> {
     .select('*')
     .eq('is_approved', true)
     .eq('is_accepting', true)
-    .eq('is_suspended', false)  // double-check standing even if is_accepting is stale
+    .neq('standing', 'suspended')  // double-check standing even if is_accepting is stale
     .order('created_at', { ascending: false })
   return data ?? []
 }

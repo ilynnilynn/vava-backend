@@ -104,16 +104,6 @@ export default function HomeClient({ firstName }: { firstName: string }) {
           搜尋設計師
         </Button>
 
-        {/* ── Coming soon note (remove once Phase 4 search is live) */}
-        <div className="rounded-2xl bg-secondary px-5 py-4 space-y-1">
-          <p className="text-sm font-semibold text-foreground">
-            設計師即將上線 ✦
-          </p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            我們正在審核設計師資料，更多美甲美睫師即將加入。
-            敬請期待！
-          </p>
-        </div>
 
       </div>
     </main>
