@@ -203,7 +203,7 @@ export async function upsertUser(params: {
       {
         id:                params.supabaseUserId,
         line_user_id:      params.lineUserId,
-        name:              params.name,
+        display_name:      params.name,
         profile_photo_url: params.pictureUrl ?? null,
         auth_provider:     'line',
         line_notifications: true,
@@ -228,6 +228,7 @@ export async function upsertPro(params: {
     .upsert(
       {
         id:                params.supabaseUserId,
+        user_id:           params.supabaseUserId,
         line_user_id:      params.lineUserId,
         display_name:      params.name,
         profile_photo_url: params.pictureUrl ?? null,
@@ -236,7 +237,7 @@ export async function upsertPro(params: {
         subscription_status: 'free',
         confirmed_booking_count: 0,
         standing:          'good',
-        no_show_window:    15,
+        no_show_window_minutes: 15,
       },
       { onConflict: 'id', ignoreDuplicates: false }
     )

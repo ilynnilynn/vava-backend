@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
   try {
     const [{ data: pro }, { data: customer }] = await Promise.all([
       supabase.from('pros').select('line_user_id, display_name, studio_address').eq('id', proId).single(),
-      supabase.from('users').select('name, phone').eq('id', user.id).single(),
+      supabase.from('users').select('display_name, phone').eq('id', user.id).single(),
     ])
 
     if (pro?.line_user_id && customer) {
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
 
       await notifyProBookingConfirmed({
         proLineUserId: pro.line_user_id,
-        customerName: customer.name,
+        customerName: customer.display_name,
         customerPhone: customer.phone,
         dateTime,
         serviceSummary,

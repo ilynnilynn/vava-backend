@@ -23,7 +23,7 @@ export default async function ProLayout({
   const { data: pro } = await supabase
     .from('pros')
     .select('id, is_approved, is_suspended')
-    .eq('user_id', user.id)
+    .eq('id', user.id)
     .single()
 
   if (!pro)              redirect('/pro/login')

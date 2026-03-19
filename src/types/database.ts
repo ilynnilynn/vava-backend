@@ -61,7 +61,7 @@ export type ServiceDomain = 'nails' | 'lashes'
 export type User = {
   id: string                       // uuid PK, auto-generated
   line_user_id: string             // from LINE Login OAuth. UNIQUE.
-  name: string                     // editable by user
+  display_name: string             // editable by user
   phone: string                    // required at onboarding
   birth_year: number               // required, read-only after set
   profile_photo_url: string | null // from LINE profile
@@ -74,7 +74,8 @@ export type User = {
 // ── Table: pros ──────────────────────────────────────────────
 
 export type Pro = {
-  id: string                       // uuid PK, auto-generated
+  id: string                       // uuid PK — set to auth.users.id on creation
+  user_id: string                  // FK → auth.users(id)
   line_user_id: string             // from LINE Login OAuth. UNIQUE.
   display_name: string             // public-facing. Triggers re-review if changed.
   phone: string                    // internal/ops only. NEVER exposed to customers.
@@ -91,7 +92,7 @@ export type Pro = {
   subscription_status: SubscriptionStatus
   confirmed_booking_count: number  // counter. Triggers paywall at 10.
   standing: ProStanding            // computed from flags — stored for fast querying
-  no_show_window: 10 | 15 | 20    // minutes before pro can mark no-show. Default 15.
+  no_show_window_minutes: 10 | 15 | 20  // minutes before pro can mark no-show. Default 15.
   created_at: string
   updated_at: string
 }

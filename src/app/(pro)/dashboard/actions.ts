@@ -85,7 +85,7 @@ export async function updateSettings(formData: {
   studio_lng?: number | null
   ig_handle?: string
   phone?: string
-  no_show_window?: 10 | 15 | 20
+  no_show_window_minutes?: 10 | 15 | 20
   portfolio_photos?: string[]
 }): Promise<Result<null>> {
   const proId = await getProId()
@@ -103,7 +103,7 @@ export async function updateSettings(formData: {
   }
   if (formData.ig_handle !== undefined) update.ig_handle = formData.ig_handle
   if (formData.phone !== undefined) update.phone = formData.phone
-  if (formData.no_show_window !== undefined) update.no_show_window = formData.no_show_window
+  if (formData.no_show_window_minutes !== undefined) update.no_show_window_minutes = formData.no_show_window_minutes
   if (formData.portfolio_photos !== undefined) {
     if (formData.portfolio_photos.length < 3) {
       return { data: null, error: 'Minimum 3 portfolio photos required' }

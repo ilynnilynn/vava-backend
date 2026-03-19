@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('name, phone, birth_year')
+    .select('display_name, phone, birth_year')
     .eq('id', user.id)
     .single()
 
@@ -29,7 +29,7 @@ export default async function HomePage() {
     redirect('/onboarding')
   }
 
-  const firstName = userData?.name?.split(' ')[0] ?? '你好'
+  const firstName = userData?.display_name?.split(' ')[0] ?? '你好'
 
   return <HomeClient firstName={firstName} />
 }

@@ -15,7 +15,7 @@ export function SettingsForm({ pro }: Props) {
   const [studioAddress, setStudioAddress] = useState(pro.studio_address)
   const [igHandle, setIgHandle] = useState(pro.ig_handle)
   const [phone, setPhone] = useState(pro.phone)
-  const [noShowWindow, setNoShowWindow] = useState(pro.no_show_window)
+  const [noShowWindow, setNoShowWindow] = useState(pro.no_show_window_minutes)
 
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +49,7 @@ export function SettingsForm({ pro }: Props) {
         studio_address: studioAddress.trim(),
         ig_handle: igHandle.trim(),
         phone: phone.trim(),
-        no_show_window: noShowWindow,
+        no_show_window_minutes: noShowWindow,
       })
       if (result.error) {
         setError(result.error)
