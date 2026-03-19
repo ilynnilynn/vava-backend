@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* ============================================================
+   VAVA Design Tokens — Figma: VAVA Design System v1.1
+   ============================================================ */
+
+@theme inline {
+  --color-background:             var(--background);
+  --color-foreground:             var(--foreground);
+  --color-primary:                var(--primary);
+  --color-primary-foreground:     var(--primary-foreground);
+  --color-secondary:              var(--secondary);
+  --color-secondary-foreground:   var(--secondary-foreground);
+  --color-muted:                  var(--muted);
+  --color-muted-foreground:       var(--muted-foreground);
+  --color-accent:                 var(--accent);
+  --color-accent-foreground:      var(--accent-foreground);
+  --color-destructive:            var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success:                var(--success);
+  --color-border:                 var(--border);
+  --color-input:                  var(--input);
+  --color-ring:                   var(--ring);
+  --color-card:                   var(--card);
+  --color-card-foreground:        var(--card-foreground);
+  --color-popover:                var(--popover);
+  --color-popover-foreground:     var(--popover-foreground);
+  --radius-sm:  calc(var(--radius) - 4px);
+  --radius-md:  calc(var(--radius) - 2px);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) + 4px);
+}
+
+:root {
+  --background:             #F5F5F0;
+  --foreground:             #1F2723;
+  --primary:                #1F2723;
+  --primary-foreground:     #FBFBF8;
+  --secondary:              #EAEAE4;
+  --secondary-foreground:   #1F2723;
+  --muted:                  #EAEAE4;
+  --muted-foreground:       #808868;
+  --accent:                 #FF5A3C;
+  --accent-foreground:      #FBFBF8;
+  --destructive:            #D93025;
+  --destructive-foreground: #FBFBF8;
+  --success:                #2E7D52;
+  --card:                   #FBFBF8;
+  --card-foreground:        #1F2723;
+  --popover:                #FBFBF8;
+  --popover-foreground:     #1F2723;
+  --border:                 #D8D9D2;
+  --input:                  #D8D9D2;
+  --ring:                   #1F2723;
+  --radius:                 0.625rem;
+}
+
+@layer base {
+  * { border-color: var(--border); }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Neuzeit Grotesk', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
