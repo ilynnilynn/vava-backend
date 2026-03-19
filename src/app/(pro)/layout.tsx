@@ -1,10 +1,13 @@
 // ============================================================
 // PRO LAYOUT — route group (pro)
 //
-// Auth guard: must be logged in AND be an approved pro.
-// Redirects to /pro/login if no session.
-// Redirects to /pro/pending if pro exists but not yet approved.
-// Redirects to /pro/login if no pro record at all.
+// Auth guard: must be logged in AND be a submitted pro.
+// Redirects to /pro/login if no session or no pro record.
+// Redirects to /pro/suspended if pro is suspended.
+// Redirects to /pro/onboarding if pro hasn't submitted yet.
+//
+// NOTE: is_approved only controls visibility in customer search,
+// not dashboard access. Pros can use the dashboard while pending.
 // ============================================================
 
 import { redirect } from 'next/navigation'
@@ -22,13 +25,13 @@ export default async function ProLayout({
 
   const { data: pro } = await supabase
     .from('pros')
-    .select('id, is_approved, is_suspended')
+    .select('id, is_approved, is_suspended, submitted_at')
     .eq('id', user.id)
     .single()
 
   if (!pro)              redirect('/pro/login')
   if (pro.is_suspended)  redirect('/pro/suspended')
-  if (!pro.is_approved)  redirect('/pro/pending')
+  if (!pro.submitted_at) redirect('/pro/onboarding')
 
   return <>{children}</>
 }

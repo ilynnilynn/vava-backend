@@ -27,7 +27,7 @@ export default async function ProLoginPage({
       .single()
 
     if (pro?.is_approved)  redirect('/pro/dashboard')
-    if (pro?.submitted_at) redirect('/pro/pending')
+    if (pro?.submitted_at) redirect('/pro/dashboard')
     if (pro)               redirect('/pro/onboarding')
   }
 
