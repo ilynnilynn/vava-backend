@@ -3,6 +3,8 @@
 import { useState, useMemo } from 'react'
 import ProCard from './ProCard'
 import SearchFilters from './SearchFilters'
+import SearchMap from './SearchMap'
+import type { MapPin } from './SearchMap'
 
 export type SlotInfo = {
   id: string
@@ -17,6 +19,8 @@ export type ProResult = {
   studioAddress: string
   district: string
   distanceKm: number | null
+  studioLat: number | null
+  studioLng: number | null
   availableSlotCount: number
   slots: SlotInfo[]
   startingPrice: number
@@ -29,13 +33,16 @@ type Props = {
   pros: ProResult[]
   fallbackTier: 'exact' | 'closest' | 'none'
   hasUserLocation: boolean
+  userLat: number | null
+  userLng: number | null
   wizardParams: string
 }
 
-export default function SearchResultsList({ pros, fallbackTier, hasUserLocation, wizardParams }: Props) {
+export default function SearchResultsList({ pros, fallbackTier, hasUserLocation, userLat, userLng, wizardParams }: Props) {
   const [minPrice, setMinPrice] = useState<number | null>(null)
   const [maxPrice, setMaxPrice] = useState<number | null>(null)
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null)
+  const [highlightedProId, setHighlightedProId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     let result = pros
@@ -51,10 +58,33 @@ export default function SearchResultsList({ pros, fallbackTier, hasUserLocation,
     return result
   }, [pros, minPrice, maxPrice, maxDistanceKm, hasUserLocation])
 
+  // Build map pins from filtered pros that have lat/lng
+  const mapPins: MapPin[] = useMemo(() => {
+    return filtered
+      .filter((p): p is ProResult & { studioLat: number; studioLng: number } =>
+        p.studioLat !== null && p.studioLng !== null
+      )
+      .map(p => ({
+        id: p.proId,
+        lat: p.studioLat,
+        lng: p.studioLng,
+        label: p.displayName,
+      }))
+  }, [filtered])
+
   return (
     <>
+      {/* Map — top 1/3 */}
+      <SearchMap
+        pins={mapPins}
+        userLat={userLat}
+        userLng={userLng}
+        selectedPinId={highlightedProId}
+        onPinClick={setHighlightedProId}
+      />
+
       {/* Filters */}
-      <div className="px-5 pb-4">
+      <div className="px-5 pt-4 pb-4">
         <SearchFilters
           minPrice={minPrice}
           maxPrice={maxPrice}

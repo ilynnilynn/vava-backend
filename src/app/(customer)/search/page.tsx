@@ -127,6 +127,8 @@ export default async function SearchPage({
         studioAddress: pro.studio_address,
         district,
         distanceKm,
+        studioLat: pro.studio_lat ?? null,
+        studioLng: pro.studio_lng ?? null,
         availableSlotCount: slots.length,
         slots: slots.map(s => ({
           id: s.id,
@@ -193,6 +195,8 @@ export default async function SearchPage({
         pros={sortedPros.length > 0 ? sortedPros : fallbackPros}
         fallbackTier={fallbackTier}
         hasUserLocation={userLat !== null}
+        userLat={userLat}
+        userLng={userLng}
         wizardParams={wizardParams}
       />
     </main>
