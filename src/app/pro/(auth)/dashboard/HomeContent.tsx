@@ -10,24 +10,36 @@ import { CalendarClock } from 'lucide-react'
 type Props = {
   pro: Pro
   bookings: Booking[]
+  proposedSlotMap?: Record<string, string>
 }
 
-export function HomeContent({ pro, bookings }: Props) {
+function formatProposedTime(startsAt: string): string {
+  return new Date(startsAt).toLocaleString('zh-TW', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+export function HomeContent({ pro, bookings, proposedSlotMap = {} }: Props) {
   const [now] = useState(() => Date.now())
 
   const today = new Date(now).toDateString()
   const in72hr = now + 72 * 60 * 60 * 1000
 
+  const activeStatuses = new Set(['confirmed', 'reschedule_pending'])
+
   const todayBookings = bookings.filter(
     (b) =>
       new Date(b.starts_at).toDateString() === today &&
-      b.status === 'confirmed'
+      activeStatuses.has(b.status)
   )
 
   const upcomingBookings = bookings.filter((b) => {
     const t = new Date(b.starts_at).getTime()
     return (
-      b.status === 'confirmed' &&
+      activeStatuses.has(b.status) &&
       new Date(b.starts_at).toDateString() !== today &&
       t > now &&
       t <= in72hr
@@ -60,7 +72,15 @@ export function HomeContent({ pro, bookings }: Props) {
           </p>
         ) : (
           todayBookings.map((b) => (
-            <BookingCard key={b.id} booking={b} />
+            <BookingCard
+              key={b.id}
+              booking={b}
+              proposedSlotTime={
+                b.proposed_slot_id && proposedSlotMap[b.proposed_slot_id]
+                  ? formatProposedTime(proposedSlotMap[b.proposed_slot_id])
+                  : undefined
+              }
+            />
           ))
         )}
       </section>
@@ -74,7 +94,15 @@ export function HomeContent({ pro, bookings }: Props) {
           </p>
         ) : (
           upcomingBookings.map((b) => (
-            <BookingCard key={b.id} booking={b} />
+            <BookingCard
+              key={b.id}
+              booking={b}
+              proposedSlotTime={
+                b.proposed_slot_id && proposedSlotMap[b.proposed_slot_id]
+                  ? formatProposedTime(proposedSlotMap[b.proposed_slot_id])
+                  : undefined
+              }
+            />
           ))
         )}
       </section>

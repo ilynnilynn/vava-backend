@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
+import { parseUTC } from '@/lib/utils'
+import PortfolioGallery from './PortfolioGallery'
 import type {
   Slot,
   ProService,
@@ -21,6 +24,9 @@ type ProInfo = {
   studioAddress: string
   profilePhotoUrl: string | null
   noShowWindowMinutes: number
+  portfolioPhotos: string[]
+  averageRating: number | null
+  ratingCount: number
 }
 
 type BookingWizardProps = {
@@ -45,6 +51,7 @@ type WizardState = {
   addonIds: string[]
   preference: string[]
   customerNote: string
+  briefingRefPhotoUrl: string | null
 }
 
 const INITIAL_STATE: WizardState = {
@@ -58,6 +65,7 @@ const INITIAL_STATE: WizardState = {
   addonIds: [],
   preference: [],
   customerNote: '',
+  briefingRefPhotoUrl: null,
 }
 
 // ── Step definitions by domain ───────────────────────────────
@@ -98,8 +106,11 @@ export default function BookingWizard({
 }: BookingWizardProps) {
   const router = useRouter()
   const [state, setState] = useState<WizardState>(INITIAL_STATE)
+  const [availableSlots, setAvailableSlots] = useState<Slot[]>(slots)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null)
 
   // Filter categories/styles to this domain & pro
   const proCategoryIds = new Set(proServices.map(ps => ps.category_id))
@@ -118,7 +129,7 @@ export default function BookingWizard({
   const currentStep = steps[state.step]
 
   // Style modifiers filtered to domain
-  const domainStyles = styleModifiers.filter(s => s.domain === domain)
+  const domainStyles = styleModifiers.filter(s => s.service_type === domain)
 
   function update(partial: Partial<WizardState>) {
     setState(prev => ({ ...prev, ...partial }))
@@ -130,6 +141,32 @@ export default function BookingWizard({
 
   function back() {
     setState(prev => ({ ...prev, step: Math.max(0, prev.step - 1) }))
+  }
+
+  // ── Photo upload ─────────────────────────────────────────
+
+  async function handlePhotoUpload(file: File) {
+    setUploadingPhoto(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${crypto.randomUUID()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('reference-photos')
+        .upload(path, file, { contentType: file.type })
+      if (uploadError) {
+        setError('照片上傳失敗，請稍後再試')
+        return
+      }
+      const { data: urlData } = supabase.storage
+        .from('reference-photos')
+        .getPublicUrl(path)
+      update({ briefingRefPhotoUrl: urlData.publicUrl })
+    } catch {
+      setError('照片上傳失敗，請稍後再試')
+    } finally {
+      setUploadingPhoto(false)
+    }
   }
 
   // ── Price calculation ──────────────────────────────────────
@@ -212,12 +249,34 @@ export default function BookingWizard({
           nailScope: state.nailScope,
           preference: state.preference.length > 0 ? state.preference : null,
           customerNote: state.customerNote.trim() || null,
+          briefingRefPhotoUrl: state.briefingRefPhotoUrl,
         }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
+        if (res.status === 409) {
+          // Slot taken — reset to slot picker and refresh available slots
+          setError('此時段剛被預約，請重新選擇')
+          setState({ ...INITIAL_STATE })
+          try {
+            const supabase = createClient()
+            const { data: freshSlots } = await supabase
+              .from('slots')
+              .select('*')
+              .eq('pro_id', pro.id)
+              .eq('is_booked', false)
+              .eq('is_expired', false)
+              .gte('starts_at', new Date().toISOString())
+              .order('starts_at', { ascending: true })
+            if (freshSlots) setAvailableSlots(freshSlots)
+          } catch {
+            // best-effort refresh
+          }
+          setSubmitting(false)
+          return
+        }
         setError(data.error ?? '預約失敗，請稍後再試')
         setSubmitting(false)
         return
@@ -234,6 +293,15 @@ export default function BookingWizard({
 
   return (
     <div className="pb-12">
+      {/* Portfolio gallery lightbox */}
+      {galleryIndex !== null && pro.portfolioPhotos.length > 0 && (
+        <PortfolioGallery
+          photos={pro.portfolioPhotos}
+          initialIndex={galleryIndex}
+          onClose={() => setGalleryIndex(null)}
+        />
+      )}
+
       {/* Header */}
       <header className="px-5 pt-12 pb-4">
         <button onClick={() => router.back()} className="text-xs text-muted-foreground">
@@ -250,10 +318,30 @@ export default function BookingWizard({
             )}
           </div>
           <div>
-            <p className="text-base font-semibold text-foreground">{pro.displayName}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-semibold text-foreground">{pro.displayName}</p>
+              {pro.averageRating !== null && (
+                <span className="text-xs text-muted-foreground">
+                  <span className="text-yellow-400">★</span> {pro.averageRating} ({pro.ratingCount})
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">{pro.studioAddress}</p>
           </div>
         </div>
+        {pro.portfolioPhotos.length > 0 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {pro.portfolioPhotos.map((url, i) => (
+              <button
+                key={i}
+                onClick={() => setGalleryIndex(i)}
+                className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-secondary"
+              >
+                <img src={url} alt={`${pro.displayName} 作品 ${i + 1}`} className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Progress */}
@@ -274,7 +362,7 @@ export default function BookingWizard({
       <div className="px-5">
         {currentStep === 'slot' && (
           <SlotPicker
-            slots={slots}
+            slots={availableSlots}
             selectedId={state.slotId}
             onSelect={(slotId, startsAt) => {
               update({ slotId, startsAt })
@@ -327,6 +415,10 @@ export default function BookingWizard({
             customerNote={state.customerNote}
             onPreferenceChange={(pref) => update({ preference: pref })}
             onNoteChange={(note) => update({ customerNote: note })}
+            refPhotoUrl={state.briefingRefPhotoUrl}
+            uploadingPhoto={uploadingPhoto}
+            onPhotoSelect={(file) => handlePhotoUpload(file)}
+            onPhotoRemove={() => update({ briefingRefPhotoUrl: null })}
           />
         )}
 
@@ -421,17 +513,17 @@ function getDensityDelta(ps: ProService, density: LashDensity): number {
 }
 
 function formatSlotTime(startsAt: string): string {
-  const date = new Date(startsAt)
+  const date = new Date(parseUTC(startsAt))
   return date.toLocaleTimeString('zh-TW', {
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
-function groupSlotsByDate(slots: Slot[]): Map<string, Slot[]> {
+function groupSlotsByDate(slotsToGroup: Slot[]): Map<string, Slot[]> {
   const grouped = new Map<string, Slot[]>()
-  for (const slot of slots) {
-    const dateKey = new Date(slot.starts_at).toLocaleDateString('zh-TW', {
+  for (const slot of slotsToGroup) {
+    const dateKey = new Date(parseUTC(slot.starts_at)).toLocaleDateString('zh-TW', {
       month: 'long',
       day: 'numeric',
       weekday: 'short',
@@ -723,11 +815,19 @@ function PreferencesStep({
   customerNote,
   onPreferenceChange,
   onNoteChange,
+  refPhotoUrl,
+  uploadingPhoto,
+  onPhotoSelect,
+  onPhotoRemove,
 }: {
   preference: string[]
   customerNote: string
   onPreferenceChange: (pref: string[]) => void
   onNoteChange: (note: string) => void
+  refPhotoUrl: string | null
+  uploadingPhoto: boolean
+  onPhotoSelect: (file: File) => void
+  onPhotoRemove: () => void
 }) {
   function toggle(value: string) {
     onPreferenceChange(
@@ -758,6 +858,46 @@ function PreferencesStep({
             {opt.label}
           </button>
         ))}
+      </div>
+
+      {/* Reference photo upload */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">參考照片</label>
+        <p className="text-xs text-muted-foreground">上傳想要的風格參考圖</p>
+        {refPhotoUrl ? (
+          <div className="relative inline-block">
+            <img
+              src={refPhotoUrl}
+              alt="參考照片"
+              className="h-32 w-32 rounded-xl object-cover border border-border"
+            />
+            <button
+              type="button"
+              onClick={onPhotoRemove}
+              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-primary-foreground text-xs"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <label className="flex h-32 w-32 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-border bg-card text-muted-foreground hover:border-foreground/30 transition-colors">
+            {uploadingPhoto ? (
+              <span className="text-xs">上傳中...</span>
+            ) : (
+              <span className="text-2xl">+</span>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploadingPhoto}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) onPhotoSelect(file)
+              }}
+            />
+          </label>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -795,7 +935,7 @@ function ConfirmStep({
   const selectedAddons = categories.filter(c => state.addonIds.includes(c.id))
 
   const dateTime = state.startsAt
-    ? new Date(state.startsAt).toLocaleString('zh-TW', {
+    ? new Date(parseUTC(state.startsAt)).toLocaleString('zh-TW', {
         month: 'long',
         day: 'numeric',
         weekday: 'short',
@@ -853,6 +993,17 @@ function ConfirmStep({
         )}
         {state.customerNote.trim() && (
           <Row label="備註" value={state.customerNote.trim()} />
+        )}
+
+        {state.briefingRefPhotoUrl && (
+          <div className="flex justify-between items-start text-sm">
+            <span className="text-muted-foreground">參考照片</span>
+            <img
+              src={state.briefingRefPhotoUrl}
+              alt="參考照片"
+              className="h-20 w-20 rounded-xl object-cover border border-border"
+            />
+          </div>
         )}
 
         <div className="border-t border-border pt-3 mt-3">

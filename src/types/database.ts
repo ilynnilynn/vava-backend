@@ -61,7 +61,7 @@ export type ServiceDomain = 'nails' | 'lashes'
 export type User = {
   id: string                       // uuid PK, auto-generated
   line_user_id: string             // from LINE Login OAuth. UNIQUE.
-  display_name: string             // editable by user
+  name: string                     // editable by user (deployed column is 'name', not 'display_name')
   phone: string                    // required at onboarding
   birth_year: number               // required, read-only after set
   profile_photo_url: string | null // from LINE profile
@@ -95,6 +95,8 @@ export type Pro = {
   confirmed_booking_count: number  // counter. Triggers paywall at 10.
   standing: ProStanding            // computed from flags — stored for fast querying
   no_show_window_minutes: 10 | 15 | 20  // minutes before pro can mark no-show. Default 15.
+  work_start_hour: number               // 0–23, default 10
+  work_end_hour: number                 // 1–24, default 20
   created_at: string
   updated_at: string
 }
@@ -119,10 +121,9 @@ export type ServiceCategory = {
 
 export type ServiceStyleModifier = {
   id: string
-  domain: ServiceDomain
+  service_type: string  // deployed column (not 'domain')
   name_zh: string       // e.g. 貓眼, 日式
   name_en: string       // e.g. Cat eye, Japanese
-  is_package: boolean   // true = 套餐 — pro sets fixed total, disables add-ons
   is_active: boolean    // admin can deprecate. Default true.
 }
 
@@ -190,7 +191,7 @@ export type Booking = {
   treatment_tier: TreatmentTier | null  // 保養 only
   fill_in_days: number | null            // 補睫 only
   is_returning_customer: boolean | null  // 補睫 only
-  starts_at: string                      // ISO timestamp — session start time
+  starts_at: string                      // populated from slots.starts_at via slot_id join (not a DB column)
   price_min: number                      // MIN across matching pros at booking time
   price_max: number                      // MAX across matching pros at booking time
   status: BookingStatus
@@ -201,13 +202,15 @@ export type Booking = {
   no_show_reporter: NoShowReporter | null
   customer_late_notified_at: string | null
   reminder_sent_at: string | null
-  session_ends_at: string               // starts_at + total duration. Set at confirm.
+  rating_prompt_sent: boolean           // true if rating prompt was sent after completion
+  session_ends_at: string               // slot.starts_at + total duration. Set at confirm.
   nail_package_id: string | null        // 套餐 only
   preference: string[] | null           // e.g. ['no_conversation']
   customer_note: string | null
   completed_at: string | null           // auto at session_ends_at OR early (pro taps 結束服務)
   early_completion: boolean             // true if pro tapped 完成 before session_ends_at
   no_show_window_minutes: number        // snapshot from pro.no_show_window at confirm time. Frozen.
+  proposed_slot_id: string | null       // reschedule flow: proposed new slot_id, set when customer requests
   created_at: string                    // booking confirm timestamp
 }
 

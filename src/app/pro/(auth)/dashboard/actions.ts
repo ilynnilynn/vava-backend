@@ -4,8 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { setAccepting } from '@/lib/pros'
 import { addSlot, removeSlot } from '@/lib/slots'
-import { cancelBooking, completeBooking, markNoShow } from '@/lib/bookings'
-import type { Result } from '@/types'
+import { cancelBooking, completeBooking, markNoShow, resolveReschedule } from '@/lib/bookings'
+import type { Result, Slot } from '@/types'
 
 // ── Auth helper ─────────────────────────────────────────────
 
@@ -30,49 +30,75 @@ export async function toggleAccepting(isAccepting: boolean): Promise<Result<null
   if (!proId) return { data: null, error: 'Not authenticated' }
 
   const result = await setAccepting(proId, isAccepting)
-  revalidatePath('/dashboard')
+  revalidatePath('/pro/dashboard')
   return result
 }
 
 // ── Slot actions ────────────────────────────────────────────
 
-export async function addSlotAction(startsAt: string): Promise<Result<null>> {
+export async function addSlotAction(startsAt: string): Promise<Result<Slot>> {
   const proId = await getProId()
   if (!proId) return { data: null, error: 'Not authenticated' }
 
-  const result = await addSlot(proId, startsAt)
-  revalidatePath('/dashboard/slots')
-  revalidatePath('/dashboard')
-  return { data: null, error: result.error }
+  return addSlot(proId, startsAt)
 }
 
 export async function removeSlotAction(slotId: string): Promise<Result<null>> {
-  const result = await removeSlot(slotId)
-  revalidatePath('/dashboard/slots')
-  revalidatePath('/dashboard')
-  return result
+  return removeSlot(slotId)
 }
 
 // ── Booking actions ─────────────────────────────────────────
 
 export async function completeBookingAction(bookingId: string): Promise<Result<null>> {
   const result = await completeBooking(bookingId, true) // early = true (pro taps button)
-  revalidatePath('/dashboard')
-  revalidatePath('/dashboard/history')
+  revalidatePath('/pro/dashboard')
+  revalidatePath('/pro/dashboard/history')
   return result
 }
 
 export async function markNoShowAction(bookingId: string): Promise<Result<null>> {
   const result = await markNoShow(bookingId, 'pro')
-  revalidatePath('/dashboard')
-  revalidatePath('/dashboard/history')
+  revalidatePath('/pro/dashboard')
+  revalidatePath('/pro/dashboard/history')
   return result
 }
 
 export async function cancelBookingAction(bookingId: string): Promise<Result<null>> {
   const result = await cancelBooking(bookingId, 'pro')
-  revalidatePath('/dashboard')
-  revalidatePath('/dashboard/history')
+  revalidatePath('/pro/dashboard')
+  revalidatePath('/pro/dashboard/history')
+  return { data: null, error: result.error }
+}
+
+export async function resolveRescheduleAction(
+  bookingId: string,
+  approved: boolean
+): Promise<Result<null>> {
+  const proId = await getProId()
+  if (!proId) return { data: null, error: 'Not authenticated' }
+
+  const supabase = await createClient()
+
+  // Load proposed_slot_id
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('proposed_slot_id, pro_id')
+    .eq('id', bookingId)
+    .single()
+
+  if (!booking) return { data: null, error: 'Booking not found' }
+  if (booking.pro_id !== proId) return { data: null, error: 'Forbidden' }
+
+  const newSlotId = approved ? (booking.proposed_slot_id ?? undefined) : undefined
+  const result = await resolveReschedule(bookingId, approved, newSlotId)
+
+  // Clear proposed_slot_id
+  await supabase
+    .from('bookings')
+    .update({ proposed_slot_id: null })
+    .eq('id', bookingId)
+
+  revalidatePath('/pro/dashboard')
   return { data: null, error: result.error }
 }
 
@@ -87,6 +113,8 @@ export async function updateSettings(formData: {
   phone?: string
   no_show_window_minutes?: 10 | 15 | 20
   portfolio_photos?: string[]
+  work_start_hour?: number
+  work_end_hour?: number
 }): Promise<Result<null>> {
   const proId = await getProId()
   if (!proId) return { data: null, error: 'Not authenticated' }
@@ -111,8 +139,36 @@ export async function updateSettings(formData: {
     update.portfolio_photos = formData.portfolio_photos
   }
 
+  if (formData.work_start_hour !== undefined && formData.work_end_hour !== undefined) {
+    if (formData.work_start_hour >= formData.work_end_hour) {
+      return { data: null, error: '營業開始時間必須早於結束時間' }
+    }
+    update.work_start_hour = formData.work_start_hour
+    update.work_end_hour = formData.work_end_hour
+  } else if (formData.work_start_hour !== undefined || formData.work_end_hour !== undefined) {
+    return { data: null, error: '必須同時設定營業開始與結束時間' }
+  }
+
   if (Object.keys(update).length === 0) {
     return { data: null, error: 'No fields to update' }
+  }
+
+  // Check if re-review fields changed
+  if (formData.display_name !== undefined || formData.studio_address !== undefined) {
+    const { data: current } = await supabase
+      .from('pros')
+      .select('display_name, studio_address')
+      .eq('id', proId)
+      .single()
+
+    if (current) {
+      const nameChanged = formData.display_name !== undefined && formData.display_name !== current.display_name
+      const addressChanged = formData.studio_address !== undefined && formData.studio_address !== current.studio_address
+      if (nameChanged || addressChanged) {
+        update.is_approved = false
+        update.submitted_at = new Date().toISOString()
+      }
+    }
   }
 
   const { error } = await supabase
@@ -120,8 +176,8 @@ export async function updateSettings(formData: {
     .update(update)
     .eq('id', proId)
 
-  revalidatePath('/dashboard/settings')
-  revalidatePath('/dashboard')
+  revalidatePath('/pro/dashboard/settings')
+  revalidatePath('/pro/dashboard')
   return { data: null, error: error?.message ?? null }
 }
 
@@ -138,7 +194,7 @@ export async function toggleService(
     .update({ is_enabled: isEnabled })
     .eq('id', serviceId)
 
-  revalidatePath('/dashboard/services')
+  revalidatePath('/pro/dashboard/services')
   return { data: null, error: error?.message ?? null }
 }
 
@@ -164,6 +220,6 @@ export async function updateServicePrice(
     .update(fields)
     .eq('id', serviceId)
 
-  revalidatePath('/dashboard/services')
+  revalidatePath('/pro/dashboard/services')
   return { data: null, error: error?.message ?? null }
 }

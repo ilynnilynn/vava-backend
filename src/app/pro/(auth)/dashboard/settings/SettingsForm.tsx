@@ -16,6 +16,8 @@ export function SettingsForm({ pro }: Props) {
   const [igHandle, setIgHandle] = useState(pro.ig_handle ?? '')
   const [phone, setPhone] = useState(pro.phone ?? '')
   const [noShowWindow, setNoShowWindow] = useState(pro.no_show_window_minutes)
+  const [workStartHour, setWorkStartHour] = useState(pro.work_start_hour ?? 10)
+  const [workEndHour, setWorkEndHour] = useState(pro.work_end_hour ?? 20)
 
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -25,6 +27,28 @@ export function SettingsForm({ pro }: Props) {
   const nameChanged = displayName !== pro.display_name
   const addressChanged = studioAddress !== pro.studio_address
   const needsReReview = nameChanged || addressChanged
+
+  const [showReReviewConfirm, setShowReReviewConfirm] = useState(false)
+
+  function doSave() {
+    startTransition(async () => {
+      const result = await updateSettings({
+        display_name: displayName.trim(),
+        studio_address: studioAddress.trim(),
+        ig_handle: igHandle.trim(),
+        phone: phone.trim(),
+        no_show_window_minutes: noShowWindow,
+        work_start_hour: workStartHour,
+        work_end_hour: workEndHour,
+      })
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+      }
+      setShowReReviewConfirm(false)
+    })
+  }
 
   function handleSave() {
     setError(null)
@@ -42,21 +66,17 @@ export function SettingsForm({ pro }: Props) {
       setError('電話不能為空')
       return
     }
+    if (workStartHour >= workEndHour) {
+      setError('營業開始時間必須早於結束時間')
+      return
+    }
 
-    startTransition(async () => {
-      const result = await updateSettings({
-        display_name: displayName.trim(),
-        studio_address: studioAddress.trim(),
-        ig_handle: igHandle.trim(),
-        phone: phone.trim(),
-        no_show_window_minutes: noShowWindow,
-      })
-      if (result.error) {
-        setError(result.error)
-      } else {
-        setSuccess(true)
-      }
-    })
+    if (needsReReview) {
+      setShowReReviewConfirm(true)
+      return
+    }
+
+    doSave()
   }
 
   return (
@@ -132,6 +152,39 @@ export function SettingsForm({ pro }: Props) {
         </div>
       </div>
 
+      {/* Working hours */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">營業時間</label>
+        <p className="text-xs text-muted-foreground">
+          設定時段管理頁面顯示的時間範圍
+        </p>
+        <div className="flex items-center gap-2">
+          <select
+            value={workStartHour}
+            onChange={(e) => setWorkStartHour(Number(e.target.value))}
+            className="rounded-md border px-2 py-1.5 text-sm"
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={i}>
+                {String(i).padStart(2, '0')}:00
+              </option>
+            ))}
+          </select>
+          <span className="text-sm text-muted-foreground">至</span>
+          <select
+            value={workEndHour}
+            onChange={(e) => setWorkEndHour(Number(e.target.value))}
+            className="rounded-md border px-2 py-1.5 text-sm"
+          >
+            {Array.from({ length: 24 }, (_, i) => i + 1).map((h) => (
+              <option key={h} value={h}>
+                {String(h).padStart(2, '0')}:00
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Portfolio photos */}
       <div className="space-y-1">
         <label className="text-sm font-medium">作品集</label>
@@ -163,6 +216,32 @@ export function SettingsForm({ pro }: Props) {
           <span className="text-xs ml-2">（如需修改請聯繫客服）</span>
         </p>
       </div>
+
+      {/* Re-review confirmation dialog */}
+      {showReReviewConfirm && (
+        <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4 space-y-3">
+          <p className="text-sm font-medium text-yellow-800">
+            修改顯示名稱或地址將暫時下架您的帳號，直到管理員重新審核。確定要修改嗎？
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowReReviewConfirm(false)}
+              disabled={isPending}
+            >
+              取消
+            </Button>
+            <Button
+              size="sm"
+              onClick={doSave}
+              disabled={isPending}
+            >
+              {isPending ? '儲存中...' : '確認修改'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Error / Success */}
       {error && <p className="text-sm text-destructive">{error}</p>}

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { Booking, BookingStatus } from '@/types'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { completeBookingAction, markNoShowAction, cancelBookingAction } from '@/app/pro/(auth)/dashboard/actions'
+import { completeBookingAction, markNoShowAction, cancelBookingAction, resolveRescheduleAction } from '@/app/pro/(auth)/dashboard/actions'
 
 // ── Status badge ────────────────────────────────────────────
 
@@ -60,6 +60,8 @@ type Props = {
   serviceSummary?: string
   /** Hide action buttons (for history view) */
   readOnly?: boolean
+  /** Proposed new slot time for reschedule_pending bookings */
+  proposedSlotTime?: string | null
 }
 
 export function BookingCard({
@@ -67,6 +69,7 @@ export function BookingCard({
   customerName = '顧客',
   serviceSummary = '服務',
   readOnly = false,
+  proposedSlotTime,
 }: Props) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -127,6 +130,44 @@ export function BookingCard({
       {/* Error */}
       {error && (
         <p className="text-sm text-destructive">{error}</p>
+      )}
+
+      {/* Reschedule pending actions */}
+      {!readOnly && booking.status === 'reschedule_pending' && (
+        <div className="space-y-2 pt-1">
+          {proposedSlotTime && (
+            <p className="text-sm text-yellow-700 font-medium">
+              申請改至：{proposedSlotTime}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={() =>
+                handleAction(
+                  () => resolveRescheduleAction(booking.id, true),
+                  'approve'
+                )
+              }
+              disabled={loading !== null}
+            >
+              {loading === 'approve' ? '處理中...' : '同意改期'}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                handleAction(
+                  () => resolveRescheduleAction(booking.id, false),
+                  'decline'
+                )
+              }
+              disabled={loading !== null}
+            >
+              {loading === 'decline' ? '處理中...' : '拒絕'}
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Actions */}

@@ -18,5 +18,21 @@ export default async function DashboardHome() {
 
   const allBookings = await getProBookings(pro.id)
 
-  return <HomeContent pro={pro} bookings={allBookings} />
+  // Resolve proposed_slot_id -> starts_at for reschedule_pending bookings
+  const proposedSlotIds = allBookings
+    .filter(b => b.status === 'reschedule_pending' && b.proposed_slot_id)
+    .map(b => b.proposed_slot_id!)
+
+  const proposedSlotMap: Record<string, string> = {}
+  if (proposedSlotIds.length > 0) {
+    const { data: proposedSlots } = await supabase
+      .from('slots')
+      .select('id, starts_at')
+      .in('id', proposedSlotIds)
+    for (const slot of proposedSlots ?? []) {
+      proposedSlotMap[slot.id] = slot.starts_at
+    }
+  }
+
+  return <HomeContent pro={pro} bookings={allBookings} proposedSlotMap={proposedSlotMap} />
 }
