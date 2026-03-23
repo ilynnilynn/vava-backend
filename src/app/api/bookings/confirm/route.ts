@@ -9,8 +9,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { confirmBooking, type ConfirmBookingParams } from '@/lib/bookings'
+import { confirmBooking, getCustomerBookings, type ConfirmBookingParams } from '@/lib/bookings'
 import { notifyProBookingConfirmed } from '@/lib/notifications'
+import { hasTimeOverlap } from '@/lib/overlap'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -78,6 +79,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Slot does not belong to this pro' }, { status: 400 })
   }
 
+  // ── Check for time overlap with existing bookings ────────
+  const sessionEndsAt = new Date(
+    new Date(startsAt).getTime() + durationMinutes * 60 * 1000
+  ).toISOString()
+
+  const existingBookings = await getCustomerBookings(user.id)
+  const confirmedBookings = existingBookings
+    .filter(b => b.status === 'confirmed')
+    .map(b => ({ starts_at: b.starts_at, session_ends_at: b.session_ends_at }))
+
+  if (hasTimeOverlap(confirmedBookings, startsAt, sessionEndsAt)) {
+    return NextResponse.json({ error: '此時段與您的其他預約重疊' }, { status: 409 })
+  }
+
   // ── Confirm booking ───────────────────────────────────────
   const params: ConfirmBookingParams = {
     userId: user.id,
@@ -115,7 +130,7 @@ export async function POST(req: NextRequest) {
   try {
     const [{ data: pro }, { data: customer }] = await Promise.all([
       supabase.from('pros').select('line_user_id, display_name, studio_address').eq('id', proId).single(),
-      supabase.from('users').select('display_name, phone').eq('id', user.id).single(),
+      supabase.from('users').select('name, phone').eq('id', user.id).single(),
     ])
 
     if (pro?.line_user_id && customer) {
@@ -132,7 +147,7 @@ export async function POST(req: NextRequest) {
 
       await notifyProBookingConfirmed({
         proLineUserId: pro.line_user_id,
-        customerName: customer.display_name,
+        customerName: customer.name,
         customerPhone: customer.phone,
         dateTime,
         serviceSummary,

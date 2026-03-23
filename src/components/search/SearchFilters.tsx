@@ -1,59 +1,52 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useCallback } from 'react'
-import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 
 const PRICE_RANGES = [
   { label: 'NT$500 以下', min: 0, max: 500 },
   { label: 'NT$500–1000', min: 500, max: 1000 },
   { label: 'NT$1000–2000', min: 1000, max: 2000 },
-  { label: 'NT$2000+', min: 2000, max: undefined },
+  { label: 'NT$2000+', min: 2000, max: null },
 ] as const
 
-export default function SearchFilters() {
+const DISTANCE_PRESETS = [
+  { label: '1km', value: 1 },
+  { label: '3km', value: 3 },
+  { label: '5km', value: 5 },
+] as const
+
+type Props = {
+  minPrice: number | null
+  maxPrice: number | null
+  maxDistanceKm: number | null
+  hasUserLocation: boolean
+  wizardParams: string
+  onPriceChange: (min: number | null, max: number | null) => void
+  onDistanceChange: (km: number | null) => void
+}
+
+export default function SearchFilters({
+  minPrice,
+  maxPrice,
+  maxDistanceKm,
+  hasUserLocation,
+  wizardParams,
+  onPriceChange,
+  onDistanceChange,
+}: Props) {
   const router = useRouter()
-  const searchParams = useSearchParams()
 
-  const currentMin = searchParams.get('minPrice')
-  const currentMax = searchParams.get('maxPrice')
-  const currentQ = searchParams.get('q') ?? ''
-
-  const [locationQuery, setLocationQuery] = useState(currentQ)
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const params = new URLSearchParams(searchParams.toString())
-      for (const [key, value] of Object.entries(updates)) {
-        if (value === undefined || value === '') {
-          params.delete(key)
-        } else {
-          params.set(key, value)
-        }
-      }
-      router.push(`?${params.toString()}`)
-    },
-    [router, searchParams]
-  )
-
-  function handlePriceToggle(min: number, max: number | undefined) {
-    const isActive =
-      currentMin === String(min) &&
-      (max === undefined ? !currentMax : currentMax === String(max))
-
+  function handlePriceToggle(min: number, max: number | null) {
+    const isActive = minPrice === min && maxPrice === max
     if (isActive) {
-      updateParams({ minPrice: undefined, maxPrice: undefined })
+      onPriceChange(null, null)
     } else {
-      updateParams({
-        minPrice: String(min),
-        maxPrice: max !== undefined ? String(max) : undefined,
-      })
+      onPriceChange(min, max)
     }
   }
 
-  function handleLocationSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    updateParams({ q: locationQuery.trim() || undefined })
+  function handleDistanceToggle(km: number) {
+    onDistanceChange(maxDistanceKm === km ? null : km)
   }
 
   return (
@@ -61,10 +54,7 @@ export default function SearchFilters() {
       {/* Price range chips */}
       <div className="flex flex-wrap gap-2">
         {PRICE_RANGES.map(({ label, min, max }) => {
-          const isActive =
-            currentMin === String(min) &&
-            (max === undefined ? !currentMax : currentMax === String(max))
-
+          const isActive = minPrice === min && maxPrice === max
           return (
             <button
               key={label}
@@ -81,21 +71,35 @@ export default function SearchFilters() {
         })}
       </div>
 
-      {/* Location search */}
-      <form onSubmit={handleLocationSubmit} className="flex gap-2">
-        <Input
-          value={locationQuery}
-          onChange={(e) => setLocationQuery(e.target.value)}
-          placeholder="搜尋地區（例：大安、信義）"
-          className="text-sm"
-        />
-        <button
-          type="submit"
-          className="shrink-0 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent transition-colors"
-        >
-          搜尋
-        </button>
-      </form>
+      {/* Distance presets — only shown if user has location */}
+      {hasUserLocation && (
+        <div className="flex gap-2">
+          {DISTANCE_PRESETS.map(({ label, value }) => {
+            const isActive = maxDistanceKm === value
+            return (
+              <button
+                key={value}
+                onClick={() => handleDistanceToggle(value)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  isActive
+                    ? 'border-foreground bg-foreground text-primary-foreground'
+                    : 'border-border bg-card text-foreground hover:border-foreground/30'
+                }`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Edit request button */}
+      <button
+        onClick={() => router.push(`/book?${wizardParams}`)}
+        className="text-xs font-medium text-foreground underline"
+      >
+        編輯需求
+      </button>
     </div>
   )
 }

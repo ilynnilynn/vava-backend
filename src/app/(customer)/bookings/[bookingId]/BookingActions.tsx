@@ -14,6 +14,7 @@ type BookingActionsProps = {
 }
 
 const GRACE_PERIOD_MS = 10 * 60 * 1000 // 10 minutes
+const REVEAL_MINUTES = 10 // phone + late button revealed at −10 min
 
 function getCancelSeverity(createdAt: string, startsAt: string): {
   label: string
@@ -39,6 +40,7 @@ export default function BookingActions({
   proPhone,
 }: BookingActionsProps) {
   const router = useRouter()
+  const [showEditMenu, setShowEditMenu] = useState(false)
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [confirmingNoShow, setConfirmingNoShow] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -48,6 +50,11 @@ export default function BookingActions({
   const startsMs = new Date(startsAt).getTime()
   const minutesUntil = (startsMs - now) / 60000
   const hasStarted = now >= startsMs
+
+  // Pro phone + late button revealed at −10 min before starts_at
+  const revealMs = startsMs - REVEAL_MINUTES * 60 * 1000
+  const isRevealed = now >= revealMs
+
   const noShowActiveAt = startsMs + noShowWindowMinutes * 60 * 1000
   const canReportNoShow = now >= noShowActiveAt
 
@@ -123,8 +130,8 @@ export default function BookingActions({
 
   return (
     <div className="space-y-3">
-      {/* Pro phone — revealed at starts_at */}
-      {hasStarted && proPhone && (
+      {/* Pro phone — revealed at −10 min before starts_at */}
+      {isRevealed && proPhone && (
         <div className="rounded-xl border border-border bg-card px-4 py-3 flex justify-between items-center">
           <span className="text-sm text-muted-foreground">設計師電話</span>
           <a href={`tel:${proPhone}`} className="text-sm font-medium text-foreground underline">
@@ -134,70 +141,86 @@ export default function BookingActions({
       )}
 
       {error && (
-        <p className="text-sm text-red-500">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       )}
 
-      {/* Reschedule button — only if > 2hr away */}
-      {!hasStarted && minutesUntil > 120 && (
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/bookings/${bookingId}/reschedule`)}
-          className="w-full rounded-xl"
-        >
-          申請改期
-        </Button>
-      )}
+      {/* 編輯預約 dropdown — before session starts */}
+      {!hasStarted && !confirmingCancel && (
+        <div className="relative">
+          <Button
+            variant="outline"
+            onClick={() => setShowEditMenu(!showEditMenu)}
+            className="w-full rounded-xl"
+          >
+            編輯預約
+          </Button>
 
-      {/* Cancel button + confirmation */}
-      {!hasStarted && (
-        <>
-          {confirmingCancel ? (
-            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-              <p className="text-sm font-medium text-foreground">確定要取消預約嗎？</p>
-              <div className={`rounded-lg px-3 py-2 text-xs ${
-                cancelInfo.severity === 'grace'
-                  ? 'bg-green-50 text-green-700'
-                  : cancelInfo.severity === 'soft'
-                  ? 'bg-yellow-50 text-yellow-700'
-                  : 'bg-red-50 text-red-700'
-              }`}>
-                {cancelInfo.severity === 'grace' && '預約後 10 分鐘內取消，不會產生違規紀錄。'}
-                {cancelInfo.severity === 'soft' && '此取消將記錄為輕微違規，累積可能影響帳號狀態。'}
-                {cancelInfo.severity === 'hard' && '距離開始不足 30 分鐘，此取消將記錄為嚴重違規。'}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setConfirmingCancel(false)}
-                  disabled={loading}
-                  className="flex-1 rounded-xl"
+          {showEditMenu && (
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-lg z-10 overflow-hidden">
+              {/* Reschedule — only if > 2hr away */}
+              {minutesUntil > 120 && (
+                <button
+                  onClick={() => {
+                    setShowEditMenu(false)
+                    router.push(`/bookings/${bookingId}/reschedule`)
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors border-b border-border"
                 >
-                  返回
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleCancel}
-                  disabled={loading}
-                  className="flex-1 rounded-xl"
-                >
-                  {loading ? '取消中...' : '確認取消'}
-                </Button>
-              </div>
+                  申請改期
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowEditMenu(false)
+                  setConfirmingCancel(true)
+                }}
+                className="w-full px-4 py-3 text-left text-sm text-destructive hover:bg-secondary transition-colors"
+              >
+                取消預約（{cancelInfo.label}）
+              </button>
             </div>
-          ) : (
+          )}
+        </div>
+      )}
+
+      {/* Cancel confirmation */}
+      {!hasStarted && confirmingCancel && (
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+          <p className="text-sm font-medium text-foreground">確定要取消預約嗎？</p>
+          <div className={`rounded-lg px-3 py-2 text-xs ${
+            cancelInfo.severity === 'grace'
+              ? 'bg-success-muted text-success-foreground'
+              : cancelInfo.severity === 'soft'
+              ? 'bg-warning-muted text-warning-foreground'
+              : 'bg-destructive-muted text-destructive'
+          }`}>
+            {cancelInfo.severity === 'grace' && '預約後 10 分鐘內取消，不會產生違規紀錄。'}
+            {cancelInfo.severity === 'soft' && '此取消將記錄為輕微違規，累積可能影響帳號狀態。'}
+            {cancelInfo.severity === 'hard' && '距離開始不足 30 分鐘，此取消將記錄為嚴重違規。'}
+          </div>
+          <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setConfirmingCancel(true)}
-              className="w-full rounded-xl"
+              onClick={() => setConfirmingCancel(false)}
+              disabled={loading}
+              className="flex-1 rounded-xl"
             >
-              取消預約（{cancelInfo.label}）
+              返回
             </Button>
-          )}
-        </>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={loading}
+              className="flex-1 rounded-xl"
+            >
+              {loading ? '取消中...' : '確認取消'}
+            </Button>
+          </div>
+        </div>
       )}
 
-      {/* Late arrival button — visible after starts_at */}
-      {hasStarted && !customerLateNotifiedAt && (
+      {/* Late arrival button — visible at −10 min before starts_at, stays through session */}
+      {isRevealed && !customerLateNotifiedAt && (
         <Button
           variant="outline"
           onClick={handleLate}
@@ -208,7 +231,7 @@ export default function BookingActions({
         </Button>
       )}
 
-      {hasStarted && customerLateNotifiedAt && (
+      {isRevealed && customerLateNotifiedAt && (
         <p className="text-xs text-muted-foreground text-center">已通知設計師您會晚到</p>
       )}
 

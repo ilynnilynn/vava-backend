@@ -3,14 +3,24 @@
 // ============================================================
 // HomeClient — client shell for the home screen
 //
-// Handles the service domain selection state.
-// When the booking search flow is built (Phase 4),
-// the "搜尋設計師" button will navigate to /search?domain=nails|lashes
+// State A: no upcoming bookings → 美甲/美睫 CTA only
+// State B: has bookings → compact booking cards + CTA below
 // ============================================================
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
+import BookingCardCompact from '@/components/booking/BookingCardCompact'
+
+export type UpcomingBooking = {
+  id: string
+  startsAt: string
+  sessionEndsAt: string
+  proName: string
+  studioAddress: string
+  serviceSummary: string
+}
 
 type Domain = 'nails' | 'lashes'
 
@@ -29,14 +39,25 @@ const DOMAINS: { value: Domain; label: string; emoji: string; desc: string }[] =
   },
 ]
 
-export default function HomeClient({ firstName }: { firstName: string }) {
-  const router = useRouter()
-  const [selected, setSelected] = useState<Domain | null>(null)
+type Props = {
+  firstName: string
+  upcomingBookings: UpcomingBooking[]
+}
 
-  function handleSearch() {
-    if (!selected) return
-    // Phase 4: navigate to /search?domain=selected
-    router.push(`/search?domain=${selected}`)
+export default function HomeClient({ firstName, upcomingBookings }: Props) {
+  const router = useRouter()
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  function handleDomainSelect(domain: Domain) {
+    router.push(`/book?domain=${domain}`)
+  }
+
+  async function handleLogout() {
+    if (loggingOut) return
+    setLoggingOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.replace('/login')
   }
 
   return (
@@ -53,18 +74,31 @@ export default function HomeClient({ firstName }: { firstName: string }) {
           </h1>
         </div>
 
-        {/* Avatar placeholder — will link to profile/settings later */}
-        <div className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
-          <span className="text-sm font-semibold text-muted-foreground">
-            {firstName.charAt(0).toUpperCase()}
-          </span>
-        </div>
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="h-9 px-3 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-secondary/80 transition-colors"
+        >
+          {loggingOut ? '...' : '登出'}
+        </button>
       </header>
 
       {/* ── Body ────────────────────────────────────────────── */}
       <div className="px-5 space-y-8">
 
-        {/* Service type selector */}
+        {/* Upcoming booking cards (State B) */}
+        {upcomingBookings.length > 0 && (
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              即將到來的預約
+            </h2>
+            {upcomingBookings.map(b => (
+              <BookingCardCompact key={b.id} booking={b} />
+            ))}
+          </section>
+        )}
+
+        {/* Service type selector (always visible) */}
         <section className="space-y-3">
           <h2 className="text-sm font-medium text-muted-foreground">
             你想預約什麼？
@@ -72,38 +106,21 @@ export default function HomeClient({ firstName }: { firstName: string }) {
 
           <div className="grid grid-cols-2 gap-3">
             {DOMAINS.map(d => (
-              <button
+              <Button
                 key={d.value}
-                onClick={() => setSelected(d.value)}
-                className={[
-                  'rounded-2xl border-2 p-5 text-left transition-all',
-                  selected === d.value
-                    ? 'border-foreground bg-foreground text-primary-foreground'
-                    : 'border-border bg-card text-foreground hover:border-foreground/30',
-                ].join(' ')}
+                variant="outline"
+                onClick={() => handleDomainSelect(d.value)}
+                className="h-auto rounded-2xl border-2 p-5 text-left flex flex-col items-start border-border bg-card text-foreground hover:border-foreground/30"
               >
                 <span className="block text-2xl mb-2">{d.emoji}</span>
                 <span className="block text-base font-bold">{d.label}</span>
-                <span className={[
-                  'block text-xs mt-0.5',
-                  selected === d.value ? 'text-primary-foreground/70' : 'text-muted-foreground',
-                ].join(' ')}>
+                <span className="block text-xs mt-0.5 text-muted-foreground">
                   {d.desc}
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
         </section>
-
-        {/* Search CTA */}
-        <Button
-          onClick={handleSearch}
-          disabled={!selected}
-          className="h-14 w-full rounded-2xl text-base font-semibold"
-        >
-          搜尋設計師
-        </Button>
-
 
       </div>
     </main>
