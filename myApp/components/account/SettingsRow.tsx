@@ -1,6 +1,6 @@
 // components/account/SettingsRow.tsx
 import { Pressable } from 'react-native'
-import { XStack, Text } from 'tamagui'
+import { XStack, Text, View } from 'tamagui'
 import { FontAwesome6 } from '@expo/vector-icons'
 
 type Props = {
@@ -8,6 +8,8 @@ type Props = {
   onPress?: () => void
   disabled?: boolean
   labelColor?: string
+  iconName?: string
+  iconColor?: string
   showChevron?: boolean
 }
 
@@ -16,6 +18,8 @@ export function SettingsRow({
   onPress,
   disabled = false,
   labelColor = '#1F2723',
+  iconName,
+  iconColor = '#808868',
   showChevron = true,
 }: Props) {
   return (
@@ -28,9 +32,16 @@ export function SettingsRow({
       accessibilityState={{ disabled }}
     >
       <XStack height={48} paddingHorizontal={16} alignItems="center" justifyContent="space-between">
-        <Text fontSize={15} lineHeight={22} color={labelColor}>
-          {label}
-        </Text>
+        <XStack alignItems="center" gap={12} flex={1}>
+          {iconName && (
+            <View width={20} alignItems="center">
+              <FontAwesome6 name={iconName} size={15} color={iconColor} />
+            </View>
+          )}
+          <Text fontSize={15} lineHeight={22} color={labelColor}>
+            {label}
+          </Text>
+        </XStack>
         {showChevron && !disabled && (
           <FontAwesome6 name="chevron-right" size={12} color="#808868" />
         )}

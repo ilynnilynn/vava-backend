@@ -1,7 +1,8 @@
 // app/(tabs)/account.tsx
 import { useState } from 'react'
 import { Alert, ScrollView, View } from 'react-native'
-import { YStack, Text } from 'tamagui'
+import { YStack, XStack, Text } from 'tamagui'
+import { FontAwesome6 } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import type { LayoutChangeEvent } from 'react-native'
 
@@ -84,11 +85,13 @@ export default function AccountScreen() {
           >
             <SettingsRow
               label="預約紀錄"
+              iconName="calendar"
               onPress={() => router.navigate('/(tabs)/bookings')}
             />
-            <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 16 }} />
+            <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 48 }} />
             <SettingsRow
               label="喜愛的設計師"
+              iconName="heart"
               onPress={() => router.push('/account/liked-pros')}
             />
           </YStack>
@@ -115,23 +118,33 @@ export default function AccountScreen() {
           >
             {user?.email && (
               <>
-                <YStack paddingHorizontal={16} paddingVertical={10}>
-                  <Text fontSize={12} color="#808868" marginBottom={2}>電子郵件</Text>
-                  <Text fontSize={15} color="#1F2723">{user.email}</Text>
-                </YStack>
-                <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 16 }} />
+                <XStack paddingHorizontal={16} paddingVertical={10} alignItems="flex-start" gap={12}>
+                  <View style={{ width: 20, alignItems: 'center', paddingTop: 2 }}>
+                    <FontAwesome6 name="envelope" size={14} color="#808868" />
+                  </View>
+                  <YStack flex={1}>
+                    <Text fontSize={12} color="#808868" marginBottom={2}>電子郵件</Text>
+                    <Text fontSize={15} color="#1F2723">{user.email}</Text>
+                  </YStack>
+                </XStack>
+                <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 48 }} />
               </>
             )}
             {user?.phone && (
               <>
-                <YStack paddingHorizontal={16} paddingVertical={10}>
-                  <Text fontSize={12} color="#808868" marginBottom={2}>手機號碼</Text>
-                  <Text fontSize={15} color="#1F2723">{user.phone}</Text>
-                </YStack>
-                <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 16 }} />
+                <XStack paddingHorizontal={16} paddingVertical={10} alignItems="flex-start" gap={12}>
+                  <View style={{ width: 20, alignItems: 'center', paddingTop: 2 }}>
+                    <FontAwesome6 name="phone" size={14} color="#808868" />
+                  </View>
+                  <YStack flex={1}>
+                    <Text fontSize={12} color="#808868" marginBottom={2}>手機號碼</Text>
+                    <Text fontSize={15} color="#1F2723">{user.phone}</Text>
+                  </YStack>
+                </XStack>
+                <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 48 }} />
               </>
             )}
-            <SettingsRow label="編輯個人資料" disabled showChevron={false} />
+            <SettingsRow label="編輯個人資料" iconName="pen" disabled showChevron={false} />
           </YStack>
         </YStack>
 
@@ -156,18 +169,22 @@ export default function AccountScreen() {
           >
             <SettingsRow
               label="幫助中心"
+              iconName="circle-question"
               onPress={() => Alert.alert('幫助中心', '即將推出')}
             />
-            <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 16 }} />
+            <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 48 }} />
             <SettingsRow
               label="聯絡我們"
+              iconName="comment"
               onPress={() => Alert.alert('聯絡我們', '即將推出')}
             />
             {!enabledRoles.includes('pro') && (
               <>
-                <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 16 }} />
+                <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 48 }} />
                 <SettingsRow
                   label="成為設計師"
+                  iconName="scissors"
+                  iconColor="#c96442"
                   labelColor="#c96442"
                   onPress={() => Alert.alert('成為設計師', '即將推出')}
                 />
@@ -186,6 +203,8 @@ export default function AccountScreen() {
           >
             <SettingsRow
               label="登出"
+              iconName="right-from-bracket"
+              iconColor="#b53333"
               labelColor="#b53333"
               showChevron={false}
               onPress={handleLogout}
