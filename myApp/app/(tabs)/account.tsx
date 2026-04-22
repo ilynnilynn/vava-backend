@@ -67,13 +67,12 @@ export default function AccountScreen() {
         {/* ── Section: 我的 Vava ── */}
         <YStack marginBottom={SECTION_GAP}>
           <Text
-            fontSize={12}
+            fontSize={18}
             fontWeight="700"
-            color="#808868"
+            color="#1F2723"
             paddingHorizontal={16}
             paddingTop={12}
-            paddingBottom={4}
-            style={{ letterSpacing: 0.5 }}
+            paddingBottom={8}
           >
             我的 Vava
           </Text>
@@ -100,13 +99,12 @@ export default function AccountScreen() {
         {/* ── Section: 設定 ── */}
         <YStack marginBottom={SECTION_GAP}>
           <Text
-            fontSize={12}
+            fontSize={18}
             fontWeight="700"
-            color="#808868"
+            color="#1F2723"
             paddingHorizontal={16}
-            paddingTop={8}
-            paddingBottom={4}
-            style={{ letterSpacing: 0.5 }}
+            paddingTop={12}
+            paddingBottom={8}
           >
             設定
           </Text>
@@ -151,13 +149,12 @@ export default function AccountScreen() {
         {/* ── Section: 支援 ── */}
         <YStack marginBottom={SECTION_GAP}>
           <Text
-            fontSize={12}
+            fontSize={18}
             fontWeight="700"
-            color="#808868"
+            color="#1F2723"
             paddingHorizontal={16}
-            paddingTop={8}
-            paddingBottom={4}
-            style={{ letterSpacing: 0.5 }}
+            paddingTop={12}
+            paddingBottom={8}
           >
             支援
           </Text>
@@ -184,8 +181,6 @@ export default function AccountScreen() {
                 <SettingsRow
                   label="成為設計師"
                   iconName="scissors"
-                  iconColor="#c96442"
-                  labelColor="#c96442"
                   onPress={() => Alert.alert('成為設計師', '即將推出')}
                 />
               </>
