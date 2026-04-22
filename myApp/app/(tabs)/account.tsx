@@ -142,7 +142,11 @@ export default function AccountScreen() {
                 <View style={{ height: 1, backgroundColor: '#F0EDE5', marginLeft: 48 }} />
               </>
             )}
-            <SettingsRow label="編輯個人資料" iconName="pen" disabled showChevron={false} />
+            <SettingsRow
+              label="編輯個人資料"
+              iconName="pen"
+              onPress={() => router.push('/account/profile')}
+            />
           </YStack>
         </YStack>
 
