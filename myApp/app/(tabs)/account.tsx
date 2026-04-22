@@ -72,7 +72,7 @@ export default function AccountScreen() {
             paddingHorizontal={16}
             paddingTop={12}
             paddingBottom={4}
-            style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}
+            style={{ letterSpacing: 0.5 }}
           >
             我的 Vava
           </Text>
@@ -101,8 +101,9 @@ export default function AccountScreen() {
             fontWeight="700"
             color="#808868"
             paddingHorizontal={16}
+            paddingTop={8}
             paddingBottom={4}
-            style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}
+            style={{ letterSpacing: 0.5 }}
           >
             設定
           </Text>
@@ -141,8 +142,9 @@ export default function AccountScreen() {
             fontWeight="700"
             color="#808868"
             paddingHorizontal={16}
+            paddingTop={8}
             paddingBottom={4}
-            style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}
+            style={{ letterSpacing: 0.5 }}
           >
             支援
           </Text>

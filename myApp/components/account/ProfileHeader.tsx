@@ -28,7 +28,7 @@ export function ProfileHeader({
       backgroundColor="#F0EDE5"
       paddingTop={insets.top + 12}
       paddingHorizontal={16}
-      paddingBottom={toggleHeight / 2}
+      paddingBottom={toggleHeight > 0 ? toggleHeight / 2 : 16}
       onLayout={onLayout}
     >
       <XStack alignItems="center" justifyContent="space-between">

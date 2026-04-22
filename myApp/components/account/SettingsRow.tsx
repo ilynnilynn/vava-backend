@@ -25,6 +25,7 @@ export function SettingsRow({
       style={({ pressed }) => ({ opacity: disabled ? 0.38 : pressed ? 0.6 : 1 })}
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ disabled }}
     >
       <XStack height={48} paddingHorizontal={16} alignItems="center" justifyContent="space-between">
         <Text fontSize={15} lineHeight={22} color={labelColor}>
