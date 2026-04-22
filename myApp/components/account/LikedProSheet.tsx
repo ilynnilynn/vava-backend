@@ -26,7 +26,7 @@ export function LikedProSheet({ pro, onClose }: Props) {
       payload: pro.service_domain === 'nails' ? 'nails' : 'lashes',
     })
     onClose()
-    router.push('/book/location')
+    router.push('/book/slots')
   }
 
   return (
