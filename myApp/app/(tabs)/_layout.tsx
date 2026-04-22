@@ -1,8 +1,11 @@
 import { Tabs } from 'expo-router'
 
 import { FloatingTabBar } from '@/components/floating-tab-bar'
+import { useRole } from '@/lib/role-context'
 
 export default function TabLayout() {
+  const { activeRole } = useRole() // subscribes — pro tab set defined in future spec
+
   return (
     <Tabs
       screenOptions={{
