@@ -1,51 +1,44 @@
 // components/account/RoleToggle.tsx
-import { Switch, View as RNView } from 'react-native'
-import { XStack, YStack, Text } from 'tamagui'
+import { View as RNView } from 'react-native'
+import { XStack, Text } from 'tamagui'
+import { useRouter } from 'expo-router'
 import { useRole } from '@/lib/role-context'
+import { ModeSwitch } from '@/components/ui/ModeSwitch'
 
-export const TOGGLE_HEIGHT = 60
+export const TOGGLE_HEIGHT = 56
 
-export function RoleToggle({ headerHeight }: { headerHeight: number }) {
+export function RoleToggle() {
   const { activeRole, setActiveRole } = useRole()
+  const router = useRouter()
   const isProMode = activeRole === 'pro'
+
+  async function handleToggle(val: boolean) {
+    await setActiveRole(val ? 'pro' : 'customer')
+    if (val) {
+      router.replace('/(pro-tabs)/')
+    } else {
+      router.replace('/(tabs)/')
+    }
+  }
 
   return (
     <RNView
       style={{
-        position: 'absolute',
-        top: headerHeight - TOGGLE_HEIGHT / 2,
-        left: 16,
-        right: 16,
-        zIndex: 10,
+        marginHorizontal: 16,
+        marginTop: 0,
+        marginBottom: 12,
         height: TOGGLE_HEIGHT,
-        backgroundColor: '#ffffff',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#e8e6dc',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 4,
+        backgroundColor: '#F5F5F0',
+        borderRadius: 12,
         paddingHorizontal: 16,
         justifyContent: 'center',
       }}
     >
       <XStack alignItems="center" justifyContent="space-between">
-        <YStack>
-          <Text fontSize={12} color="#87867f" lineHeight={16}>
-            Using Vava as
-          </Text>
-          <Text fontSize={15} fontWeight="700" color="#1F2723" lineHeight={22}>
-            {isProMode ? '設計師' : '顧客'}
-          </Text>
-        </YStack>
-        <Switch
-          value={isProMode}
-          onValueChange={(val) => setActiveRole(val ? 'pro' : 'customer')}
-          trackColor={{ false: '#b0aea5', true: '#c96442' }}
-          thumbColor="#ffffff"
-        />
+        <Text fontSize={15} fontWeight="600" color="#141413" lineHeight={22}>
+          {isProMode ? '設計師模式' : '顧客模式'}
+        </Text>
+        <ModeSwitch value={isProMode} onValueChange={handleToggle} />
       </XStack>
     </RNView>
   )
