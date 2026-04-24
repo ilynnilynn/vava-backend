@@ -35,7 +35,7 @@ export function SettingsRow({
         <XStack alignItems="center" gap={14} flex={1}>
           {iconName && (
             <View width={22} height={22} alignItems="center" justifyContent="center">
-              <FA6ProIcon name={iconName} size={22} color={iconColor} />
+              <FA6ProIcon name={iconName} size={22} color={iconColor} weight="regular" />
             </View>
           )}
           <Text fontSize={15} lineHeight={22} color={labelColor}>
