@@ -67,10 +67,11 @@ export function FloatingTabBar({ state, navigation, iconNames, labels }: BottomT
         {/* Inner row — padded so the active bubble has equal inset on all sides */}
         <View style={styles.row}>
           {state.routes.map((route, index) => {
-            const isFocused = state.index === index
             const resolvedIcons = iconNames ?? DEFAULT_ICON_NAMES
             const resolvedLabels = labels ?? DEFAULT_LABELS
-            const iconName = resolvedIcons[route.name] ?? 'house'
+            if (!(route.name in resolvedIcons)) return null
+            const isFocused = state.index === index
+            const iconName = resolvedIcons[route.name]!
             const label = resolvedLabels[route.name] ?? route.name
             const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR
 

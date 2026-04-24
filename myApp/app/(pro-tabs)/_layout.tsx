@@ -25,7 +25,7 @@ export default function ProTabLayout() {
         <FloatingTabBar {...props} iconNames={PRO_ICONS} labels={PRO_LABELS} />
       )}
     >
-      <Tabs.Screen name="index" options={{ href: null }} />
+      <Tabs.Screen name="index" />
       <Tabs.Screen name="slots" />
       <Tabs.Screen name="bookings" />
       <Tabs.Screen name="account" />
