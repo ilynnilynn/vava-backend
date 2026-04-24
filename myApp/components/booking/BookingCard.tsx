@@ -42,13 +42,13 @@ export function BookingCard({ booking, onPress }: Props) {
         <XStack alignItems="center" justifyContent="space-between">
           <XStack gap={10} alignItems="center" flex={1}>
             <XStack gap={5} alignItems="center">
-              <FA6ProIcon name={domainIcon} size={12} color="#808868" />
-              <Text fontSize={14} fontWeight="500" color="#808868">{domainLabel}</Text>
+              <FA6ProIcon name={domainIcon} size={12} color="#858279" />
+              <Text fontSize={14} fontWeight="500" color="#858279">{domainLabel}</Text>
             </XStack>
             <View width={3} height={3} borderRadius={9999} backgroundColor="rgba(31,39,35,0.2)" />
             <XStack gap={5} alignItems="center">
-              <FA6ProIcon name="calendar" size={12} color="#808868" />
-              <Text fontSize={14} fontWeight="500" color="#808868">{dateLabel}  {timeLabel}</Text>
+              <FA6ProIcon name="calendar" size={12} color="#858279" />
+              <Text fontSize={14} fontWeight="500" color="#858279">{dateLabel}  {timeLabel}</Text>
             </XStack>
           </XStack>
           <FA6ProIcon name="chevron-right" size={11} color="rgba(31,39,35,0.25)" />

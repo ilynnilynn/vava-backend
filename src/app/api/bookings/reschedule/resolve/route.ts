@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveReschedule } from '@/lib/bookings'
 import { notifyCustomerRescheduleOutcome } from '@/lib/notifications'
-import { parseUTC } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -73,7 +72,7 @@ export async function POST(req: NextRequest) {
         .eq('id', newSlotId)
         .single()
       if (slot) {
-        newDateTime = new Date(parseUTC(slot.starts_at)).toLocaleString('zh-TW', {
+        newDateTime = new Date(slot.starts_at).toLocaleString('zh-TW', {
           month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
         })
       }

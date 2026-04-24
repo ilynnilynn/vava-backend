@@ -42,7 +42,7 @@ export default function SearchResultsList({ pros, fallbackTier, hasUserLocation,
   const [minPrice, setMinPrice] = useState<number | null>(null)
   const [maxPrice, setMaxPrice] = useState<number | null>(null)
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null)
-  const [highlightedProId, setHighlightedProId] = useState<string | null>(null)
+  const [activeProId, setActiveProId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     let result = pros
@@ -79,8 +79,8 @@ export default function SearchResultsList({ pros, fallbackTier, hasUserLocation,
         pins={mapPins}
         userLat={userLat}
         userLng={userLng}
-        selectedPinId={highlightedProId}
-        onPinClick={setHighlightedProId}
+        selectedPinId={activeProId}
+        onPinClick={setActiveProId}
       />
 
       {/* Filters */}
@@ -129,6 +129,8 @@ export default function SearchResultsList({ pros, fallbackTier, hasUserLocation,
               key={p.proId}
               pro={p}
               wizardParams={wizardParams}
+              expanded={activeProId === p.proId}
+              onToggle={() => setActiveProId(activeProId === p.proId ? null : p.proId)}
             />
           ))
         )}

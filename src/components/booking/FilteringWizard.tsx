@@ -10,7 +10,7 @@
 import { useReducer } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import type { ServiceDomain } from '@/types/database'
+import type { ServiceDomain, ServiceCategory, ServiceStyleModifier, LashSpecialFiberTag } from '@/types/database'
 
 import LocationStep from './steps/LocationStep'
 import DateStep from './steps/DateStep'
@@ -32,7 +32,7 @@ export type WizardState = {
   lng: number | null
   locationLabel: string
   // Date + time
-  date: DateOption | null
+  dates: DateOption[]
   timeBand: TimeBand | null
   // Nails
   nailServices: string[]        // category ids
@@ -56,7 +56,7 @@ export type WizardState = {
 
 type Action =
   | { type: 'SET_LOCATION'; lat: number; lng: number; label: string }
-  | { type: 'SET_DATE'; date: DateOption }
+  | { type: 'TOGGLE_DATE'; date: DateOption }
   | { type: 'SET_TIME_BAND'; timeBand: TimeBand }
   | { type: 'SET_NAIL_SERVICES'; ids: string[] }
   | { type: 'SET_TREATMENT_TIER'; tier: 'basic' | 'deep' | null }
@@ -80,8 +80,15 @@ function reducer(state: WizardState, action: Action): WizardState {
   switch (action.type) {
     case 'SET_LOCATION':
       return { ...state, lat: action.lat, lng: action.lng, locationLabel: action.label }
-    case 'SET_DATE':
-      return { ...state, date: action.date, timeBand: action.date === 'now' ? null : state.timeBand }
+    case 'TOGGLE_DATE': {
+      const exists = state.dates.includes(action.date)
+      const next = exists
+        ? state.dates.filter(d => d !== action.date)
+        : [...state.dates, action.date]
+      // Clear timeBand if only 'now' remains
+      const timeBand = next.every(d => d === 'now') ? null : state.timeBand
+      return { ...state, dates: next, timeBand }
+    }
     case 'SET_TIME_BAND':
       return { ...state, timeBand: action.timeBand }
     case 'SET_NAIL_SERVICES':
@@ -123,53 +130,60 @@ function reducer(state: WizardState, action: Action): WizardState {
   }
 }
 
-function initialState(domain: ServiceDomain): WizardState {
+type InitArg = { domain: ServiceDomain; overrides?: Partial<WizardState> }
+
+function initialState({ domain, overrides }: InitArg): WizardState {
   return {
     step: 0,
     domain,
-    lat: null,
-    lng: null,
-    locationLabel: '',
-    date: null,
-    timeBand: null,
-    nailServices: [],
-    treatmentTier: null,
-    nailStyleId: null,
-    nailAddons: [],
-    lashService: null,
-    lashRemovalAdded: false,
-    fillInDays: null,
-    lashDirectionId: null,
-    lashDensity: null,
-    lashStyleTags: [],
-    lashFiberTagId: null,
-    lashAddons: [],
-    silentPreference: false,
-    customerNote: '',
-    refPhotoUrl: null,
+    lat: overrides?.lat ?? null,
+    lng: overrides?.lng ?? null,
+    locationLabel: overrides?.locationLabel ?? '',
+    dates: overrides?.dates ?? [],
+    timeBand: overrides?.timeBand ?? null,
+    nailServices: overrides?.nailServices ?? [],
+    treatmentTier: overrides?.treatmentTier ?? null,
+    nailStyleId: overrides?.nailStyleId ?? null,
+    nailAddons: overrides?.nailAddons ?? [],
+    lashService: overrides?.lashService ?? null,
+    lashRemovalAdded: overrides?.lashRemovalAdded ?? false,
+    fillInDays: overrides?.fillInDays ?? null,
+    lashDirectionId: overrides?.lashDirectionId ?? null,
+    lashDensity: overrides?.lashDensity ?? null,
+    lashStyleTags: overrides?.lashStyleTags ?? [],
+    lashFiberTagId: overrides?.lashFiberTagId ?? null,
+    lashAddons: overrides?.lashAddons ?? [],
+    silentPreference: overrides?.silentPreference ?? false,
+    customerNote: overrides?.customerNote ?? '',
+    refPhotoUrl: overrides?.refPhotoUrl ?? null,
   }
 }
 
 // ── Step definitions ──────────────────────────────────────────
 
-function getSteps(state: WizardState): string[] {
-  const steps = ['location', 'date']
-  // Skip time band if "now" selected
-  if (state.date !== 'now') {
-    steps.push('timeBand')
-  }
-  steps.push('service')
-  steps.push('preferences')
-  return steps
+function getSteps(): string[] {
+  return ['location', 'date', 'service', 'preferences']
 }
 
 // ── Component ─────────────────────────────────────────────────
 
-export default function FilteringWizard({ domain }: { domain: ServiceDomain }) {
-  const router = useRouter()
-  const [state, dispatch] = useReducer(reducer, domain, initialState)
+type FilteringWizardProps = {
+  domain: ServiceDomain
+  categories: ServiceCategory[]
+  styleModifiers: ServiceStyleModifier[]
+  fiberTags: LashSpecialFiberTag[]
+  initialValues?: Partial<WizardState>
+}
 
-  const steps = getSteps(state)
+export default function FilteringWizard({ domain, categories, styleModifiers, fiberTags, initialValues }: FilteringWizardProps) {
+  const router = useRouter()
+  const [state, dispatch] = useReducer(
+    reducer,
+    { domain, overrides: initialValues },
+    initialState,
+  )
+
+  const steps = getSteps()
   const currentStepName = steps[state.step] ?? 'preferences'
   const isLastStep = state.step >= steps.length - 1
 
@@ -179,10 +193,8 @@ export default function FilteringWizard({ domain }: { domain: ServiceDomain }) {
       canProceed = state.lat !== null && state.lng !== null
       break
     case 'date':
-      canProceed = state.date !== null
-      break
-    case 'timeBand':
-      canProceed = state.timeBand !== null
+      canProceed = state.dates.length > 0
+        && (state.dates.every(d => d === 'now') || state.timeBand !== null)
       break
     case 'service':
       canProceed = domain === 'nails' ? state.nailServices.length > 0 : state.lashService !== null
@@ -206,7 +218,8 @@ export default function FilteringWizard({ domain }: { domain: ServiceDomain }) {
 
     if (state.lat !== null) params.set('lat', String(state.lat))
     if (state.lng !== null) params.set('lng', String(state.lng))
-    if (state.date) params.set('date', state.date)
+    if (state.locationLabel) params.set('locationLabel', state.locationLabel)
+    if (state.dates.length) params.set('dates', state.dates.join(','))
     if (state.timeBand) params.set('timeBand', state.timeBand)
 
     if (domain === 'nails') {
@@ -278,19 +291,23 @@ export default function FilteringWizard({ domain }: { domain: ServiceDomain }) {
           />
         )}
         {currentStepName === 'date' && (
-          <DateStep
-            selected={state.date}
-            onSelect={(d) => dispatch({ type: 'SET_DATE', date: d })}
-          />
-        )}
-        {currentStepName === 'timeBand' && (
-          <TimeBandStep
-            selected={state.timeBand}
-            onSelect={(tb) => dispatch({ type: 'SET_TIME_BAND', timeBand: tb })}
-          />
+          <div className="space-y-6">
+            <DateStep
+              selected={state.dates}
+              onToggle={(d) => dispatch({ type: 'TOGGLE_DATE', date: d })}
+            />
+            {state.dates.some(d => d !== 'now') && (
+              <TimeBandStep
+                selected={state.timeBand}
+                onSelect={(tb) => dispatch({ type: 'SET_TIME_BAND', timeBand: tb })}
+              />
+            )}
+          </div>
         )}
         {currentStepName === 'service' && domain === 'nails' && (
           <NailsServiceStep
+            categories={categories}
+            styleModifiers={styleModifiers}
             selectedServices={state.nailServices}
             treatmentTier={state.treatmentTier}
             styleId={state.nailStyleId}
@@ -303,6 +320,8 @@ export default function FilteringWizard({ domain }: { domain: ServiceDomain }) {
         )}
         {currentStepName === 'service' && domain === 'lashes' && (
           <LashesServiceStep
+            categories={categories}
+            fiberTags={fiberTags}
             selectedService={state.lashService}
             removalAdded={state.lashRemovalAdded}
             fillInDays={state.fillInDays}

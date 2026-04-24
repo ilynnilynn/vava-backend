@@ -51,7 +51,7 @@ export default async function SubscriptionPage() {
           </div>
 
           {count >= 8 && (
-            <p className="text-sm text-yellow-700">
+            <p className="text-sm text-warning-foreground">
               即將達到免費額度上限
             </p>
           )}
@@ -62,7 +62,7 @@ export default async function SubscriptionPage() {
       {subscription_status === 'active' && (
         <div className="rounded-lg border p-6 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs font-medium">
+            <span className="rounded-full bg-success-muted text-success-foreground px-2 py-0.5 text-xs font-medium">
               訂閱中
             </span>
           </div>
@@ -78,15 +78,15 @@ export default async function SubscriptionPage() {
 
       {/* Read-only (paywall) */}
       {subscription_status === 'read_only' && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 space-y-4">
+        <div className="rounded-lg border border-destructive/30 bg-destructive-muted p-6 space-y-4">
           <div className="space-y-1">
-            <p className="font-semibold text-red-900">免費額度已用完</p>
-            <p className="text-sm text-red-700">
+            <p className="font-semibold text-destructive">免費額度已用完</p>
+            <p className="text-sm text-destructive">
               你已完成 {count} 筆預約。訂閱後即可繼續開放時段接單。
             </p>
           </div>
 
-          <div className="rounded-lg bg-white border p-4 space-y-2">
+          <div className="rounded-lg bg-card border p-4 space-y-2">
             <p className="font-medium">VAVA Pro 方案</p>
             <p className="text-2xl font-bold">NT$270<span className="text-sm font-normal text-muted-foreground">/月</span></p>
             <ul className="text-sm text-muted-foreground space-y-1">

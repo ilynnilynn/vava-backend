@@ -16,7 +16,7 @@ export default async function HistoryPage() {
 
   if (!pro) redirect('/pro/login')
 
-  const bookings = await getProBookings(pro.id)
+  const bookings = await getProBookings(pro.id, supabase)
 
   return (
     <div className="space-y-6 py-6">

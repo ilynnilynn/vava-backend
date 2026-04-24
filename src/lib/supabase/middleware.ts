@@ -27,8 +27,10 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session — do NOT remove this
-  await supabase.auth.getUser()
+  // Refresh session — reads JWT from cookie, only contacts Supabase Auth
+  // server when the token is expired and needs refreshing (~1x per hour).
+  // Actual auth validation happens in server components via getAuthUser().
+  await supabase.auth.getSession()
 
   return supabaseResponse
 }

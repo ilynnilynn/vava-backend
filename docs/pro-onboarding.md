@@ -1,6 +1,6 @@
 # Pro Onboarding Flow
 
-_Dev reference. Source: Session 11 (2026-03-15)._
+_Dev reference. Source: Session 11 (2026-03-15). Last reviewed: 2026-03-23._
 
 ---
 
@@ -18,7 +18,7 @@ Linear 8-step flow, completed once. After submission, admin reviews and sets `is
 | 2 | Basic Info | `display_name`, `phone`, `gender`, `ig_handle` | All required. Gender: 男/女/不透露. Not editable self-serve after submission — contact support. |
 | 3 | Studio Address | `studio_address` → geocoded to `studio_lat`, `studio_lng` | Required. Triggers re-review if changed post-approval. |
 | 4 | Domain and Scope | Service domain: Nails / Lashes / Both; `nail_scope` ('hands'/'feet'/'both') if nails | Determines which service screens appear in Step 5. |
-| 5 | Services (toggle only) | `pro_services` rows: `is_enabled` only. No price or duration — those are set in dashboard after approval. | Min 1 service `is_enabled = true` to proceed. Per-domain sub-pages when domain = both. |
+| 5 | Services and Pricing | `pro_services` rows: `is_enabled`, `price_ntd`, `duration_minutes`. Lash directions show density delta fields (`density_light/daily/heavy_delta`). 補睫 shows 4 fill-in price fields (`same_shop_14/21_price`, `outside_shop_14/21_price`) + `outside_fillin_enabled`. `pro_nail_packages` rows if 套餐 enabled. | Min 1 service `is_enabled = true` to proceed. Editable later in dashboard. Per-domain sub-pages when domain = both. |
 | 6 | Preferences and Settings | `no_show_window` (10 / 15 / 20 min, default 15) | Editable in dashboard settings later. |
 | 7 | Portfolio and ID | `portfolio_photos[]` (min 3, array of URLs); `id_photo_front_url` (camera or file upload) | Camera API via mobile web HTTPS (guaranteed by Vercel). Admin verifies ID manually. `id_photo_front_url` stored in Supabase Storage, never exposed to customers. |
 | 8 | Submit for Review | Summary confirmation screen | Sets `submitted_at`. Account read-only until approved. Pro sees 審核中 state. |

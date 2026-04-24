@@ -28,7 +28,7 @@ export function ApproveButton({ proId, proLineUserId }: { proId: string; proLine
   }
 
   if (approved) {
-    return <span className="text-xs font-medium text-green-600">Approved</span>
+    return <span className="text-xs font-medium text-success">Approved</span>
   }
 
   return (

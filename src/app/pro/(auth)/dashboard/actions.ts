@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { setAccepting } from '@/lib/pros'
-import { addSlot, removeSlot } from '@/lib/slots'
+import { addSlot, removeSlot, addBlock, removeBlock } from '@/lib/slots'
 import { cancelBooking, completeBooking, markNoShow, resolveReschedule } from '@/lib/bookings'
 import type { Result, Slot } from '@/types'
 
@@ -45,6 +45,32 @@ export async function addSlotAction(startsAt: string): Promise<Result<Slot>> {
 
 export async function removeSlotAction(slotId: string): Promise<Result<null>> {
   return removeSlot(slotId)
+}
+
+// ── Block actions ─────────────────────────────────────────
+
+export async function addBlockAction(
+  date: string,
+  startTime: string,
+  endTime: string,
+): Promise<Result<null>> {
+  const proId = await getProId()
+  if (!proId) return { data: null, error: 'Not authenticated' }
+
+  const result = await addBlock(proId, date, startTime, endTime)
+  revalidatePath('/pro/dashboard/slots')
+  return { data: null, error: result.error }
+}
+
+export async function removeBlockAction(
+  slotIds: string[],
+): Promise<Result<null>> {
+  const proId = await getProId()
+  if (!proId) return { data: null, error: 'Not authenticated' }
+
+  const result = await removeBlock(slotIds)
+  revalidatePath('/pro/dashboard/slots')
+  return result
 }
 
 // ── Booking actions ─────────────────────────────────────────

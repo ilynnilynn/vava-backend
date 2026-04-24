@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 
 const PRICE_RANGES = [
+  { label: '不限', min: null, max: null },
   { label: 'NT$500 以下', min: 0, max: 500 },
   { label: 'NT$500–1000', min: 500, max: 1000 },
   { label: 'NT$1000–2000', min: 1000, max: 2000 },
@@ -10,6 +11,7 @@ const PRICE_RANGES = [
 ] as const
 
 const DISTANCE_PRESETS = [
+  { label: '不限', value: null },
   { label: '1km', value: 1 },
   { label: '3km', value: 3 },
   { label: '5km', value: 5 },
@@ -36,64 +38,58 @@ export default function SearchFilters({
 }: Props) {
   const router = useRouter()
 
-  function handlePriceToggle(min: number, max: number | null) {
-    const isActive = minPrice === min && maxPrice === max
-    if (isActive) {
-      onPriceChange(null, null)
-    } else {
-      onPriceChange(min, max)
-    }
+  function handlePriceSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+    const idx = parseInt(e.target.value, 10)
+    const range = PRICE_RANGES[idx]
+    onPriceChange(range.min, range.max)
   }
 
-  function handleDistanceToggle(km: number) {
-    onDistanceChange(maxDistanceKm === km ? null : km)
+  function handleDistanceSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+    const idx = parseInt(e.target.value, 10)
+    onDistanceChange(DISTANCE_PRESETS[idx].value)
   }
+
+  const activePriceIdx = PRICE_RANGES.findIndex(
+    r => r.min === minPrice && r.max === maxPrice,
+  )
+
+  const activeDistIdx = DISTANCE_PRESETS.findIndex(
+    d => d.value === maxDistanceKm,
+  )
 
   return (
-    <div className="space-y-3">
-      {/* Price range chips */}
-      <div className="flex flex-wrap gap-2">
-        {PRICE_RANGES.map(({ label, min, max }) => {
-          const isActive = minPrice === min && maxPrice === max
-          return (
-            <button
-              key={label}
-              onClick={() => handlePriceToggle(min, max)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                isActive
-                  ? 'border-foreground bg-foreground text-primary-foreground'
-                  : 'border-border bg-card text-foreground hover:border-foreground/30'
-              }`}
-            >
-              {label}
-            </button>
-          )
-        })}
-      </div>
+    <div className="flex items-center gap-2">
+      {/* Price dropdown */}
+      <select
+        value={activePriceIdx === -1 ? 0 : activePriceIdx}
+        onChange={handlePriceSelect}
+        className="h-8 rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground"
+      >
+        {PRICE_RANGES.map((r, i) => (
+          <option key={i} value={i}>
+            {i === 0 ? '價格' : r.label}
+          </option>
+        ))}
+      </select>
 
-      {/* Distance presets — only shown if user has location */}
+      {/* Distance dropdown — only if user has location */}
       {hasUserLocation && (
-        <div className="flex gap-2">
-          {DISTANCE_PRESETS.map(({ label, value }) => {
-            const isActive = maxDistanceKm === value
-            return (
-              <button
-                key={value}
-                onClick={() => handleDistanceToggle(value)}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'border-foreground bg-foreground text-primary-foreground'
-                    : 'border-border bg-card text-foreground hover:border-foreground/30'
-                }`}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </div>
+        <select
+          value={activeDistIdx === -1 ? 0 : activeDistIdx}
+          onChange={handleDistanceSelect}
+          className="h-8 rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground"
+        >
+          {DISTANCE_PRESETS.map((d, i) => (
+            <option key={i} value={i}>
+              {i === 0 ? '距離' : d.label}
+            </option>
+          ))}
+        </select>
       )}
 
-      {/* Edit request button */}
+      <div className="flex-1" />
+
+      {/* Edit request link */}
       <button
         onClick={() => router.push(`/book?${wizardParams}`)}
         className="text-xs font-medium text-foreground underline"

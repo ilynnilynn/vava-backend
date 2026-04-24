@@ -501,7 +501,7 @@ export default function ResultsScreen() {
         )}
         {status === 'empty' && (
           <RNView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 }}>
-            <Text fontSize={16} color="#808868" textAlign="center">目前沒有符合條件的{categoryLabel}</Text>
+            <Text fontSize={16} color="#858279" textAlign="center">目前沒有符合條件的{categoryLabel}</Text>
             <Pressable onPress={() => router.back()} style={{ borderRadius: 9999, height: 48, paddingHorizontal: 24, backgroundColor: '#1F2723', alignItems: 'center', justifyContent: 'center' }}>
               <Text fontSize={16} fontWeight="600" color="#FBFBF8">修改需求</Text>
             </Pressable>
@@ -509,7 +509,7 @@ export default function ResultsScreen() {
         )}
         {status === 'error' && (
           <RNView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 }}>
-            <Text fontSize={16} color="#808868">載入失敗</Text>
+            <Text fontSize={16} color="#858279">載入失敗</Text>
             <Pressable onPress={fetchResults} style={{ borderRadius: 9999, height: 48, paddingHorizontal: 24, backgroundColor: '#1F2723', alignItems: 'center', justifyContent: 'center' }}>
               <Text fontSize={16} fontWeight="600" color="#FBFBF8">重試</Text>
             </Pressable>
@@ -562,8 +562,8 @@ export default function ResultsScreen() {
                     </RNView>
                     {detailPro?.pro.district ? (
                       <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <FA6ProIcon name="location-dot" size={12} color="#808868" weight="solid" />
-                        <Text fontSize={13} lineHeight={20} color="#808868">
+                        <FA6ProIcon name="location-dot" size={12} color="#858279" weight="solid" />
+                        <Text fontSize={13} lineHeight={20} color="#858279">
                           {detailPro.pro.district}
                           {detailPro.distanceKm != null ? `　${detailPro.distanceKm.toFixed(1)}km` : ''}
                         </Text>
@@ -599,8 +599,8 @@ export default function ResultsScreen() {
                         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignSelf: 'flex-start' })}
                       >
                         <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <FA6ProIcon name="at" size={13} color="#808868" />
-                          <Text fontSize={13} lineHeight={20} color="#808868">@{detailPro.pro.igHandle}</Text>
+                          <FA6ProIcon name="at" size={13} color="#858279" />
+                          <Text fontSize={13} lineHeight={20} color="#858279">@{detailPro.pro.igHandle}</Text>
                         </RNView>
                       </Pressable>
                     ) : null}
@@ -614,7 +614,7 @@ export default function ResultsScreen() {
                     <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                       <Text fontSize={15} fontWeight="600" lineHeight={22} color="#1F2723">可預約時段</Text>
                       {state.date ? (
-                        <Text fontSize={12} lineHeight={20} color="#808868">
+                        <Text fontSize={12} lineHeight={20} color="#858279">
                           {state.date === 'now' ? '現在（2小時內）' : state.date}
                         </Text>
                       ) : null}
@@ -739,7 +739,7 @@ export default function ResultsScreen() {
                     }}
                   >
                     <RNView style={{ width: 32, alignItems: 'center' }}>
-                      <FA6ProIcon name={row!.icon} size={15} color="#808868" weight={row!.icon === 'flower' || row!.icon === 'location-dot' ? 'solid' : 'regular'} />
+                      <FA6ProIcon name={row!.icon} size={15} color="#858279" weight={row!.icon === 'flower' || row!.icon === 'location-dot' ? 'solid' : 'regular'} />
                     </RNView>
                     {row!.value === '__photo__' ? (
                       <Image

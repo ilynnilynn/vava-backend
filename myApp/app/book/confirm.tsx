@@ -159,7 +159,7 @@ export default function ConfirmScreen() {
         </YStack>
 
         {/* Payment note */}
-        <Text fontSize={13} color="#808868" paddingTop={16} lineHeight={20} textAlign="center">
+        <Text fontSize={13} color="#858279" paddingTop={16} lineHeight={20} textAlign="center">
           實際費用將於服務現場由{proTitle}確認
         </Text>
       </ScrollView>
@@ -175,12 +175,12 @@ export default function ConfirmScreen() {
           justifyContent="center"
           gap={10}
         >
-          <FA6ProIcon name="shield-halved" size={15} color="#808868" />
+          <FA6ProIcon name="shield-halved" size={15} color="#858279" />
           <YStack gap={1} alignItems="center">
             <Text fontSize={13} fontWeight="600" lineHeight={18} color="#4d4c48" textAlign="center">
               確認後10分鐘內可免責取消
             </Text>
-            <Text fontSize={12} lineHeight={16} color="#808868" textAlign="center">
+            <Text fontSize={12} lineHeight={16} color="#858279" textAlign="center">
               安心預約，隨時保有彈性
             </Text>
           </YStack>
@@ -223,8 +223,8 @@ function InfoRow({ icon, label, value }: { icon: string; label: string; value: s
   return (
     <XStack justifyContent="space-between" alignItems="flex-start" gap={12}>
       <XStack alignItems="center" gap={8} style={{ minWidth: 80 }}>
-        <FA6ProIcon name={icon} size={13} color="#808868" />
-        <Text fontSize={14} lineHeight={20} color="#808868">{label}</Text>
+        <FA6ProIcon name={icon} size={13} color="#858279" />
+        <Text fontSize={14} lineHeight={20} color="#858279">{label}</Text>
       </XStack>
       <Text fontSize={15} lineHeight={22} fontWeight="600" color="#1F2723" flex={1} textAlign="right">
         {value}
@@ -237,8 +237,8 @@ function ServiceRows({ lines }: { lines: string[] }) {
   return (
     <XStack justifyContent="space-between" alignItems="flex-start" gap={12}>
       <XStack alignItems="center" gap={8} style={{ minWidth: 80 }}>
-        <FA6ProIcon name="flower" size={13} color="#808868" />
-        <Text fontSize={14} lineHeight={20} color="#808868">服務</Text>
+        <FA6ProIcon name="flower" size={13} color="#858279" />
+        <Text fontSize={14} lineHeight={20} color="#858279">服務</Text>
       </XStack>
       <YStack flex={1} alignItems="flex-end" gap={2}>
         {lines.map((line, i) => (

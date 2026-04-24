@@ -22,16 +22,16 @@ const statusLabels: Record<BookingStatus, string> = {
 }
 
 const statusColors: Record<BookingStatus, string> = {
-  confirmed: 'bg-green-100 text-green-800',
-  reschedule_pending: 'bg-yellow-100 text-yellow-800',
-  rescheduled: 'bg-blue-100 text-blue-800',
-  cancelled_grace: 'bg-gray-100 text-gray-600',
-  cancelled_customer: 'bg-gray-100 text-gray-600',
-  cancelled_pro: 'bg-gray-100 text-gray-600',
-  completed: 'bg-blue-100 text-blue-800',
-  no_show_customer: 'bg-red-100 text-red-800',
-  no_show_pro: 'bg-red-100 text-red-800',
-  expired: 'bg-gray-100 text-gray-400',
+  confirmed: 'bg-success-muted text-success-foreground',
+  reschedule_pending: 'bg-warning-muted text-warning-foreground',
+  rescheduled: 'bg-info-muted text-info-foreground',
+  cancelled_grace: 'bg-secondary text-muted-foreground',
+  cancelled_customer: 'bg-secondary text-muted-foreground',
+  cancelled_pro: 'bg-secondary text-muted-foreground',
+  completed: 'bg-info-muted text-info-foreground',
+  no_show_customer: 'bg-destructive-muted text-destructive',
+  no_show_pro: 'bg-destructive-muted text-destructive',
+  expired: 'bg-secondary text-muted-foreground',
 }
 
 // ── Time helpers ────────────────────────────────────────────
@@ -136,7 +136,7 @@ export function BookingCard({
       {!readOnly && booking.status === 'reschedule_pending' && (
         <div className="space-y-2 pt-1">
           {proposedSlotTime && (
-            <p className="text-sm text-yellow-700 font-medium">
+            <p className="text-sm text-warning-foreground font-medium">
               申請改至：{proposedSlotTime}
             </p>
           )}

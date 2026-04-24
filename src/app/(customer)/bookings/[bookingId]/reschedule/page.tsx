@@ -1,9 +1,9 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import { getBooking } from '@/lib/bookings'
 import { getProAvailableSlots } from '@/lib/slots'
-import { parseUTC } from '@/lib/utils'
 import RescheduleSlotPicker from './RescheduleSlotPicker'
 
 type Params = Promise<{ bookingId: string }>
@@ -14,14 +14,13 @@ export default async function ReschedulePage({
   params: Params
 }) {
   const { bookingId } = await params
-  const supabase = await createClient()
-
-  // Auth
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
+  const supabase = await createClient()
+
   // Load booking
-  const result = await getBooking(bookingId)
+  const result = await getBooking(bookingId, supabase)
   if (result.error || !result.data) notFound()
 
   const booking = result.data
@@ -36,7 +35,7 @@ export default async function ReschedulePage({
 
   // Must be > 2hr away
   const now = new Date()
-  const minutesUntil = (new Date(parseUTC(booking.starts_at)).getTime() - now.getTime()) / 60000
+  const minutesUntil = (new Date(booking.starts_at).getTime() - now.getTime()) / 60000
   if (minutesUntil < 120) {
     redirect(`/bookings/${bookingId}`)
   }

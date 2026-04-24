@@ -54,7 +54,7 @@ export default function ProfileScreen() {
             accessibilityRole="button"
           >
             {editing
-              ? <Text fontSize={15} color="#808868">取消</Text>
+              ? <Text fontSize={15} color="#858279">取消</Text>
               : <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
             }
           </Pressable>
@@ -96,10 +96,10 @@ export default function ProfileScreen() {
           gap={12}
         >
           <View width={20} alignItems="center">
-            <FA6ProIcon name="user" size={14} color="#808868" />
+            <FA6ProIcon name="user" size={14} color="#858279" />
           </View>
           <YStack flex={1}>
-            <Text fontSize={12} color="#808868" marginBottom={2}>姓名</Text>
+            <Text fontSize={12} color="#858279" marginBottom={2}>姓名</Text>
             {editing ? (
               <TextInput
                 value={name}
@@ -132,10 +132,10 @@ export default function ProfileScreen() {
           <>
             <XStack height={52} paddingHorizontal={16} alignItems="center" gap={12}>
               <View width={20} alignItems="center">
-                <FA6ProIcon name="envelope" size={14} color="#808868" />
+                <FA6ProIcon name="envelope" size={14} color="#858279" />
               </View>
               <YStack flex={1}>
-                <Text fontSize={12} color="#808868" marginBottom={2}>電子郵件</Text>
+                <Text fontSize={12} color="#858279" marginBottom={2}>電子郵件</Text>
                 <Text fontSize={15} color="#1F2723">{user.email}</Text>
               </YStack>
             </XStack>
@@ -149,10 +149,10 @@ export default function ProfileScreen() {
         {user?.phone && (
           <XStack height={52} paddingHorizontal={16} alignItems="center" gap={12}>
             <View width={20} alignItems="center">
-              <FA6ProIcon name="phone" size={14} color="#808868" />
+              <FA6ProIcon name="phone" size={14} color="#858279" />
             </View>
             <YStack flex={1}>
-              <Text fontSize={12} color="#808868" marginBottom={2}>手機號碼</Text>
+              <Text fontSize={12} color="#858279" marginBottom={2}>手機號碼</Text>
               <Text fontSize={15} color="#1F2723">{user.phone}</Text>
             </YStack>
           </XStack>

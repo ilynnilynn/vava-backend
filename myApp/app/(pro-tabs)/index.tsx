@@ -62,7 +62,7 @@ export default function ProHomeScreen() {
         <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={30}>
           今日預約
         </Text>
-        <Text fontSize={13} color="#808868" marginTop={2}>
+        <Text fontSize={13} color="#858279" marginTop={2}>
           {formatTodayHeader()}
         </Text>
       </YStack>
@@ -70,7 +70,7 @@ export default function ProHomeScreen() {
       {today.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24}>
           <FA6ProIcon name="calendar-xmark" size={40} color="#e0e0d8" />
-          <Text fontSize={15} color="#808868">今天沒有預約</Text>
+          <Text fontSize={15} color="#858279">今天沒有預約</Text>
         </YStack>
       ) : (
         <FlatList

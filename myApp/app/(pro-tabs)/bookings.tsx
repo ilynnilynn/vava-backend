@@ -67,7 +67,7 @@ export default function ProBookingsScreen() {
       {/* List */}
       {data.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" paddingHorizontal={24}>
-          <Text fontSize={14} color="#808868">
+          <Text fontSize={14} color="#858279">
             {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
         </YStack>
@@ -109,7 +109,7 @@ function TabPill({ label, active, onPress }: { label: string; active: boolean; o
         opacity: !active && pressed ? 0.5 : 1,
       })}
     >
-      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#141413' : '#808868'}>
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#141413' : '#858279'}>
         {label}
       </Text>
     </Pressable>

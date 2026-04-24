@@ -1,26 +1,26 @@
 // ============================================================
-// /home — Customer home screen
+// /home — Customer home screen (server component)
 //
-// Entry point after login + onboarding.
-// State A: no upcoming bookings → 美甲/美睫 CTA only
-// State B: has upcoming bookings → cards sorted soonest first, CTA below
-//
-// Server component — reads user + upcoming bookings from Supabase.
+// Fetches:
+//   1. Auth + onboarding guard
+//   2. Upcoming confirmed bookings (72hr window)
+//   3. Live pro counts per category (for "現在有空" section)
 // ============================================================
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import { getCustomerBookings } from '@/lib/bookings'
 import HomeClient from './HomeClient'
-import type { UpcomingBooking } from './HomeClient'
+import type { UpcomingBooking, ProCounts } from './HomeClient'
 import type { Booking } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export default async function HomePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const user = await getAuthUser()
   if (!user) redirect('/login')
+
+  const supabase = await createClient()
 
   const { data: userData } = await supabase
     .from('users')
@@ -28,22 +28,68 @@ export default async function HomePage() {
     .eq('id', user.id)
     .single()
 
-  // Guard: if onboarding not complete, send them back
   if (!userData?.phone || !userData?.birth_year) {
     redirect('/onboarding')
   }
 
-  // Get display name from auth metadata
-  const meta = user.user_metadata ?? {}
-  const firstName = (meta.name as string)?.split(' ')[0] ?? '你好'
+  // ── Fetch data in parallel ──────────────────────────────────────────────────
+  const [allBookings, proCounts] = await Promise.all([
+    getCustomerBookings(user.id, supabase),
+    fetchProCounts(supabase),
+  ])
 
-  // Fetch upcoming confirmed bookings within 72hr window
-  const allBookings = await getCustomerBookings(user.id)
-  const upcomingBookings = filterUpcomingBookings(allBookings)
-  const enrichedBookings = await enrichBookings(upcomingBookings, supabase)
+  const upcomingBookings = await enrichBookings(
+    filterUpcomingBookings(allBookings),
+    supabase,
+  )
 
-  return <HomeClient firstName={firstName} upcomingBookings={enrichedBookings} />
+  return (
+    <HomeClient
+      upcomingBookings={upcomingBookings}
+      proCounts={proCounts}
+    />
+  )
 }
+
+// ── Pro counts per category ─────────────────────────────────────────────────
+//
+// Counts active pros offering each service category.
+// TODO: filter by district once pros store a location field.
+// TODO: filter by real-time availability once pros have an "available" toggle.
+
+async function fetchProCounts(supabase: SupabaseClient): Promise<ProCounts> {
+  try {
+    const { data: categories } = await supabase
+      .from('service_categories')
+      .select('id, name_zh')
+      .in('name_zh', ['美甲', '美睫', '美妝'])
+
+    if (!categories || categories.length === 0) {
+      return { nails: 0, lashes: 0, makeup: 0 }
+    }
+
+    const catMap = new Map(categories.map(c => [c.name_zh, c.id]))
+    const nailsId  = catMap.get('美甲')
+    const lashesId = catMap.get('美睫')
+    const makeupId = catMap.get('美妝')
+
+    const [nailsRes, lashesRes, makeupRes] = await Promise.all([
+      nailsId  ? supabase.from('pros').select('id', { count: 'exact', head: true }).contains('service_category_ids', [nailsId])  : { count: 0 },
+      lashesId ? supabase.from('pros').select('id', { count: 'exact', head: true }).contains('service_category_ids', [lashesId]) : { count: 0 },
+      makeupId ? supabase.from('pros').select('id', { count: 'exact', head: true }).contains('service_category_ids', [makeupId]) : { count: 0 },
+    ])
+
+    return {
+      nails:  nailsRes.count  ?? 0,
+      lashes: lashesRes.count ?? 0,
+      makeup: makeupRes.count ?? 0,
+    }
+  } catch {
+    return { nails: 0, lashes: 0, makeup: 0 }
+  }
+}
+
+// ── Booking helpers ─────────────────────────────────────────────────────────
 
 function filterUpcomingBookings(bookings: Booking[]) {
   const now = Date.now()

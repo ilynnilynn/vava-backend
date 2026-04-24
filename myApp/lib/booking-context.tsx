@@ -20,6 +20,7 @@ export type BookingRequestState = {
   customerNote: string
   refPhotoUrl: string | null
   prefilledFields: string[]
+  isEditing: boolean
 }
 
 export type BookingAction =
@@ -30,6 +31,7 @@ export type BookingAction =
   | { type: 'SET_ADDONS'; payload: string[] }
   | { type: 'SET_EXTRAS'; payload: { preferences: string[]; customerNote: string; refPhotoUrl: string | null } }
   | { type: 'SET_PREFILLED'; payload: string[] }
+  | { type: 'SET_EDITING'; payload: boolean }
   | { type: 'RESET' }
 
 const initialState: BookingRequestState = {
@@ -43,6 +45,7 @@ const initialState: BookingRequestState = {
   customerNote: '',
   refPhotoUrl: null,
   prefilledFields: [],
+  isEditing: false,
 }
 
 function bookingReducer(state: BookingRequestState, action: BookingAction): BookingRequestState {
@@ -61,6 +64,8 @@ function bookingReducer(state: BookingRequestState, action: BookingAction): Book
       return { ...state, preferences: action.payload.preferences, customerNote: action.payload.customerNote, refPhotoUrl: action.payload.refPhotoUrl }
     case 'SET_PREFILLED':
       return { ...state, prefilledFields: action.payload }
+    case 'SET_EDITING':
+      return { ...state, isEditing: action.payload }
     case 'RESET':
       return initialState
     default:

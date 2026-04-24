@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { parseUTC } from '@/lib/utils'
 import type { Slot } from '@/types/database'
 
 type Props = {
@@ -12,7 +11,7 @@ type Props = {
 }
 
 function formatSlotTime(startsAt: string): string {
-  return new Date(parseUTC(startsAt)).toLocaleTimeString('zh-TW', {
+  return new Date(startsAt).toLocaleTimeString('zh-TW', {
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -21,7 +20,7 @@ function formatSlotTime(startsAt: string): string {
 function groupSlotsByDate(slots: Slot[]): Map<string, Slot[]> {
   const grouped = new Map<string, Slot[]>()
   for (const slot of slots) {
-    const dateKey = new Date(parseUTC(slot.starts_at)).toLocaleDateString('zh-TW', {
+    const dateKey = new Date(slot.starts_at).toLocaleDateString('zh-TW', {
       month: 'long',
       day: 'numeric',
       weekday: 'short',
@@ -103,7 +102,7 @@ export default function RescheduleSlotPicker({ bookingId, slots }: Props) {
         ))}
       </section>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button
         onClick={handleSubmit}

@@ -16,7 +16,7 @@ export default async function DashboardHome() {
 
   if (!pro) redirect('/pro/login')
 
-  const allBookings = await getProBookings(pro.id)
+  const allBookings = await getProBookings(pro.id, supabase)
 
   // Resolve proposed_slot_id -> starts_at for reschedule_pending bookings
   const proposedSlotIds = allBookings

@@ -13,6 +13,16 @@ import { confirmBooking, getCustomerBookings, type ConfirmBookingParams } from '
 import { notifyProBookingConfirmed } from '@/lib/notifications'
 import { hasTimeOverlap } from '@/lib/overlap'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function isUUID(v: unknown): v is string {
+  return typeof v === 'string' && UUID_RE.test(v)
+}
+
+function allUUIDs(arr: unknown[]): arr is string[] {
+  return arr.every(isUUID)
+}
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
 
@@ -43,6 +53,9 @@ export async function POST(req: NextRequest) {
   if (!proId || !slotId || !startsAt) {
     return NextResponse.json({ error: 'proId, slotId, and startsAt are required' }, { status: 400 })
   }
+  if (!isUUID(proId) || !isUUID(slotId)) {
+    return NextResponse.json({ error: 'proId and slotId must be valid UUIDs' }, { status: 400 })
+  }
   if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
     return NextResponse.json({ error: 'durationMinutes must be a positive number' }, { status: 400 })
   }
@@ -52,8 +65,8 @@ export async function POST(req: NextRequest) {
   if (!Number.isFinite(priceMin) || !Number.isFinite(priceMax) || priceMin < 0 || priceMax < priceMin) {
     return NextResponse.json({ error: 'Invalid price range' }, { status: 400 })
   }
-  if (serviceCategoryIds.length === 0 || !serviceCategoryIds.every((id: unknown) => typeof id === 'string')) {
-    return NextResponse.json({ error: 'serviceCategoryIds must be a non-empty string array' }, { status: 400 })
+  if (serviceCategoryIds.length === 0 || !allUUIDs(serviceCategoryIds)) {
+    return NextResponse.json({ error: 'serviceCategoryIds must be a non-empty array of valid UUIDs' }, { status: 400 })
   }
   if (isNaN(new Date(startsAt).getTime())) {
     return NextResponse.json({ error: 'startsAt must be a valid ISO timestamp' }, { status: 400 })
@@ -84,13 +97,28 @@ export async function POST(req: NextRequest) {
     new Date(startsAt).getTime() + durationMinutes * 60 * 1000
   ).toISOString()
 
-  const existingBookings = await getCustomerBookings(user.id)
+  const existingBookings = await getCustomerBookings(user.id, supabase)
   const confirmedBookings = existingBookings
     .filter(b => b.status === 'confirmed')
     .map(b => ({ starts_at: b.starts_at, session_ends_at: b.session_ends_at }))
 
   if (hasTimeOverlap(confirmedBookings, startsAt, sessionEndsAt)) {
     return NextResponse.json({ error: '此時段與您的其他預約重疊' }, { status: 409 })
+  }
+
+  // ── Validate optional UUID fields ─────────────────────────
+  const styleId = typeof body.styleId === 'string' ? body.styleId : null
+  const lashSpecialFiberTagId = typeof body.lashSpecialFiberTagId === 'string' ? body.lashSpecialFiberTagId : null
+  const addonIds = Array.isArray(body.addonIds) ? body.addonIds : null
+
+  if (styleId !== null && !isUUID(styleId)) {
+    return NextResponse.json({ error: 'styleId must be a valid UUID' }, { status: 400 })
+  }
+  if (lashSpecialFiberTagId !== null && !isUUID(lashSpecialFiberTagId)) {
+    return NextResponse.json({ error: 'lashSpecialFiberTagId must be a valid UUID' }, { status: 400 })
+  }
+  if (addonIds !== null && !allUUIDs(addonIds)) {
+    return NextResponse.json({ error: 'addonIds must be an array of valid UUIDs' }, { status: 400 })
   }
 
   // ── Confirm booking ───────────────────────────────────────
@@ -104,11 +132,11 @@ export async function POST(req: NextRequest) {
     priceMin,
     priceMax,
     serviceCategoryIds: serviceCategoryIds as string[],
-    styleId: typeof body.styleId === 'string' ? body.styleId : null,
+    styleId,
     lashDensity: body.lashDensity as ConfirmBookingParams['lashDensity'],
-    lashSpecialFiberTagId: typeof body.lashSpecialFiberTagId === 'string' ? body.lashSpecialFiberTagId : null,
+    lashSpecialFiberTagId,
     lashStyleTags: Array.isArray(body.lashStyleTags) ? body.lashStyleTags : null,
-    addonIds: Array.isArray(body.addonIds) ? body.addonIds : null,
+    addonIds,
     nailScope: body.nailScope as ConfirmBookingParams['nailScope'],
     treatmentTier: body.treatmentTier as ConfirmBookingParams['treatmentTier'],
     fillInDays: typeof body.fillInDays === 'number' ? body.fillInDays : null,

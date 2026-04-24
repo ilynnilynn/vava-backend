@@ -102,7 +102,7 @@ export default function CategoryScreen() {
                   </XStack>
                   <Text
                     fontSize={13}
-                    color={isSelected ? 'rgba(251,251,248,0.7)' : '#808868'}
+                    color={isSelected ? 'rgba(251,251,248,0.7)' : '#858279'}
                   >
                     {cat.subtitle}
                   </Text>

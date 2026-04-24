@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requestReschedule } from '@/lib/bookings'
 import { notifyProRescheduleRequested } from '@/lib/notifications'
-import { parseUTC } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -81,10 +80,10 @@ export async function POST(req: NextRequest) {
   ])
 
   if (proRes.data?.line_user_id && slotRes.data && userRes.data) {
-    const originalDateTime = new Date(parseUTC(slotRes.data.starts_at)).toLocaleString('zh-TW', {
+    const originalDateTime = new Date(slotRes.data.starts_at).toLocaleString('zh-TW', {
       month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
     })
-    const newDateTime = new Date(parseUTC(newSlot.starts_at)).toLocaleString('zh-TW', {
+    const newDateTime = new Date(newSlot.starts_at).toLocaleString('zh-TW', {
       month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
     })
 

@@ -27,7 +27,7 @@ export function LikedProCard({ pro, onBook }: Props) {
 
       <YStack flex={1} gap={2}>
         <Text fontSize={15} fontWeight="700" color="#1F2723">{pro.pro_display_name}</Text>
-        <Text fontSize={13} color="#808868">{domainLabel}</Text>
+        <Text fontSize={13} color="#858279">{domainLabel}</Text>
       </YStack>
 
       <Pressable

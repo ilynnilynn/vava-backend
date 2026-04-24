@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "mapbox-gl/dist/mapbox-gl.css";
 
 /* ============================================================
    VAVA Design Tokens — Figma: VAVA Design System v1.1
@@ -18,6 +19,17 @@
   --color-destructive:            var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success:                var(--success);
+  --color-success-foreground:     var(--success-foreground);
+  --color-success-muted:          var(--success-muted);
+  --color-warning:                var(--warning);
+  --color-warning-foreground:     var(--warning-foreground);
+  --color-warning-muted:          var(--warning-muted);
+  --color-destructive-muted:      var(--destructive-muted);
+  --color-info:                   var(--info);
+  --color-info-foreground:        var(--info-foreground);
+  --color-info-muted:             var(--info-muted);
+  --color-accent-muted:           var(--accent-muted);
+  --color-star:                   var(--star);
   --color-border:                 var(--border);
   --color-input:                  var(--input);
   --color-ring:                   var(--ring);
@@ -49,6 +61,17 @@
   --card-foreground:        #1F2723;
   --popover:                #FBFBF8;
   --popover-foreground:     #1F2723;
+  --success-foreground:     #1A5C38;
+  --success-muted:          #E6F3EC;
+  --warning:                #B8860B;
+  --warning-foreground:     #7A5A00;
+  --warning-muted:          #FFF8E7;
+  --destructive-muted:      #FDE8E6;
+  --info:                   #2563EB;
+  --info-foreground:        #1E40AF;
+  --info-muted:             #E8F0FE;
+  --accent-muted:           #FFE8E3;
+  --star:                   #E5A100;
   --border:                 #D8D9D2;
   --input:                  #D8D9D2;
   --ring:                   #1F2723;
@@ -66,5 +89,9 @@
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     letter-spacing: -0.02em;
+  }
+  /* Prevent iOS Safari auto-zoom on focus (requires >= 16px) */
+  input, select, textarea {
+    font-size: 16px;
   }
 }

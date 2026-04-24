@@ -32,18 +32,18 @@ export default async function AuthErrorPage({
         <div className="text-4xl">⚠️</div>
 
         <h1 className="text-xl font-semibold">登入失敗</h1>
-        <p className="text-sm text-gray-500">{message}</p>
+        <p className="text-sm text-muted-foreground">{message}</p>
 
         <div className="flex flex-col gap-3">
           <Link
             href="/login"
-            className="inline-flex items-center justify-center rounded-xl bg-black px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-xl bg-foreground px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             返回客戶登入
           </Link>
           <Link
             href="/pro/login"
-            className="inline-flex items-center justify-center rounded-xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center justify-center rounded-xl border border-border px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
           >
             前往設計師登入
           </Link>

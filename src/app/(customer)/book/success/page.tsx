@@ -7,6 +7,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import { getBooking } from '@/lib/bookings'
 import SuccessClient from './SuccessClient'
 
@@ -32,11 +33,12 @@ export default async function SuccessPage({
     )
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: booking } = await getBooking(bookingId)
+  const supabase = await createClient()
+
+  const { data: booking } = await getBooking(bookingId, supabase)
   if (!booking || booking.user_id !== user.id) {
     return (
       <main className="min-h-screen bg-background px-5 pt-12">

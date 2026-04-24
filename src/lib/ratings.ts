@@ -22,6 +22,7 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Rating, RaterType, Result } from '@/types/database'
 
 // ── Write ─────────────────────────────────────────────────────
@@ -124,8 +125,9 @@ export async function getRatingForBooking(
 
 // Mark rating prompt as sent. Called by cron after notifyCustomerRatingPrompt().
 // Prevents duplicate LINE messages.
-export async function markRatingPromptSent(bookingId: string): Promise<Result<null>> {
-  const supabase = await createClient()
+// Pass admin client from cron routes (no user session available).
+export async function markRatingPromptSent(bookingId: string, sb?: SupabaseClient): Promise<Result<null>> {
+  const supabase = sb ?? await createClient()
 
   const { error } = await supabase
     .from('bookings')
@@ -141,8 +143,9 @@ export async function markRatingPromptSent(bookingId: string): Promise<Result<nu
 //   - Have NOT had a rating prompt sent yet
 //
 // Called by cron/rating-prompts every 15 min.
-export async function getBookingsNeedingRatingPrompt() {
-  const supabase = await createClient()
+// Pass admin client from cron routes (no user session available).
+export async function getBookingsNeedingRatingPrompt(sb?: SupabaseClient) {
+  const supabase = sb ?? await createClient()
 
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
 

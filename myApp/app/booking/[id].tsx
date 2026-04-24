@@ -43,7 +43,7 @@ export default function BookingDetailScreen() {
   if (error || !detail) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16}>
-        <Text fontSize={15} color="#808868">{error ?? '找不到預約'}</Text>
+        <Text fontSize={15} color="#858279">{error ?? '找不到預約'}</Text>
         <Pressable onPress={() => router.back()}>
           <Text fontSize={14} fontWeight="600" color="#1F2723">返回</Text>
         </Pressable>
@@ -147,37 +147,37 @@ export default function BookingDetailScreen() {
 
           <YStack gap={8}>
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="scissors" size={14} color="#808868" />
-              <Text fontSize={15} lineHeight={22} color="#808868">
+              <FA6ProIcon name="scissors" size={14} color="#858279" />
+              <Text fontSize={15} lineHeight={22} color="#858279">
                 {domainLabel} — {detail.service_label}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="calendar" size={14} color="#808868" />
-              <Text fontSize={15} lineHeight={22} color="#808868">
+              <FA6ProIcon name="calendar" size={14} color="#858279" />
+              <Text fontSize={15} lineHeight={22} color="#858279">
                 {formatBookingDate(detail.starts_at)} {formatSlotTime(detail.starts_at)}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="location-dot" size={14} color="#808868" />
-              <Text fontSize={15} lineHeight={22} color="#808868">
+              <FA6ProIcon name="location-dot" size={14} color="#858279" />
+              <Text fontSize={15} lineHeight={22} color="#858279">
                 {detail.studio_address}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="dollar-sign" size={14} color="#808868" />
-              <Text fontSize={15} lineHeight={22} color="#808868">
+              <FA6ProIcon name="dollar-sign" size={14} color="#858279" />
+              <Text fontSize={15} lineHeight={22} color="#858279">
                 NT${detail.price_min}–{detail.price_max}
               </Text>
             </XStack>
 
             {showPhone && detail.pro_phone && (
               <XStack gap={8} alignItems="center">
-                <FA6ProIcon name="phone" size={14} color="#808868" />
-                <Text fontSize={15} fontWeight="600" color="#808868">
+                <FA6ProIcon name="phone" size={14} color="#858279" />
+                <Text fontSize={15} fontWeight="600" color="#858279">
                   {detail.pro_phone}
                 </Text>
               </XStack>
@@ -240,7 +240,7 @@ export default function BookingDetailScreen() {
                 opacity: 0.4,
               }}
             >
-              <Text fontSize={16} fontWeight="600" color="#808868">改期（即將推出）</Text>
+              <Text fontSize={16} fontWeight="600" color="#858279">改期（即將推出）</Text>
             </Pressable>
           </YStack>
         )}
@@ -281,14 +281,14 @@ export default function BookingDetailScreen() {
                 opacity: 0.4,
               }}
             >
-              <Text fontSize={16} fontWeight="600" color="#808868">評分（即將推出）</Text>
+              <Text fontSize={16} fontWeight="600" color="#858279">評分（即將推出）</Text>
             </Pressable>
           </YStack>
         )}
 
         {/* Payment note */}
         {isUpcoming && (
-          <Text fontSize={13} color="#808868" textAlign="center" marginTop={24}>
+          <Text fontSize={13} color="#858279" textAlign="center" marginTop={24}>
             實際費用將於服務結束後由設計師確認
           </Text>
         )}

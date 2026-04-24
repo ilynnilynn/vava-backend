@@ -6,13 +6,33 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { Booking, BookingStatus, CancellationActor, Result } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // ── Constants ────────────────────────────────────────────────
 
 const GRACE_PERIOD_MS    = 10 * 60 * 1000   // 10 minutes
 const HARD_FLAG_MINS     = 30               // < 30 min before = hard flag
 const REMINDER_MINS      = 10              // reminder fires at -10 min
+
+// ── Helpers ─────────────────────────────────────────────────
+
+// starts_at lives on the slots table, not bookings.
+// This helper enriches booking rows with starts_at from their associated slot.
+async function enrichWithStartsAt(
+  supabase: SupabaseClient,
+  rows: Record<string, unknown>[]
+): Promise<Booking[]> {
+  if (!rows.length) return []
+  const slotIds = [...new Set(rows.map(r => r.slot_id as string))]
+  const { data: slots } = await supabase
+    .from('slots')
+    .select('id, starts_at')
+    .in('id', slotIds)
+  const slotMap = new Map((slots ?? []).map(s => [s.id, s.starts_at]))
+  return rows.map(r => ({ ...r, starts_at: slotMap.get(r.slot_id as string) ?? '' }) as Booking)
+}
 
 // ── Confirm ──────────────────────────────────────────────────
 
@@ -45,7 +65,8 @@ export type ConfirmBookingParams = {
 // Call this when customer taps 確認預約.
 // After this: lock slot + send LINE notification to pro.
 export async function confirmBooking(params: ConfirmBookingParams): Promise<Result<Booking>> {
-  const supabase = await createClient()
+  // Use admin client — caller (API route) has already verified auth
+  const supabase = createAdminClient()
 
   const sessionEndsAt = new Date(
     new Date(params.startsAt).getTime() + params.durationMinutes * 60 * 1000
@@ -69,7 +90,6 @@ export async function confirmBooking(params: ConfirmBookingParams): Promise<Resu
       is_returning_customer:     params.isReturningCustomer ?? null,
       price_min:                 params.priceMin,
       price_max:                 params.priceMax,
-      starts_at:                 params.startsAt,
       status:                    'confirmed' satisfies BookingStatus,
       session_ends_at:           sessionEndsAt,
       no_show_window_minutes:    params.noShowWindowMinutes,
@@ -90,32 +110,43 @@ export async function confirmBooking(params: ConfirmBookingParams): Promise<Resu
     .update({ is_booked: true })
     .eq('id', params.slotId)
 
-  return { data, error: null }
+  // Attach starts_at from the slot (not a booking column)
+  return { data: { ...data, starts_at: params.startsAt } as Booking, error: null }
 }
 
 // ── Cancel ───────────────────────────────────────────────────
 
 // Cancels a booking. Determines status + flag type by actor + timing.
 // Call createCancellationFlag() from lib/flags.ts after this.
+// Caller (API route / server action) must verify auth before calling.
 export async function cancelBooking(
   bookingId: string,
   actor: CancellationActor
 ): Promise<Result<{ status: BookingStatus; isSameDay: boolean; minutesUntil: number }>> {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { data: booking } = await supabase
+  const { data: booking } = await admin
     .from('bookings')
-    .select('slot_id, created_at, starts_at, status')
+    .select('slot_id, created_at, status')
     .eq('id', bookingId)
     .single()
 
   if (!booking) return { data: null, error: 'Booking not found' }
 
+  // starts_at lives on the slot, not the booking
+  const { data: slot } = await admin
+    .from('slots')
+    .select('starts_at')
+    .eq('id', booking.slot_id)
+    .single()
+
+  if (!slot) return { data: null, error: 'Slot not found' }
+
   const now        = Date.now()
   const createdMs  = new Date(booking.created_at).getTime()
-  const startsMs   = new Date(booking.starts_at).getTime()
+  const startsMs   = new Date(slot.starts_at).getTime()
   const minutesUntil = (startsMs - now) / 60000
-  const isSameDay  = new Date(booking.starts_at).toDateString() === new Date().toDateString()
+  const isSameDay  = new Date(slot.starts_at).toDateString() === new Date().toDateString()
   const withinGrace = actor === 'customer' && (now - createdMs) < GRACE_PERIOD_MS
 
   const status: BookingStatus =
@@ -123,13 +154,15 @@ export async function cancelBooking(
     withinGrace       ? 'cancelled_grace' :
                         'cancelled_customer'
 
-  await supabase
+  const { error: updateError } = await admin
     .from('bookings')
     .update({ status, cancelled_at: new Date().toISOString(), cancellation_actor: actor })
     .eq('id', bookingId)
 
+  if (updateError) return { data: null, error: updateError.message }
+
   // Free the slot
-  await supabase.from('slots').update({ is_booked: false }).eq('id', booking.slot_id)
+  await admin.from('slots').update({ is_booked: false }).eq('id', booking.slot_id)
 
   return { data: { status, isSameDay, minutesUntil }, error: null }
 }
@@ -143,9 +176,9 @@ export async function completeBooking(
   bookingId: string,
   early: boolean
 ): Promise<Result<null>> {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('bookings')
     .update({
       status:           'completed' satisfies BookingStatus,
@@ -161,22 +194,31 @@ export async function completeBooking(
 
 // Marks a no-show. Activates only after starts_at + no_show_window_minutes.
 // Check window before calling — enforced in the UI, but double-check here.
+// Caller must verify auth before calling.
 export async function markNoShow(
   bookingId: string,
   reporter: 'customer' | 'pro'
 ): Promise<Result<null>> {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { data: booking } = await supabase
+  const { data: booking } = await admin
     .from('bookings')
-    .select('starts_at, no_show_window_minutes')
+    .select('slot_id, no_show_window_minutes')
     .eq('id', bookingId)
     .single()
 
   if (!booking) return { data: null, error: 'Booking not found' }
 
+  const { data: slot } = await admin
+    .from('slots')
+    .select('starts_at')
+    .eq('id', booking.slot_id)
+    .single()
+
+  if (!slot) return { data: null, error: 'Slot not found' }
+
   const windowMs = booking.no_show_window_minutes * 60 * 1000
-  const activatesAt = new Date(booking.starts_at).getTime() + windowMs
+  const activatesAt = new Date(slot.starts_at).getTime() + windowMs
 
   if (Date.now() < activatesAt) {
     return { data: null, error: 'No-show window has not opened yet' }
@@ -184,7 +226,7 @@ export async function markNoShow(
 
   const status: BookingStatus = reporter === 'pro' ? 'no_show_customer' : 'no_show_pro'
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('bookings')
     .update({ status, no_show_reported_at: new Date().toISOString(), no_show_reporter: reporter })
     .eq('id', bookingId)
@@ -195,21 +237,30 @@ export async function markNoShow(
 // ── Reschedule ───────────────────────────────────────────────
 
 // Customer requests a reschedule. Only allowed if session > 2hr away.
+// Caller must verify auth before calling.
 export async function requestReschedule(bookingId: string): Promise<Result<null>> {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { data: booking } = await supabase
+  const { data: booking } = await admin
     .from('bookings')
-    .select('starts_at, status')
+    .select('slot_id, status')
     .eq('id', bookingId)
     .single()
 
   if (!booking) return { data: null, error: 'Booking not found' }
 
-  const minsUntil = (new Date(booking.starts_at).getTime() - Date.now()) / 60000
+  const { data: slot } = await admin
+    .from('slots')
+    .select('starts_at')
+    .eq('id', booking.slot_id)
+    .single()
+
+  if (!slot) return { data: null, error: 'Slot not found' }
+
+  const minsUntil = (new Date(slot.starts_at).getTime() - Date.now()) / 60000
   if (minsUntil < 120) return { data: null, error: 'Reschedule not allowed within 2 hours of session' }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('bookings')
     .update({ status: 'reschedule_pending' satisfies BookingStatus })
     .eq('id', bookingId)
@@ -220,15 +271,16 @@ export async function requestReschedule(bookingId: string): Promise<Result<null>
 // Pro approves or declines reschedule.
 // If approved: old slot freed, new slot locked, status → rescheduled.
 // If declined: status → confirmed (original booking restored).
+// Caller must verify auth before calling.
 export async function resolveReschedule(
   bookingId: string,
   approved: boolean,
   newSlotId?: string
 ): Promise<Result<null>> {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
   if (!approved) {
-    await supabase
+    await admin
       .from('bookings')
       .update({ status: 'confirmed' satisfies BookingStatus })
       .eq('id', bookingId)
@@ -237,7 +289,7 @@ export async function resolveReschedule(
 
   if (!newSlotId) return { data: null, error: 'newSlotId required when approved = true' }
 
-  const { data: booking } = await supabase
+  const { data: booking } = await admin
     .from('bookings')
     .select('slot_id')
     .eq('id', bookingId)
@@ -246,10 +298,10 @@ export async function resolveReschedule(
   if (!booking) return { data: null, error: 'Booking not found' }
 
   // Free old slot, lock new slot
-  await supabase.from('slots').update({ is_booked: false }).eq('id', booking.slot_id)
-  await supabase.from('slots').update({ is_booked: true }).eq('id', newSlotId)
+  await admin.from('slots').update({ is_booked: false }).eq('id', booking.slot_id)
+  await admin.from('slots').update({ is_booked: true }).eq('id', newSlotId)
 
-  await supabase
+  await admin
     .from('bookings')
     .update({ status: 'rescheduled' satisfies BookingStatus, slot_id: newSlotId })
     .eq('id', bookingId)
@@ -261,8 +313,8 @@ export async function resolveReschedule(
 
 // Mark reminder as sent (called by cron job at -10 min).
 export async function markReminderSent(bookingId: string): Promise<Result<null>> {
-  const supabase = await createClient()
-  const { error } = await supabase
+  const admin = createAdminClient()
+  const { error } = await admin
     .from('bookings')
     .update({ reminder_sent_at: new Date().toISOString() })
     .eq('id', bookingId)
@@ -271,73 +323,87 @@ export async function markReminderSent(bookingId: string): Promise<Result<null>>
 
 // ── Read ─────────────────────────────────────────────────────
 
-export async function getBooking(bookingId: string): Promise<Result<Booking>> {
-  const supabase = await createClient()
+export async function getBooking(bookingId: string, sb?: SupabaseClient): Promise<Result<Booking>> {
+  const supabase = sb ?? await createClient()
   const { data, error } = await supabase
     .from('bookings')
     .select('*')
     .eq('id', bookingId)
     .single()
-  return { data, error: error?.message ?? null }
+  if (error || !data) return { data: null, error: error?.message ?? 'Not found' }
+  const [enriched] = await enrichWithStartsAt(supabase, [data])
+  return { data: enriched, error: null }
 }
 
-export async function getCustomerBookings(userId: string): Promise<Booking[]> {
-  const supabase = await createClient()
+export async function getCustomerBookings(userId: string, sb?: SupabaseClient): Promise<Booking[]> {
+  const supabase = sb ?? await createClient()
   const { data } = await supabase
     .from('bookings')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  return data ?? []
+  return enrichWithStartsAt(supabase, data ?? [])
 }
 
-export async function getProBookings(proId: string): Promise<Booking[]> {
-  const supabase = await createClient()
+export async function getProBookings(proId: string, sb?: SupabaseClient): Promise<Booking[]> {
+  const supabase = sb ?? await createClient()
   const { data } = await supabase
     .from('bookings')
     .select('*')
     .eq('pro_id', proId)
-    .order('starts_at', { ascending: true })
-  return data ?? []
+    .order('created_at', { ascending: true })
+  return enrichWithStartsAt(supabase, data ?? [])
 }
 
 // Bookings that need a -10min reminder (starts in 8–12 min, reminder not yet sent)
-export async function getBookingsNeedingReminder(): Promise<Booking[]> {
-  const supabase = await createClient()
+// Pass admin client from cron routes (no user session available).
+export async function getBookingsNeedingReminder(sb?: SupabaseClient): Promise<Booking[]> {
+  const supabase = sb ?? await createClient()
   const now      = new Date()
   const from     = new Date(now.getTime() + (REMINDER_MINS - 2) * 60 * 1000).toISOString()
   const to       = new Date(now.getTime() + (REMINDER_MINS + 2) * 60 * 1000).toISOString()
+
+  // starts_at lives on slots, so find booked slots in the window first
+  const { data: slots } = await supabase
+    .from('slots')
+    .select('id')
+    .eq('is_booked', true)
+    .gte('starts_at', from)
+    .lte('starts_at', to)
+
+  if (!slots?.length) return []
 
   const { data } = await supabase
     .from('bookings')
     .select('*')
     .eq('status', 'confirmed')
     .is('reminder_sent_at', null)
-    .gte('starts_at', from)
-    .lte('starts_at', to)
+    .in('slot_id', slots.map(s => s.id))
 
-  return data ?? []
+  return enrichWithStartsAt(supabase, data ?? [])
 }
 
 // Bookings where session_ends_at has passed but status is still confirmed
-export async function getBookingsReadyToComplete(): Promise<Booking[]> {
-  const supabase = await createClient()
+// Pass admin client from cron routes (no user session available).
+export async function getBookingsReadyToComplete(sb?: SupabaseClient): Promise<Booking[]> {
+  const supabase = sb ?? await createClient()
   const { data } = await supabase
     .from('bookings')
     .select('*')
     .eq('status', 'confirmed')
     .lte('session_ends_at', new Date().toISOString())
-  return data ?? []
+  return enrichWithStartsAt(supabase, data ?? [])
 }
 
 // Bookings stuck in reschedule_pending past 6hr
-export async function getExpiredReschedulePending(): Promise<Booking[]> {
-  const supabase = await createClient()
+// Pass admin client from cron routes (no user session available).
+export async function getExpiredReschedulePending(sb?: SupabaseClient): Promise<Booking[]> {
+  const supabase = sb ?? await createClient()
   const cutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
   const { data } = await supabase
     .from('bookings')
     .select('*')
     .eq('status', 'reschedule_pending')
-    .lte('updated_at', cutoff)
-  return data ?? []
+    .lte('created_at', cutoff)
+  return enrichWithStartsAt(supabase, data ?? [])
 }

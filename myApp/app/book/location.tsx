@@ -151,7 +151,7 @@ export default function LocationScreen() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="輸入地址"
-            placeholderTextColor="#808868"
+            placeholderTextColor="#858279"
             style={{
               backgroundColor: '#FBFBF8',
               borderRadius: 8,
@@ -243,7 +243,7 @@ export default function LocationScreen() {
                   })}
                 >
                   <XStack gap={10} alignItems="center">
-                    <FA6ProIcon name="location-dot" size={13} color="#808868" />
+                    <FA6ProIcon name="location-dot" size={13} color="#858279" />
                     <Text fontSize={14} color="#1F2723" flex={1} numberOfLines={1}>
                       {s.description}
                     </Text>

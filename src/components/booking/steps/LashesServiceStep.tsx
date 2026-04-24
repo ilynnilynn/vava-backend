@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import type { ServiceCategory, LashSpecialFiberTag, LashDensity } from '@/types/database'
 
 type Props = {
+  categories: ServiceCategory[]
+  fiberTags: LashSpecialFiberTag[]
   selectedService: string | null
   removalAdded: boolean
   fillInDays: number | null
@@ -21,19 +24,13 @@ type Props = {
   onAddonsChange: (addons: string[]) => void
 }
 
-const LASH_SERVICES = [
-  { id: 'new-set', label: '嫁接' },
-  { id: 'fill-in', label: '補睫' },
-  { id: 'removal', label: '卸睫' },
-  { id: 'management', label: '睫毛管理' },
-]
-
 const FILL_IN_RANGES = [
   { value: 14, label: '≤14 天' },
   { value: 18, label: '15–21 天' },
   { value: 22, label: '>21 天' },
 ]
 
+// Direction options (not DB entities — stored as free-text preference)
 const DIRECTIONS = [
   { id: 'japanese', label: '日式' },
   { id: 'korean', label: '韓式' },
@@ -43,12 +40,14 @@ const DIRECTIONS = [
   { id: 'unsure', label: '不確定' },
 ]
 
-const DENSITIES = [
+// Density options matching the lash_density DB enum
+const DENSITIES: { value: LashDensity; label: string }[] = [
   { value: 'light', label: '自然輕盈' },
-  { value: 'natural', label: '日常妝感' },
-  { value: 'full', label: '極致濃密' },
+  { value: 'daily', label: '日常妝感' },
+  { value: 'heavy', label: '極致濃密' },
 ]
 
+// Neo-Chinese style tags (stored as text[] in lash_style_tags column)
 const NEO_CHINESE_STYLES = [
   { id: 'fox', label: '狐系' },
   { id: 'comic', label: '漫畫款' },
@@ -57,15 +56,19 @@ const NEO_CHINESE_STYLES = [
   { id: 'fringe', label: '流蘇' },
 ]
 
-const SPECIAL_FIBERS = [
-  { id: 'camellia', label: '山茶花' },
-  { id: 'mermaid-yy', label: '人魚編織(YY)' },
-  { id: '6d-feather', label: '6D羽毛' },
-  { id: '6d-cotton', label: '6D棉花' },
-  { id: 'clover', label: '三葉草' },
-]
+// Identify categories by name_zh for conditional UI behavior
+function isRemovalCategory(c: ServiceCategory): boolean {
+  return c.name_zh === '卸睫'
+}
+
+function getSelectedCategoryName(categories: ServiceCategory[], id: string | null): string | null {
+  if (!id) return null
+  return categories.find(c => c.id === id)?.name_zh ?? null
+}
 
 export default function LashesServiceStep({
+  categories,
+  fiberTags,
   selectedService,
   removalAdded,
   fillInDays,
@@ -85,18 +88,23 @@ export default function LashesServiceStep({
 }: Props) {
   const [showRedirectWarning, setShowRedirectWarning] = useState(false)
 
+  // Split categories into main services vs addons
+  const mainServices = categories.filter(c => !c.is_addon && !isRemovalCategory(c))
+  const removalCategory = categories.find(isRemovalCategory)
+  const addonCategories = categories.filter(c => c.is_addon)
+  const newSetCategory = categories.find(c => c.name_zh === '嫁接')
+
+  const selectedName = getSelectedCategoryName(categories, selectedService)
+
   function handleServiceSelect(id: string) {
-    if (id === 'removal') {
-      // 卸睫 is multi-selectable with others
+    if (removalCategory && id === removalCategory.id) {
       onRemovalToggle(!removalAdded)
       return
     }
-    // Single select for others
     if (selectedService === id) {
       onServiceChange(null)
     } else {
       onServiceChange(id)
-      // Clear conditional fields
       onFillInDaysChange(null)
     }
   }
@@ -111,7 +119,9 @@ export default function LashesServiceStep({
 
   function handleRedirectToNewSet() {
     setShowRedirectWarning(false)
-    onServiceChange('new-set')
+    if (newSetCategory) {
+      onServiceChange(newSetCategory.id)
+    }
     onFillInDaysChange(null)
   }
 
@@ -123,20 +133,26 @@ export default function LashesServiceStep({
     }
   }
 
-  function toggleAddon(addon: string) {
-    if (addons.includes(addon)) {
-      onAddonsChange(addons.filter(a => a !== addon))
+  function toggleAddon(id: string) {
+    if (addons.includes(id)) {
+      onAddonsChange(addons.filter(a => a !== id))
     } else {
-      onAddonsChange([...addons, addon])
+      onAddonsChange([...addons, id])
     }
   }
 
-  const showFillIn = selectedService === 'fill-in'
-  const showDirection = selectedService === 'new-set' || selectedService === 'fill-in'
+  const showFillIn = selectedName === '補睫'
+  const showDirection = selectedName === '嫁接' || selectedName === '補睫'
   const showDensity = showDirection && directionId !== null && directionId !== 'unsure'
   const showNeoChineseStyles = directionId === 'neo-chinese'
   const showSpecialFibers = directionId === 'special-fiber'
-  const showAddons = selectedService === 'new-set' || selectedService === 'fill-in'
+  const showAddons = selectedName === '嫁接' || selectedName === '補睫'
+
+  // Combine main services + removal into one list for rendering
+  const allDisplayServices = [
+    ...mainServices,
+    ...(removalCategory ? [removalCategory] : []),
+  ]
 
   return (
     <div className="space-y-6">
@@ -146,8 +162,8 @@ export default function LashesServiceStep({
         <p className="text-xs text-muted-foreground">卸睫可與其他服務同時選擇</p>
 
         <div className="flex flex-wrap gap-2">
-          {LASH_SERVICES.map(s => {
-            const isActive = s.id === 'removal' ? removalAdded : selectedService === s.id
+          {allDisplayServices.map(s => {
+            const isActive = isRemovalCategory(s) ? removalAdded : selectedService === s.id
             return (
               <button
                 key={s.id}
@@ -158,7 +174,7 @@ export default function LashesServiceStep({
                     : 'border-border bg-card text-foreground hover:border-foreground/30'
                 }`}
               >
-                {s.label}
+                {s.name_zh}
               </button>
             )
           })}
@@ -288,12 +304,12 @@ export default function LashesServiceStep({
         </div>
       )}
 
-      {/* Special fiber tags */}
-      {showSpecialFibers && (
+      {/* Special fiber tags — from DB */}
+      {showSpecialFibers && fiberTags.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">特殊毛種（選填）</p>
           <div className="flex flex-wrap gap-2">
-            {SPECIAL_FIBERS.map(f => {
+            {fiberTags.map(f => {
               const isActive = fiberTagId === f.id
               return (
                 <button
@@ -305,7 +321,7 @@ export default function LashesServiceStep({
                       : 'border-border bg-card text-foreground hover:border-foreground/30'
                   }`}
                 >
-                  {f.label}
+                  {f.name_zh}
                 </button>
               )
             })}
@@ -313,20 +329,25 @@ export default function LashesServiceStep({
         </div>
       )}
 
-      {/* Add-ons — only for 嫁接/補睫 */}
-      {showAddons && (
+      {/* Add-ons — from DB (addon categories for lashes domain) */}
+      {showAddons && addonCategories.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">加購項目（選填）</p>
-          <button
-            onClick={() => toggleAddon('lower-lashes')}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-              addons.includes('lower-lashes')
-                ? 'border-foreground bg-foreground text-primary-foreground'
-                : 'border-border bg-card text-foreground hover:border-foreground/30'
-            }`}
-          >
-            下睫毛
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {addonCategories.map(a => (
+              <button
+                key={a.id}
+                onClick={() => toggleAddon(a.id)}
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                  addons.includes(a.id)
+                    ? 'border-foreground bg-foreground text-primary-foreground'
+                    : 'border-border bg-card text-foreground hover:border-foreground/30'
+                }`}
+              >
+                {a.name_zh}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

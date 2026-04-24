@@ -8,6 +8,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import { getProById } from '@/lib/pros'
 import ConfirmClient from '@/components/booking/ConfirmClient'
 
@@ -40,10 +41,10 @@ export default async function ConfirmPage({
     )
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
+  const supabase = await createClient()
   const pro = await getProById(proId)
   if (!pro) {
     return (

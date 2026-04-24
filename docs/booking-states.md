@@ -34,8 +34,7 @@ _Dev reference. Source: Session 10 (2026-03-15). Authoritative for status enum: 
 
 | Time | Event |
 |---|---|
-| −10 min before `starts_at` | LINE reminder sent to customer |
-| `starts_at` (0 min) | 「我會晚到」button appears on customer booking card |
+| −10 min before `starts_at` | LINE reminder sent to customer; pro phone number revealed on booking card; 「我會晚到」button appears — stays visible throughout session |
 | `starts_at` + `no_show_window_minutes` | No-show buttons activate on both sides; 「我會晚到」stays visible |
 | `session_ends_at` | Status auto-flips to `completed`; `completed_at` set |
 | `session_ends_at` + 1hr | Rating prompt sent via LINE to customer and pro |

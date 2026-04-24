@@ -1,43 +1,32 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
+import { Plus, X } from 'lucide-react'
 import type { Slot } from '@/types'
+import type { AvailabilityBlock } from '@/lib/slots'
 import { cn } from '@/lib/utils'
-import { addSlotAction, removeSlotAction } from '@/app/pro/(auth)/dashboard/actions'
+import { addBlockAction, removeBlockAction } from '../actions'
+import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 
-// ── Constants (mirrored from lib/slots — can't import server module in client)
-const SLOT_WINDOW_HOURS = 72
-const SLOT_INCREMENT_MINS = 15
+// ── Constants ────────────────────────────────────────────────
 
-function generateSlotOptions(date: Date): Date[] {
-  const slots: Date[] = []
-  const now = new Date()
-  const maxTime = new Date(now.getTime() + SLOT_WINDOW_HOURS * 60 * 60 * 1000)
+const SLOT_INCREMENT_MINS = 30
 
-  const cursor = new Date(date)
-  cursor.setHours(0, 0, 0, 0)
+// ── Helpers ──────────────────────────────────────────────────
 
-  const end = new Date(date)
-  end.setHours(23, 59, 0, 0)
-
-  while (cursor <= end) {
-    if (cursor > now && cursor <= maxTime) {
-      slots.push(new Date(cursor))
-    }
-    cursor.setTime(cursor.getTime() + SLOT_INCREMENT_MINS * 60 * 1000)
-  }
-
-  return slots
+function toHHmm(date: Date): string {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
-// ── Helpers ─────────────────────────────────────────────────
-
-function formatTime(date: Date) {
-  return date.toLocaleTimeString('zh-TW', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
+function toDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
 function formatDateHeader(date: Date) {
@@ -51,7 +40,7 @@ function formatDateHeader(date: Date) {
 function getDaysInWindow(): Date[] {
   const days: Date[] = []
   const now = new Date()
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     const d = new Date(now)
     d.setDate(d.getDate() + i)
     d.setHours(0, 0, 0, 0)
@@ -60,142 +49,284 @@ function getDaysInWindow(): Date[] {
   return days
 }
 
-// ── Types ───────────────────────────────────────────────────
-
-type SlotState = 'past' | 'available' | 'open' | 'booked'
-
-function getSlotState(time: Date, existingSlot: Slot | undefined): SlotState {
-  if (time.getTime() < Date.now()) return 'past'
-  if (!existingSlot) return 'available'
-  if (existingSlot.is_booked) return 'booked'
-  return 'open'
+function generateTimeOptions(startHour: number, endHour: number): string[] {
+  const options: string[] = []
+  let mins = startHour * 60
+  const endMins = endHour * 60
+  while (mins <= endMins) {
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
+    mins += SLOT_INCREMENT_MINS
+  }
+  return options
 }
 
-const stateStyles: Record<SlotState, string> = {
-  past: 'bg-gray-100 text-gray-400 cursor-not-allowed',
-  available: 'bg-white border hover:bg-gray-50 cursor-pointer',
-  open: 'bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200 cursor-pointer',
-  booked: 'bg-green-100 text-green-800 border-green-300 cursor-not-allowed',
-}
+// Reconstruct blocks from raw slots (client-side mirror of lib function)
+function reconstructBlocks(slots: Slot[]): Record<string, AvailabilityBlock[]> {
+  if (slots.length === 0) return {}
 
-const stateLabels: Record<SlotState, string> = {
-  past: '',
-  available: '',
-  open: '開放',
-  booked: '已預約',
-}
+  const sorted = [...slots].sort(
+    (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+  )
 
-// ── Component ───────────────────────────────────────────────
+  const result: Record<string, AvailabilityBlock[]> = {}
+  const incrementMs = SLOT_INCREMENT_MINS * 60 * 1000
 
-type Props = {
-  initialSlots: Slot[]
-  isReadOnly: boolean
-}
+  for (const slot of sorted) {
+    const slotDate = new Date(slot.starts_at)
+    const dateKey = toDateKey(slotDate)
+    const timeStr = toHHmm(slotDate)
+    const isBooked = slot.is_booked
 
-export function SlotManager({ initialSlots, isReadOnly }: Props) {
-  const [slots] = useState(initialSlots)
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
+    if (!result[dateKey]) result[dateKey] = []
+    const blocks = result[dateKey]
+    const lastBlock = blocks[blocks.length - 1]
 
-  const days = getDaysInWindow()
+    if (lastBlock && lastBlock.isBooked === isBooked) {
+      const [eh, em] = lastBlock.endTime.split(':').map(Number)
+      const lastEndMs = new Date(slotDate)
+      lastEndMs.setHours(eh, em, 0, 0)
 
-  function findSlot(time: Date): Slot | undefined {
-    return slots.find(
-      (s) => new Date(s.starts_at).getTime() === time.getTime()
-    )
+      if (Math.abs(slotDate.getTime() - lastEndMs.getTime()) < 1000) {
+        const slotEnd = new Date(slotDate.getTime() + incrementMs)
+        lastBlock.endTime = toHHmm(slotEnd)
+        lastBlock.slotIds.push(slot.id)
+        continue
+      }
+    }
+
+    const slotEnd = new Date(slotDate.getTime() + incrementMs)
+    blocks.push({
+      startTime: timeStr,
+      endTime: toHHmm(slotEnd),
+      isBooked,
+      slotIds: [slot.id],
+    })
   }
 
-  function handleSlotTap(time: Date) {
-    if (isPending) return
+  return result
+}
 
-    const existing = findSlot(time)
-    const state = getSlotState(time, existing)
+// ── Component ────────────────────────────────────────────────
 
-    if (state === 'past' || state === 'booked') return
-    if (state === 'available' && isReadOnly) return
+type Props = {
+  proId: string
+  initialSlots: Slot[]
+  isReadOnly: boolean
+  workStartHour: number
+  workEndHour: number
+}
 
+export function SlotManager({ proId, initialSlots, isReadOnly, workStartHour, workEndHour }: Props) {
+  const [slots, setSlots] = useState(initialSlots)
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  // Bottom sheet state
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetDate, setSheetDate] = useState<Date | null>(null)
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
+
+  const days = getDaysInWindow()
+  const timeOptions = useMemo(
+    () => generateTimeOptions(workStartHour, workEndHour),
+    [workStartHour, workEndHour]
+  )
+
+  const blocksByDay = useMemo(() => reconstructBlocks(slots), [slots])
+
+  function openSheet(day: Date) {
+    setSheetDate(day)
+    setStartTime(timeOptions[0] ?? '')
+    setEndTime(timeOptions[1] ?? '')
     setError(null)
+    setSheetOpen(true)
+  }
+
+  function handleAddBlock() {
+    if (!sheetDate || !startTime || !endTime) return
+    const dateKey = toDateKey(sheetDate)
+
+    // Optimistic: create temp slots for immediate display
+    const [sh, sm] = startTime.split(':').map(Number)
+    const [eh, em] = endTime.split(':').map(Number)
+    const startMins = sh * 60 + sm
+    const endMins = eh * 60 + em
+    const tempSlots: Slot[] = []
+    let cursor = startMins
+    while (cursor < endMins) {
+      const h = Math.floor(cursor / 60)
+      const m = cursor % 60
+      const slotDate = new Date(`${dateKey}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`)
+      tempSlots.push({
+        id: `temp-${cursor}`,
+        pro_id: proId,
+        starts_at: slotDate.toISOString(),
+        ends_at: null,
+        is_booked: false,
+        is_expired: false,
+        created_at: new Date().toISOString(),
+      })
+      cursor += SLOT_INCREMENT_MINS
+    }
+
+    const prevSlots = slots
+    setSlots(prev => [...prev, ...tempSlots])
+    setSheetOpen(false)
 
     startTransition(async () => {
-      if (state === 'available') {
-        // Add slot
-        const result = await addSlotAction(time.toISOString())
-        if (result.error) {
-          setError(result.error)
-        }
-      } else if (state === 'open' && existing) {
-        // Remove slot
-        const result = await removeSlotAction(existing.id)
-        if (result.error) {
-          setError(result.error)
-        }
+      const result = await addBlockAction(dateKey, startTime, endTime)
+      if (result.error) {
+        setSlots(prevSlots)
+        setError(result.error)
+      } else {
+        setError(null)
       }
     })
   }
 
+  function handleRemoveBlock(block: AvailabilityBlock) {
+    const prevSlots = slots
+    // Optimistic: remove these slot IDs
+    const idsToRemove = new Set(block.slotIds)
+    setSlots(prev => prev.filter(s => !idsToRemove.has(s.id)))
+
+    startTransition(async () => {
+      const result = await removeBlockAction(block.slotIds)
+      if (result.error) {
+        setSlots(prevSlots)
+        setError(result.error)
+      } else {
+        setError(null)
+      }
+    })
+  }
+
+  // Filter end time options to be after start time
+  const endTimeOptions = timeOptions.filter(t => t > startTime)
+
+  // Validate add form
+  const canAdd = startTime && endTime && endTime > startTime
+
   return (
     <div className="space-y-6">
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 text-xs">
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-gray-100 border" /> 已過
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-white border" /> 可開放
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-purple-100 border border-purple-300" /> 已開放
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-green-100 border border-green-300" /> 已預約
-        </span>
-      </div>
-
       {error && (
         <p className="text-sm text-destructive">{error}</p>
       )}
 
-      {/* Day sections */}
-      {days.map((day) => {
-        const options = generateSlotOptions(day)
-        if (options.length === 0) return null
+      {days.map(day => {
+        const dateKey = toDateKey(day)
+        const blocks = blocksByDay[dateKey] ?? []
 
         return (
-          <section key={day.toISOString()} className="space-y-2">
+          <section key={dateKey} className="space-y-3">
             <h3 className="text-sm font-medium">{formatDateHeader(day)}</h3>
-            <div className="grid grid-cols-4 gap-2">
-              {options.map((time) => {
-                const existing = findSlot(time)
-                const state = getSlotState(time, existing)
-                return (
+
+            {blocks.length === 0 && !isReadOnly && (
+              <p className="text-xs text-muted-foreground">尚無可預約時段</p>
+            )}
+
+            {blocks.map((block, i) => (
+              <div
+                key={`${dateKey}-${block.startTime}-${i}`}
+                className={cn(
+                  'flex items-center justify-between rounded-lg px-4 py-3',
+                  block.isBooked
+                    ? 'bg-success-muted text-success-foreground'
+                    : 'bg-primary text-primary-foreground'
+                )}
+              >
+                <span className="text-sm font-medium">
+                  {block.startTime} – {block.endTime}
+                </span>
+                {block.isBooked ? (
+                  <span className="text-xs">已預約</span>
+                ) : (
                   <button
-                    key={time.toISOString()}
-                    onClick={() => handleSlotTap(time)}
-                    disabled={
-                      isPending ||
-                      state === 'past' ||
-                      state === 'booked' ||
-                      (state === 'available' && isReadOnly)
-                    }
-                    className={cn(
-                      'rounded-md border px-2 py-1.5 text-xs font-medium transition-colors',
-                      stateStyles[state],
-                      isPending && 'opacity-50'
-                    )}
+                    onClick={() => handleRemoveBlock(block)}
+                    disabled={isPending}
+                    className="rounded-full p-1 hover:bg-white/20 transition-colors disabled:opacity-50"
                   >
-                    {formatTime(time)}
-                    {stateLabels[state] && (
-                      <span className="block text-[10px] font-normal">
-                        {stateLabels[state]}
-                      </span>
-                    )}
+                    <X className="h-4 w-4" />
                   </button>
-                )
-              })}
-            </div>
+                )}
+              </div>
+            ))}
+
+            {!isReadOnly && (
+              <button
+                onClick={() => openSheet(day)}
+                disabled={isPending}
+                className="flex items-center gap-1.5 rounded-lg border border-dashed px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" />
+                新增時段
+              </button>
+            )}
           </section>
         )
       })}
+
+      {/* Add block bottom sheet */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader className="text-left">
+            <SheetTitle>新增可預約時段</SheetTitle>
+            <SheetDescription>
+              {sheetDate && formatDateHeader(sheetDate)}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">開始時間</label>
+                <select
+                  value={startTime}
+                  onChange={e => {
+                    setStartTime(e.target.value)
+                    // Auto-advance end time if needed
+                    if (endTime <= e.target.value) {
+                      const nextIdx = timeOptions.indexOf(e.target.value) + 1
+                      if (nextIdx < timeOptions.length) {
+                        setEndTime(timeOptions[nextIdx])
+                      }
+                    }
+                  }}
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  {timeOptions.slice(0, -1).map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">結束時間</label>
+                <select
+                  value={endTime}
+                  onChange={e => setEndTime(e.target.value)}
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  {endTimeOptions.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleAddBlock}
+              disabled={!canAdd || isPending}
+              className="w-full"
+            >
+              {isPending ? '新增中...' : '新增'}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

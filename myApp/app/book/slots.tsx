@@ -117,7 +117,7 @@ export default function SlotsScreen() {
         </View>
         <View width={44} />
       </XStack>
-      <Text fontSize={13} color="#808868" textAlign="center" paddingHorizontal={16} paddingBottom={12}>
+      <Text fontSize={13} color="#858279" textAlign="center" paddingHorizontal={16} paddingBottom={12}>
         {summary}
       </Text>
     </YStack>
@@ -209,10 +209,10 @@ export default function SlotsScreen() {
                 </Text>
                 <XStack gap={6} alignItems="center">
                   {proResult.pro.district && (
-                    <Text fontSize={13} color="#808868">{proResult.pro.district}</Text>
+                    <Text fontSize={13} color="#858279">{proResult.pro.district}</Text>
                   )}
                   {proResult.distanceKm != null && (
-                    <Text fontSize={13} color="#808868">{proResult.distanceKm.toFixed(1)} km</Text>
+                    <Text fontSize={13} color="#858279">{proResult.distanceKm.toFixed(1)} km</Text>
                   )}
                 </XStack>
               </YStack>

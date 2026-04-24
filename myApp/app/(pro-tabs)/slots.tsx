@@ -84,7 +84,7 @@ export default function ProSlotsScreen() {
       {/* Header */}
       <YStack paddingTop={insets.top + 20} paddingHorizontal={20} paddingBottom={12}>
         <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={30}>時段管理</Text>
-        <Text fontSize={13} color="#808868" marginTop={2}>{dateRange}</Text>
+        <Text fontSize={13} color="#858279" marginTop={2}>{dateRange}</Text>
       </YStack>
 
       {/* Day tabs */}
@@ -102,7 +102,7 @@ export default function ProSlotsScreen() {
             accessibilityState={{ selected: activeDay === i }}
             style={[styles.dayTab, activeDay === i && styles.dayTabActive]}
           >
-            <Text fontSize={14} fontWeight={activeDay === i ? '700' : '500'} color={activeDay === i ? '#141413' : '#808868'}>
+            <Text fontSize={14} fontWeight={activeDay === i ? '700' : '500'} color={activeDay === i ? '#141413' : '#858279'}>
               {label}
             </Text>
             <Text fontSize={11} color={activeDay === i ? '#141413' : '#aaa'}>{getDateStr(i)}</Text>

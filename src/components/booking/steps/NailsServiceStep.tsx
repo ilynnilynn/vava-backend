@@ -1,6 +1,10 @@
 'use client'
 
+import type { ServiceCategory, ServiceStyleModifier } from '@/types/database'
+
 type Props = {
+  categories: ServiceCategory[]
+  styleModifiers: ServiceStyleModifier[]
   selectedServices: string[]
   treatmentTier: 'basic' | 'deep' | null
   styleId: string | null
@@ -11,29 +15,21 @@ type Props = {
   onAddonsChange: (addons: string[]) => void
 }
 
-// Hard-coded service options per spec (these match service_categories in DB)
-const NAIL_SERVICES = [
-  { id: 'gel', label: '凝膠' },
-  { id: 'removal', label: '卸甲' },
-  { id: 'repair', label: '修補' },
-  { id: 'care', label: '保養' },
-]
-
 const TREATMENT_TIERS = [
   { value: 'basic' as const, label: '基本' },
   { value: 'deep' as const, label: '深層' },
 ]
 
-const NAIL_STYLES = [
-  { id: 'solid', label: '單色' },
-  { id: 'design', label: '設計款' },
-  { id: 'cat-eye', label: '貓眼' },
-  { id: 'french', label: '法式' },
-  { id: 'gradient', label: '漸層' },
-  { id: 'mirror', label: '鏡面' },
-]
+// Identify categories by name_zh for conditional UI behavior
+function getSelectedNames(categories: ServiceCategory[], ids: string[]): Set<string> {
+  return new Set(
+    categories.filter(c => ids.includes(c.id)).map(c => c.name_zh)
+  )
+}
 
 export default function NailsServiceStep({
+  categories,
+  styleModifiers,
   selectedServices,
   treatmentTier,
   styleId,
@@ -43,28 +39,32 @@ export default function NailsServiceStep({
   onStyleChange,
   onAddonsChange,
 }: Props) {
+  const mainServices = categories.filter(c => !c.is_addon)
+  const addonCategories = categories.filter(c => c.is_addon)
+
   function toggleService(id: string) {
+    const cat = categories.find(c => c.id === id)
     if (selectedServices.includes(id)) {
       onServicesChange(selectedServices.filter(s => s !== id))
-      // Clear conditional fields when parent service removed
-      if (id === 'care') onTreatmentTierChange(null)
-      if (id === 'gel') onStyleChange(null)
+      if (cat?.name_zh === '保養') onTreatmentTierChange(null)
+      if (cat?.name_zh === '凝膠') onStyleChange(null)
     } else {
       onServicesChange([...selectedServices, id])
     }
   }
 
-  const showTreatmentTier = selectedServices.includes('care')
-  const showStyle = selectedServices.includes('gel')
-  const showAddons = selectedServices.includes('gel') || selectedServices.includes('repair')
-
-  function toggleAddon(addon: string) {
-    if (addons.includes(addon)) {
-      onAddonsChange(addons.filter(a => a !== addon))
+  function toggleAddon(id: string) {
+    if (addons.includes(id)) {
+      onAddonsChange(addons.filter(a => a !== id))
     } else {
-      onAddonsChange([...addons, addon])
+      onAddonsChange([...addons, id])
     }
   }
+
+  const selectedNames = getSelectedNames(categories, selectedServices)
+  const showTreatmentTier = selectedNames.has('保養')
+  const showStyle = selectedNames.has('凝膠')
+  const showAddons = selectedNames.has('凝膠') || selectedNames.has('修補')
 
   return (
     <div className="space-y-6">
@@ -73,7 +73,7 @@ export default function NailsServiceStep({
         <p className="text-xs text-muted-foreground">可複選</p>
 
         <div className="flex flex-wrap gap-2">
-          {NAIL_SERVICES.map(s => {
+          {mainServices.map(s => {
             const isActive = selectedServices.includes(s.id)
             return (
               <button
@@ -85,7 +85,7 @@ export default function NailsServiceStep({
                     : 'border-border bg-card text-foreground hover:border-foreground/30'
                 }`}
               >
-                {s.label}
+                {s.name_zh}
               </button>
             )
           })}
@@ -117,12 +117,12 @@ export default function NailsServiceStep({
         </div>
       )}
 
-      {/* Style — optional dropdown below 凝膠 */}
-      {showStyle && (
+      {/* Style — from DB style modifiers */}
+      {showStyle && styleModifiers.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">款式偏好（選填）</p>
           <div className="flex flex-wrap gap-2">
-            {NAIL_STYLES.map(s => {
+            {styleModifiers.map(s => {
               const isActive = styleId === s.id
               return (
                 <button
@@ -134,7 +134,7 @@ export default function NailsServiceStep({
                       : 'border-border bg-card text-foreground hover:border-foreground/30'
                   }`}
                 >
-                  {s.label}
+                  {s.name_zh}
                 </button>
               )
             })}
@@ -142,20 +142,25 @@ export default function NailsServiceStep({
         </div>
       )}
 
-      {/* Add-ons — only when 凝膠 or 修補 selected */}
-      {showAddons && (
+      {/* Add-ons — from DB addon categories */}
+      {showAddons && addonCategories.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">加購項目（選填）</p>
-          <button
-            onClick={() => toggleAddon('extension')}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-              addons.includes('extension')
-                ? 'border-foreground bg-foreground text-primary-foreground'
-                : 'border-border bg-card text-foreground hover:border-foreground/30'
-            }`}
-          >
-            延甲
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {addonCategories.map(a => (
+              <button
+                key={a.id}
+                onClick={() => toggleAddon(a.id)}
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                  addons.includes(a.id)
+                    ? 'border-foreground bg-foreground text-primary-foreground'
+                    : 'border-border bg-card text-foreground hover:border-foreground/30'
+                }`}
+              >
+                {a.name_zh}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -121,12 +121,12 @@ export async function getLashesPriceRange(params: {
 
 // ── Helpers ───────────────────────────────────────────────────
 
-function minMax(prices: number[]): PriceRange {
+export function minMax(prices: number[]): PriceRange {
   if (!prices.length) return { min: 0, max: 0 }
   return { min: Math.min(...prices), max: Math.max(...prices) }
 }
 
-function getDensityDelta(
+export function getDensityDelta(
   row: { density_light_delta: number | null; density_daily_delta: number | null; density_heavy_delta: number | null },
   density?: LashDensity | null
 ): number {
@@ -138,7 +138,7 @@ function getDensityDelta(
 
 // Returns the correct fill-in price field name from pro_services.
 // >21 days = blocked upstream — return null to signal a bug if reached.
-function getFillInPriceField(
+export function getFillInPriceField(
   isReturning: boolean,
   fillInDays: number
 ): 'same_shop_14_price' | 'same_shop_21_price' | 'outside_shop_14_price' | 'outside_shop_21_price' | null {

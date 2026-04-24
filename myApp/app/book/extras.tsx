@@ -250,9 +250,9 @@ export default function ExtrasScreen() {
                 <FA6ProIcon
                   name="image-polaroid"
                   size={18}
-                  color={photoDenied ? '#B0B0A8' : '#808868'}
+                  color={photoDenied ? '#B0B0A8' : '#858279'}
                 />
-                <Text fontSize={15} color={photoDenied ? '#B0B0A8' : '#808868'}>
+                <Text fontSize={15} color={photoDenied ? '#B0B0A8' : '#858279'}>
                   上傳圖片
                 </Text>
               </XStack>
@@ -271,7 +271,7 @@ export default function ExtrasScreen() {
             value={note}
             onChangeText={setNote}
             placeholder="有什麼想跟設計師說的嗎？"
-            placeholderTextColor="#808868"
+            placeholderTextColor="#858279"
             multiline
             accessibilityLabel="備註"
             style={{
@@ -341,7 +341,7 @@ function ToggleRow({
             {label}
           </Text>
           {subtitle && (
-            <Text fontSize={12} lineHeight={18} color="#808868">
+            <Text fontSize={12} lineHeight={18} color="#858279">
               {subtitle}
             </Text>
           )}

@@ -82,7 +82,7 @@ export default function BookingsScreen() {
   if (error) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16} paddingHorizontal={24}>
-        <Text fontSize={15} color="#808868" textAlign="center">{error}</Text>
+        <Text fontSize={15} color="#858279" textAlign="center">{error}</Text>
         <Pressable
           onPress={() => { setLoading(true); load() }}
           style={{
@@ -105,7 +105,7 @@ export default function BookingsScreen() {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16} paddingHorizontal={24}>
         <FA6ProIcon name="calendar-xmark" size={48} color="#EAEAE4" />
-        <Text fontSize={16} fontWeight="600" color="#808868">還沒有預約紀錄</Text>
+        <Text fontSize={16} fontWeight="600" color="#858279">還沒有預約紀錄</Text>
         <Pressable
           onPress={() => router.push('/book/category')}
           style={{
@@ -152,7 +152,7 @@ export default function BookingsScreen() {
       {/* List */}
       {data.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={8} paddingHorizontal={24}>
-          <Text fontSize={14} color="#808868">
+          <Text fontSize={14} color="#858279">
             {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
         </YStack>
@@ -220,7 +220,7 @@ function TabPill({
         opacity: !active && pressed ? 0.5 : 1,
       })}
     >
-      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#808868'}>
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#858279'}>
         {label}
       </Text>
     </Pressable>

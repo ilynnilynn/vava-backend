@@ -38,12 +38,12 @@ export default async function LoginPage({
         {/* Logo / wordmark */}
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight">VAVA</h1>
-          <p className="mt-2 text-sm text-gray-500">預約你的指甲 · 睫毛設計師</p>
+          <p className="mt-2 text-sm text-muted-foreground">預約你的指甲 · 睫毛設計師</p>
         </div>
 
         {/* Error message */}
         {error && errorMessages[error] && (
-          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="rounded-lg bg-destructive-muted px-4 py-3 text-sm text-destructive">
             {errorMessages[error]}
           </div>
         )}
@@ -52,7 +52,7 @@ export default async function LoginPage({
         {/* href triggers GET /api/auth/line which redirects to LINE OAuth */}
         <a
           href="/api/auth/line?type=customer"
-          className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#06C755] px-6 py-4 text-base font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80"
+          className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#06C755] px-6 py-4 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80"
         >
           {/* LINE icon */}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true">
@@ -62,9 +62,9 @@ export default async function LoginPage({
         </a>
 
         {/* Pro login link */}
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-muted-foreground">
           是設計師？{' '}
-          <a href="/pro/login" className="text-gray-600 underline underline-offset-2">
+          <a href="/pro/login" className="text-foreground underline underline-offset-2">
             前往設計師登入
           </a>
         </p>

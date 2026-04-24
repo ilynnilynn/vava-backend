@@ -12,7 +12,7 @@ import type { ProBookingListItem, ProDisplayStatus } from '@/types/pro'
 
 const AVATAR_PALETTE = [
   { bg: '#DFF5AD', fg: '#3d3d3a' },
-  { bg: '#808868', fg: '#ffffff' },
+  { bg: '#858279', fg: '#ffffff' },
   { bg: '#9472DE', fg: '#ffffff' },
   { bg: '#CDB5FF', fg: '#3d3d3a' },
   { bg: '#A4CFFB', fg: '#3d3d3a' },
@@ -170,12 +170,12 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
 
         {/* Service + time */}
         <XStack gap={6} alignItems="center" marginBottom={2}>
-          <FA6ProIcon name={domainIcon} size={12} color="#808868" />
-          <Text fontSize={14} color="#808868">{booking.service_label}</Text>
+          <FA6ProIcon name={domainIcon} size={12} color="#858279" />
+          <Text fontSize={14} color="#858279">{booking.service_label}</Text>
         </XStack>
         <XStack gap={6} alignItems="center">
-          <FA6ProIcon name="clock" size={12} color="#808868" />
-          <Text fontSize={14} color="#808868">{startTime} — {endTime}</Text>
+          <FA6ProIcon name="clock" size={12} color="#858279" />
+          <Text fontSize={14} color="#858279">{startTime} — {endTime}</Text>
         </XStack>
 
         {/* Action buttons — only for in_progress */}

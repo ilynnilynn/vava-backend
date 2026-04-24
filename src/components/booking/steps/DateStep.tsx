@@ -3,8 +3,8 @@
 import type { DateOption } from '../FilteringWizard'
 
 type Props = {
-  selected: DateOption | null
-  onSelect: (date: DateOption) => void
+  selected: DateOption[]
+  onToggle: (date: DateOption) => void
 }
 
 function generateDateOptions(): { value: DateOption; label: string; sublabel: string }[] {
@@ -15,20 +15,18 @@ function generateDateOptions(): { value: DateOption; label: string; sublabel: st
   const now = new Date()
   const dayNames = ['日', '一', '二', '三', '四', '五', '六']
 
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 3; i++) {
     const d = new Date(now)
     d.setDate(now.getDate() + i)
-    // Set to start of day in local timezone
     d.setHours(0, 0, 0, 0)
     const iso = d.toISOString().split('T')[0]
     const mm = d.getMonth() + 1
     const dd = d.getDate()
-    const dayName = dayNames[d.getDay()]
 
     let label: string
     if (i === 0) label = '今天'
     else if (i === 1) label = '明天'
-    else label = `星期${dayName}`
+    else label = `星期${dayNames[d.getDay()]}`
 
     options.push({
       value: iso,
@@ -40,7 +38,7 @@ function generateDateOptions(): { value: DateOption; label: string; sublabel: st
   return options
 }
 
-export default function DateStep({ selected, onSelect }: Props) {
+export default function DateStep({ selected, onToggle }: Props) {
   const options = generateDateOptions()
 
   return (
@@ -49,11 +47,11 @@ export default function DateStep({ selected, onSelect }: Props) {
 
       <div className="flex flex-wrap gap-2">
         {options.map(opt => {
-          const isActive = selected === opt.value
+          const isActive = selected.includes(opt.value)
           return (
             <button
               key={opt.value}
-              onClick={() => onSelect(opt.value)}
+              onClick={() => onToggle(opt.value)}
               className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 isActive
                   ? 'border-foreground bg-foreground text-primary-foreground'

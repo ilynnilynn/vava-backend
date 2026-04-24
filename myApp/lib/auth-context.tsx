@@ -5,9 +5,10 @@ import { supabase } from './supabase'
 type AuthContextType = {
   session: Session | null
   isLoading: boolean
+  signOut: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType>({ session: null, isLoading: true })
+const AuthContext = createContext<AuthContextType>({ session: null, isLoading: true, signOut: async () => {} })
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
@@ -28,8 +29,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  async function signOut() {
+    await supabase.auth.signOut()
+  }
+
   return (
-    <AuthContext.Provider value={{ session, isLoading }}>
+    <AuthContext.Provider value={{ session, isLoading, signOut }}>
       {children}
     </AuthContext.Provider>
   )

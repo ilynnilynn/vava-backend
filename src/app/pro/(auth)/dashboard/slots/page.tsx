@@ -10,7 +10,7 @@ export default async function SlotsPage() {
 
   const { data: pro } = await supabase
     .from('pros')
-    .select('id, subscription_status')
+    .select('*')
     .eq('id', user.id)
     .single()
 
@@ -18,6 +18,8 @@ export default async function SlotsPage() {
 
   const slots = await getProSlots(pro.id)
   const isReadOnly = pro.subscription_status === 'read_only'
+  const workStartHour = pro.work_start_hour ?? 10
+  const workEndHour = pro.work_end_hour ?? 20
 
   return (
     <div className="space-y-6 py-6">
@@ -29,14 +31,17 @@ export default async function SlotsPage() {
       </div>
 
       {isReadOnly && (
-        <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+        <div className="rounded-lg border border-warning bg-warning-muted p-3 text-sm text-warning-foreground">
           訂閱已到期，無法新增時段。請前往訂閱頁面升級。
         </div>
       )}
 
       <SlotManager
+        proId={pro.id}
         initialSlots={slots}
         isReadOnly={isReadOnly}
+        workStartHour={workStartHour}
+        workEndHour={workEndHour}
       />
     </div>
   )

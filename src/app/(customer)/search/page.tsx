@@ -16,13 +16,35 @@ import type { ProResult } from '@/components/search/SearchResultsList'
 import type { ServiceDomain } from '@/types/database'
 import type { TimeBand } from '@/components/booking/FilteringWizard'
 
+/** All wizard params — must list every key so the Next.js searchParams proxy
+ *  exposes them when we build the round-trip wizardParams string. */
+const WIZARD_PARAM_KEYS = [
+  'domain', 'lat', 'lng', 'locationLabel', 'dates', 'timeBand',
+  'services', 'treatmentTier', 'styleId', 'addons',
+  'lashRemoval', 'fillInDays', 'directionId', 'density',
+  'styleTags', 'fiberTagId', 'silent', 'note', 'refPhoto',
+] as const
+
 type SearchParams = Promise<{
   domain?: string
   lat?: string
   lng?: string
-  date?: string
+  locationLabel?: string
+  dates?: string
   timeBand?: string
   services?: string
+  treatmentTier?: string
+  styleId?: string
+  addons?: string
+  lashRemoval?: string
+  fillInDays?: string
+  directionId?: string
+  density?: string
+  styleTags?: string
+  fiberTagId?: string
+  silent?: string
+  note?: string
+  refPhoto?: string
   [key: string]: string | undefined
 }>
 
@@ -33,6 +55,10 @@ function getTimeBandRange(band: TimeBand): { startHour: number; endHour: number 
     case 'evening': return { startHour: 17, endHour: 22 }
     case 'any': return null
   }
+}
+
+function getNowMs(): number {
+  return Date.now()
 }
 
 export default async function SearchPage({
@@ -57,8 +83,12 @@ export default async function SearchPage({
   const validDomain: ServiceDomain = domain
   const userLat = params.lat ? parseFloat(params.lat) : null
   const userLng = params.lng ? parseFloat(params.lng) : null
+  const selectedDates = params.dates ? params.dates.split(',') : []
+  const hasNow = selectedDates.includes('now')
+  const specificDates = selectedDates.filter(d => d !== 'now')
   const timeBand = (params.timeBand ?? 'any') as TimeBand
   const timeBandRange = getTimeBandRange(timeBand)
+  const nowMs = hasNow ? getNowMs() : 0
 
   // Get all accepting pros
   const allPros = await getAcceptingPros()
@@ -102,13 +132,29 @@ export default async function SearchPage({
         getProPublicRatings(pro.id),
       ])
 
+      // Filter slots by selected dates
+      let slots = allSlots
+      if (selectedDates.length > 0) {
+        slots = slots.filter(s => {
+          const d = new Date(s.starts_at)
+          const ms = d.getTime()
+          const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+          // Match "now" (within 1 hour)
+          if (hasNow && ms >= nowMs && ms <= nowMs + 3600000) return true
+          // Match any specific date
+          if (specificDates.includes(localDate)) return true
+          return false
+        })
+      }
+
       // Filter slots by time band if specified
-      const slots = timeBandRange
-        ? allSlots.filter(s => {
-            const h = new Date(s.starts_at).getUTCHours()
-            return h >= timeBandRange.startHour && h < timeBandRange.endHour
-          })
-        : allSlots
+      if (timeBandRange) {
+        slots = slots.filter(s => {
+          const h = new Date(s.starts_at).getHours()
+          return h >= timeBandRange.startHour && h < timeBandRange.endHour
+        })
+      }
 
       // Compute distance
       const distanceKm =
@@ -178,7 +224,14 @@ export default async function SearchPage({
   }
 
   const title = validDomain === 'nails' ? '美甲設計師' : '美睫設計師'
-  const wizardParams = new URLSearchParams(params as Record<string, string>).toString()
+  // Build wizardParams by explicitly reading each key — avoids Next.js
+  // searchParams proxy dropping unaccessed keys during iteration.
+  const wp = new URLSearchParams()
+  for (const key of WIZARD_PARAM_KEYS) {
+    const val = params[key]
+    if (val !== undefined) wp.set(key, val)
+  }
+  const wizardParams = wp.toString()
 
   return (
     <main className="min-h-screen bg-background">

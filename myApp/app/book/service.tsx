@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Alert } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useRouter } from 'expo-router'
 
@@ -15,14 +14,9 @@ const TREATMENT_TIERS = ['基本', '深層'] as const
 const NAIL_SCOPES = ['手', '腳', '手+腳'] as const
 
 // ── Lash options ──
-const LASH_SERVICES = ['嫁接', '補睫', '卸睫', '睫毛管理'] as const
-const FILL_IN_DAYS = [
-  { label: '≤14天', value: 14 },
-  { label: '15-21天', value: 18 },
-  { label: '>21天', value: 22 },
-] as const
+const LASH_SERVICES = ['嫁接', '卸睫', '睫毛管理'] as const
 const LASH_DIRECTIONS = ['日式', '韓式', '歐美', '新中式', '特殊毛種', '不確定'] as const
-const LASH_DENSITY = ['自然輕盈', '日常妝感', '極致濃密'] as const
+const LASH_DENSITY = ['輕盈', '妝感', '濃密'] as const
 const STYLE_TAGS = ['狐系', '漫畫款', '仙女款', '太陽花', '流蘇'] as const
 const FIBER_TAGS = ['山茶花', '人魚編織(YY)', '6D羽毛', '6D棉花', '三葉草'] as const
 
@@ -48,9 +42,6 @@ export default function ServiceScreen() {
   // ── Lash state ──
   const [lashServices, setLashServices] = useState<string[]>(
     state.services?.categoryIds ?? [],
-  )
-  const [fillInDays, setFillInDays] = useState<number | null>(
-    state.services?.fillInDays ?? null,
   )
   const [lashDirection, setLashDirection] = useState<string | null>(
     state.services?.styleId ?? null,
@@ -78,7 +69,7 @@ export default function ServiceScreen() {
   // ── Lash helpers ──
   function toggleLashService(s: string) {
     setLashServices((prev) => {
-      // 卸睫 can be multi-selected with 嫁接 or 補睫
+      // 卸睫 can be multi-selected with 嫁接
       // Other main services are single-select among themselves
       if (s === '卸睫') {
         return prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
@@ -86,41 +77,16 @@ export default function ServiceScreen() {
       if (s === '睫毛管理') {
         return prev.includes(s) ? prev.filter((x) => x !== s) : [s, ...prev.filter((x) => x === '卸睫')]
       }
-      // 嫁接 or 補睫: replace any existing main (non-卸睫) selection
+      // 嫁接: replace any existing main (non-卸睫) selection
       const withoutMain = prev.filter((x) => x === '卸睫')
       return prev.includes(s) ? prev.filter((x) => x !== s) : [...withoutMain, s]
     })
   }
 
-  function handleFillInDays(val: number) {
-    if (val === 22) {
-      Alert.alert(
-        '建議更換服務',
-        '超過 21 天建議選擇嫁接而非補睫',
-        [
-          {
-            text: '切換到嫁接',
-            onPress: () => {
-              setLashServices((prev) => {
-                const without = prev.filter((x) => x !== '補睫')
-                return without.includes('嫁接') ? without : [...without, '嫁接']
-              })
-              setFillInDays(null)
-            },
-          },
-          { text: '取消', style: 'cancel' },
-        ],
-      )
-      return
-    }
-    setFillInDays(val)
-  }
-
-  const showFillIn = lashServices.includes('補睫')
-  const showLashDirection = lashServices.includes('嫁接') || lashServices.includes('補睫')
+  const showLashDirection = lashServices.includes('嫁接')
   const showDensity = showLashDirection && lashDirection !== null && lashDirection !== '不確定'
-  const showStyleTags = lashDirection === '新中式'
-  const showFiberTag = lashDirection === '特殊毛種'
+  const showStyleTags = showLashDirection && lashDirection === '新中式'
+  const showFiberTag = showLashDirection && lashDirection === '特殊毛種'
 
   // ── Validation ──
   function canProceedNails(): boolean {
@@ -158,7 +124,7 @@ export default function ServiceScreen() {
           nailScope: null,
           lashDensity: lashDensity,
           treatmentTier: null,
-          fillInDays: fillInDays,
+          fillInDays: null,
           fiberTagId: fiberTag,
           styleTags: selectedStyleTags,
         },
@@ -176,6 +142,7 @@ export default function ServiceScreen() {
       totalSteps={6}
       onNext={handleConfirm}
       nextDisabled={!canProceed}
+      noScroll
     >
       {category === 'nails' ? (
         <NailsUI
@@ -194,9 +161,6 @@ export default function ServiceScreen() {
         <LashesUI
           lashServices={lashServices}
           toggleLashService={toggleLashService}
-          showFillIn={showFillIn}
-          fillInDays={fillInDays}
-          handleFillInDays={handleFillInDays}
           showLashDirection={showLashDirection}
           lashDirection={lashDirection}
           setLashDirection={setLashDirection}
@@ -240,7 +204,24 @@ function NailsUI({
   setNailScope: (s: string | null) => void
 }) {
   return (
-    <YStack gap={24} paddingTop={8}>
+    <YStack flex={1} gap={24} paddingTop={16}>
+      {/* Scope — always, now first */}
+      <YStack gap={12}>
+        <Text fontSize={16} fontWeight="700" color="#1F2723">
+          手/腳
+        </Text>
+        <XStack flexWrap="wrap" gap={8}>
+          {NAIL_SCOPES.map((s) => (
+            <SelectionChip
+              key={s}
+              label={s}
+              selected={nailScope === s}
+              onPress={() => setNailScope(s)}
+            />
+          ))}
+        </XStack>
+      </YStack>
+
       {/* Service type — multi-select */}
       <YStack gap={12}>
         <Text fontSize={16} fontWeight="700" color="#1F2723">
@@ -295,23 +276,6 @@ function NailsUI({
           </XStack>
         </YStack>
       </SectionExpander>
-
-      {/* Scope — always */}
-      <YStack gap={12}>
-        <Text fontSize={16} fontWeight="700" color="#1F2723">
-          手/腳
-        </Text>
-        <XStack flexWrap="wrap" gap={8}>
-          {NAIL_SCOPES.map((s) => (
-            <SelectionChip
-              key={s}
-              label={s}
-              selected={nailScope === s}
-              onPress={() => setNailScope(s)}
-            />
-          ))}
-        </XStack>
-      </YStack>
     </YStack>
   )
 }
@@ -320,9 +284,6 @@ function NailsUI({
 function LashesUI({
   lashServices,
   toggleLashService,
-  showFillIn,
-  fillInDays,
-  handleFillInDays,
   showLashDirection,
   lashDirection,
   setLashDirection,
@@ -338,9 +299,6 @@ function LashesUI({
 }: {
   lashServices: string[]
   toggleLashService: (s: string) => void
-  showFillIn: boolean
-  fillInDays: number | null
-  handleFillInDays: (val: number) => void
   showLashDirection: boolean
   lashDirection: string | null
   setLashDirection: (s: string | null) => void
@@ -361,7 +319,7 @@ function LashesUI({
   }
 
   return (
-    <YStack gap={24} paddingTop={8}>
+    <YStack flex={1} gap={24} paddingTop={16}>
       {/* Service type */}
       <YStack gap={12}>
         <Text fontSize={16} fontWeight="700" color="#1F2723">
@@ -379,26 +337,7 @@ function LashesUI({
         </XStack>
       </YStack>
 
-      {/* Fill-in days — only if 補睫 */}
-      <SectionExpander visible={showFillIn}>
-        <YStack gap={12}>
-          <Text fontSize={16} fontWeight="700" color="#1F2723">
-            上次接睫時間
-          </Text>
-          <XStack flexWrap="wrap" gap={8}>
-            {FILL_IN_DAYS.map((d) => (
-              <SelectionChip
-                key={d.label}
-                label={d.label}
-                selected={fillInDays === d.value}
-                onPress={() => handleFillInDays(d.value)}
-              />
-            ))}
-          </XStack>
-        </YStack>
-      </SectionExpander>
-
-      {/* Direction — if 嫁接 or 補睫 */}
+      {/* Direction — only if 嫁接 */}
       <SectionExpander visible={showLashDirection}>
         <YStack gap={12}>
           <Text fontSize={16} fontWeight="700" color="#1F2723">

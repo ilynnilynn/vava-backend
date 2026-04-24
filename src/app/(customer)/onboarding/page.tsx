@@ -16,6 +16,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input }  from '@/components/ui/input'
+import { createClient } from '@/lib/supabase/client'
 
 const PHONE_REGEX = /^09\d{8}$/
 
@@ -65,7 +66,9 @@ export default function OnboardingPage() {
         return
       }
 
-      router.replace('/home')
+      // Hard navigation — bypasses Next.js Router Cache so
+      // /home server component re-runs and sees the freshly saved data.
+      window.location.href = '/home'
     } catch {
       setError('網路異常，請稍後再試。')
     } finally {
@@ -185,6 +188,21 @@ export default function OnboardingPage() {
           )}
 
         </div>
+      </div>
+
+      {/* Logout link */}
+      <div className="py-6 text-center">
+        <button
+          type="button"
+          onClick={async () => {
+            const supabase = createClient()
+            await supabase.auth.signOut()
+            router.replace('/login')
+          }}
+          className="text-xs text-muted-foreground underline underline-offset-2"
+        >
+          登出
+        </button>
       </div>
     </main>
   )

@@ -22,8 +22,23 @@
 //   SUPABASE_SERVICE_ROLE_KEY → Supabase Dashboard → API settings
 // ============================================================
 
+import { cache } from 'react'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import crypto from 'crypto'
+
+// ── Cached getUser (React Server Components) ─────────────────
+//
+// Deduplicates supabase.auth.getUser() within a single React
+// render pass.  Layout + page + nested server components all
+// share ONE HTTP call to the Supabase Auth API.
+// Middleware runs in a separate Edge context and is unaffected.
+
+export const getAuthUser = cache(async () => {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+})
 
 // ── LINE OAuth helpers ────────────────────────────────────────
 
@@ -197,19 +212,23 @@ export async function upsertUser(params: {
 }): Promise<void> {
   const admin = createAdminClient()
 
-  await admin
+  // Only use columns confirmed to exist in the live DB.
+  // display_name, profile_photo_url, auth_provider, line_notifications
+  // may not exist yet (schema drift) — omit to avoid upsert failure.
+  const { error } = await admin
     .from('users')
     .upsert(
       {
-        id:                params.supabaseUserId,
-        line_user_id:      params.lineUserId,
-        display_name:      params.name,
-        profile_photo_url: params.pictureUrl ?? null,
-        auth_provider:     'line',
-        line_notifications: true,
+        id:           params.supabaseUserId,
+        line_user_id: params.lineUserId,
       },
       { onConflict: 'id', ignoreDuplicates: false }
     )
+
+  if (error) {
+    console.error('[upsertUser] failed:', error)
+    throw new Error(`Failed to upsert user row: ${error.message}`)
+  }
 }
 
 // Called in /pro/auth/callback after session is set.

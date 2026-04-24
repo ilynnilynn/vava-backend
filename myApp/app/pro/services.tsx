@@ -23,14 +23,14 @@ function ServiceCard({ service }: { service: ServiceItem }) {
     >
       <YStack flex={1} gap={3}>
         <Text fontSize={15} fontWeight="600" color="#141413">{service.name}</Text>
-        <Text fontSize={13} color="#808868">{service.duration_minutes} 分鐘 · NT${service.price}</Text>
+        <Text fontSize={13} color="#858279">{service.duration_minutes} 分鐘 · NT${service.price}</Text>
       </YStack>
       <Pressable
         onPress={() => Alert.alert('編輯', '即將推出')}
         accessibilityLabel={`編輯 ${service.name}`}
         style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
       >
-        <FA6ProIcon name="pen" size={14} color="#808868" />
+        <FA6ProIcon name="pen" size={14} color="#858279" />
       </Pressable>
     </XStack>
   )

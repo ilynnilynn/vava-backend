@@ -49,12 +49,12 @@ export default async function ProLoginPage({
         {/* Logo / wordmark */}
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight">VAVA</h1>
-          <p className="mt-2 text-sm text-gray-500">設計師專區</p>
+          <p className="mt-2 text-sm text-muted-foreground">設計師專區</p>
         </div>
 
         {/* Error message */}
         {error && errorMessages[error] && (
-          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="rounded-lg bg-destructive-muted px-4 py-3 text-sm text-destructive">
             {errorMessages[error]}
           </div>
         )}
@@ -62,7 +62,7 @@ export default async function ProLoginPage({
         {/* LINE login button */}
         <a
           href="/api/auth/line?type=pro"
-          className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#06C755] px-6 py-4 text-base font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80"
+          className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#06C755] px-6 py-4 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80"
         >
           {/* LINE icon */}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true">
@@ -72,9 +72,9 @@ export default async function ProLoginPage({
         </a>
 
         {/* Customer login link */}
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-muted-foreground">
           找設計師預約？{' '}
-          <a href="/login" className="text-gray-600 underline underline-offset-2">
+          <a href="/login" className="text-foreground underline underline-offset-2">
             前往客戶登入
           </a>
         </p>

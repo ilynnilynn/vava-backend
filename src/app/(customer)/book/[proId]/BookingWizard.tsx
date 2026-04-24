@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
-import { parseUTC } from '@/lib/utils'
 import PortfolioGallery from './PortfolioGallery'
 import type {
   Slot,
@@ -322,7 +321,7 @@ export default function BookingWizard({
               <p className="text-base font-semibold text-foreground">{pro.displayName}</p>
               {pro.averageRating !== null && (
                 <span className="text-xs text-muted-foreground">
-                  <span className="text-yellow-400">★</span> {pro.averageRating} ({pro.ratingCount})
+                  <span className="text-star">★</span> {pro.averageRating} ({pro.ratingCount})
                 </span>
               )}
             </div>
@@ -435,7 +434,7 @@ export default function BookingWizard({
 
         {/* Error */}
         {error && (
-          <p className="mt-4 text-sm text-red-500">{error}</p>
+          <p className="mt-4 text-sm text-destructive">{error}</p>
         )}
 
         {/* Navigation */}
@@ -513,7 +512,7 @@ function getDensityDelta(ps: ProService, density: LashDensity): number {
 }
 
 function formatSlotTime(startsAt: string): string {
-  const date = new Date(parseUTC(startsAt))
+  const date = new Date(startsAt)
   return date.toLocaleTimeString('zh-TW', {
     hour: '2-digit',
     minute: '2-digit',
@@ -523,7 +522,7 @@ function formatSlotTime(startsAt: string): string {
 function groupSlotsByDate(slotsToGroup: Slot[]): Map<string, Slot[]> {
   const grouped = new Map<string, Slot[]>()
   for (const slot of slotsToGroup) {
-    const dateKey = new Date(parseUTC(slot.starts_at)).toLocaleDateString('zh-TW', {
+    const dateKey = new Date(slot.starts_at).toLocaleDateString('zh-TW', {
       month: 'long',
       day: 'numeric',
       weekday: 'short',
@@ -935,7 +934,7 @@ function ConfirmStep({
   const selectedAddons = categories.filter(c => state.addonIds.includes(c.id))
 
   const dateTime = state.startsAt
-    ? new Date(parseUTC(state.startsAt)).toLocaleString('zh-TW', {
+    ? new Date(state.startsAt).toLocaleString('zh-TW', {
         month: 'long',
         day: 'numeric',
         weekday: 'short',

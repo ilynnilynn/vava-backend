@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 
 type Props = {
@@ -14,9 +15,46 @@ type Props = {
 export default function PreferencesStep({
   silentPreference,
   customerNote,
+  refPhotoUrl,
   onSilentChange,
   onNoteChange,
+  onRefPhotoChange,
 }: Props) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    setUploadError(null)
+
+    try {
+      const form = new FormData()
+      form.append('file', file)
+
+      const res = await fetch('/api/bookings/upload-ref-photo', {
+        method: 'POST',
+        body: form,
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setUploadError(data.error ?? '上傳失敗')
+        return
+      }
+
+      const { url } = await res.json()
+      onRefPhotoChange(url)
+    } catch {
+      setUploadError('網路錯誤，請稍後再試')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Silent preference */}
@@ -54,10 +92,52 @@ export default function PreferencesStep({
         />
       </div>
 
-      {/* Ref photo placeholder — upload handled separately */}
+      {/* Reference photo upload */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-foreground">參考照片（選填）</p>
-        <p className="text-xs text-muted-foreground">即將推出上傳功能</p>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {refPhotoUrl ? (
+          <div className="relative w-24 h-24">
+            <img
+              src={refPhotoUrl}
+              alt="參考照片"
+              className="w-24 h-24 rounded-xl object-cover"
+            />
+            <button
+              onClick={() => {
+                onRefPhotoChange(null)
+                if (fileRef.current) fileRef.current.value = ''
+              }}
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-foreground text-primary-foreground text-xs flex items-center justify-center"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center justify-center w-24 h-24 rounded-xl border-2 border-dashed border-border bg-card text-muted-foreground hover:border-foreground/30 transition-colors"
+          >
+            {uploading ? (
+              <span className="text-xs">上傳中...</span>
+            ) : (
+              <span className="text-2xl">+</span>
+            )}
+          </button>
+        )}
+
+        {uploadError && (
+          <p className="text-xs text-destructive">{uploadError}</p>
+        )}
       </div>
     </div>
   )

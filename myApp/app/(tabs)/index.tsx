@@ -102,7 +102,7 @@ export default function HomeScreen() {
             fontSize={16}
             fontWeight="500"
             lineHeight={22}
-            color="#808868"
+            color="#858279"
             textAlign="center"
           >
             馬上找到有空又符合你需求的設計師

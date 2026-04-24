@@ -33,9 +33,9 @@ export default async function ProPendingPage() {
       <div className="w-full max-w-sm space-y-6 text-center">
 
         {/* Success icon */}
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-muted">
           <svg
-            className="h-8 w-8 text-green-600"
+            className="h-8 w-8 text-success"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

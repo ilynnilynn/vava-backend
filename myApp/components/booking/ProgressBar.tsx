@@ -19,7 +19,7 @@ export function ProgressBar({ currentStep, totalSteps }: Props) {
             width={size}
             height={size}
             borderRadius={size / 2}
-            backgroundColor={isCompleted || isCurrent ? '#1F2723' : '#EAEAE4'}
+            backgroundColor={isCompleted || isCurrent ? '#1F2723' : '#D8D9D2'}
           />
         )
       })}

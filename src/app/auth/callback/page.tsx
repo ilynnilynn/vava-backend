@@ -25,7 +25,7 @@ export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-gray-400">登入中⋯</p>
+        <p className="text-sm text-muted-foreground">登入中⋯</p>
       </main>
     }>
       <AuthCallbackInner />
@@ -109,7 +109,7 @@ function AuthCallbackInner() {
 
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <p className="text-sm text-gray-400">登入中⋯</p>
+      <p className="text-sm text-muted-foreground">登入中⋯</p>
     </main>
   )
 }

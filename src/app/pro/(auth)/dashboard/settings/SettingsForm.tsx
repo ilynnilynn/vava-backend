@@ -83,7 +83,7 @@ export function SettingsForm({ pro }: Props) {
     <div className="space-y-4">
       {/* Re-review warning */}
       {needsReReview && (
-        <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+        <div className="rounded-lg border border-warning bg-warning-muted p-3 text-sm text-warning-foreground">
           修改顯示名稱或工作室地址需要重新審核
         </div>
       )}
@@ -92,7 +92,7 @@ export function SettingsForm({ pro }: Props) {
       <div className="space-y-1">
         <label className="text-sm font-medium">
           顯示名稱
-          {nameChanged && <span className="text-yellow-600 ml-1">需審核</span>}
+          {nameChanged && <span className="text-warning ml-1">需審核</span>}
         </label>
         <Input
           value={displayName}
@@ -104,7 +104,7 @@ export function SettingsForm({ pro }: Props) {
       <div className="space-y-1">
         <label className="text-sm font-medium">
           工作室地址
-          {addressChanged && <span className="text-yellow-600 ml-1">需審核</span>}
+          {addressChanged && <span className="text-warning ml-1">需審核</span>}
         </label>
         <Input
           value={studioAddress}
@@ -219,8 +219,8 @@ export function SettingsForm({ pro }: Props) {
 
       {/* Re-review confirmation dialog */}
       {showReReviewConfirm && (
-        <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4 space-y-3">
-          <p className="text-sm font-medium text-yellow-800">
+        <div className="rounded-lg border border-warning bg-warning-muted p-4 space-y-3">
+          <p className="text-sm font-medium text-warning-foreground">
             修改顯示名稱或地址將暫時下架您的帳號，直到管理員重新審核。確定要修改嗎？
           </p>
           <div className="flex gap-2">
@@ -245,7 +245,7 @@ export function SettingsForm({ pro }: Props) {
 
       {/* Error / Success */}
       {error && <p className="text-sm text-destructive">{error}</p>}
-      {success && <p className="text-sm text-green-600">已儲存</p>}
+      {success && <p className="text-sm text-success">已儲存</p>}
 
       {/* Save */}
       <Button onClick={handleSave} disabled={isPending} className="w-full">
