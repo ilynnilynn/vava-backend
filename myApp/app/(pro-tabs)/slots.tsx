@@ -122,7 +122,7 @@ export default function ProSlotsScreen() {
       {/* Header */}
       <XStack paddingTop={insets.top + 20} paddingHorizontal={20} paddingBottom={12} alignItems="center">
         <YStack flex={1}>
-          <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={30}>預約</Text>
+          <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={30}>時段管理</Text>
           <Text fontSize={13} color="#858279" marginTop={2}>
             週{WEEKDAYS_ZH[now.getDay()]} {getDateStr(0)} — {getDateStr(2)}
           </Text>
