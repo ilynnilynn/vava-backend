@@ -8,7 +8,6 @@ import * as ImagePicker from 'expo-image-picker'
 
 import { StepLayout } from '@/components/booking/StepLayout'
 import { useBookingRequest } from '@/lib/booking-context'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 export default function ExtrasScreen() {
   const router = useRouter()

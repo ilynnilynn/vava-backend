@@ -13,7 +13,6 @@ import MapView, { Marker } from 'react-native-maps'
 import { Image } from 'expo-image'
 
 import { useBookingRequest } from '@/lib/booking-context'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
 import { apiPost } from '@/lib/api'
 import { formatSlotTime } from '@/lib/booking-helpers'
 import { HeartButton } from '@/components/HeartButton'
