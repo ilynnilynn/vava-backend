@@ -33,7 +33,7 @@ function ClientAvatar({ name }: { name: string }) {
   const { bg, fg } = getAvatarColor(name)
   return (
     <View style={[styles.avatar, { backgroundColor: bg }]}>
-      <Text style={{ fontSize: 15, fontWeight: '700', color: fg, lineHeight: 20 }}>
+      <Text style={{ fontSize: 18, fontWeight: '700', color: fg, lineHeight: 24 }}>
         {name[0] ?? '?'}
       </Text>
     </View>
@@ -162,7 +162,7 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
       <YStack flex={1}>
         {/* Client name + badge */}
         <XStack justifyContent="space-between" alignItems="center" marginBottom={6}>
-          <Text fontSize={15} fontWeight="700" color="#141413" flex={1} marginRight={8} numberOfLines={1}>
+          <Text fontSize={16} fontWeight="700" color="#141413" flex={1} marginRight={8} numberOfLines={1}>
             {booking.client_display_name}
           </Text>
           <ProStatusBadge displayStatus={displayStatus} />
@@ -171,11 +171,11 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
         {/* Service + time */}
         <XStack gap={6} alignItems="center" marginBottom={2}>
           <FA6ProIcon name={domainIcon} size={12} color="#808868" />
-          <Text fontSize={13} color="#808868">{booking.service_label}</Text>
+          <Text fontSize={14} color="#808868">{booking.service_label}</Text>
         </XStack>
         <XStack gap={6} alignItems="center">
           <FA6ProIcon name="clock" size={12} color="#808868" />
-          <Text fontSize={13} color="#808868">{startTime} — {endTime}</Text>
+          <Text fontSize={14} color="#808868">{startTime} — {endTime}</Text>
         </XStack>
 
         {/* Action buttons — only for in_progress */}
@@ -192,9 +192,9 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
 
 const styles = StyleSheet.create({
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
