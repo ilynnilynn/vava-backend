@@ -1,6 +1,6 @@
 // app/(pro-tabs)/bookings.tsx
 import { useCallback, useState } from 'react'
-import { FlatList, Pressable, RefreshControl, ActivityIndicator } from 'react-native'
+import { FlatList, Pressable, RefreshControl, ActivityIndicator, View } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
@@ -76,13 +76,14 @@ export default function ProBookingsScreen() {
           data={data}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{
-            paddingHorizontal: 16,
             paddingBottom: insets.bottom + 100,
-            gap: 10,
           }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load() }} tintColor="#141413" />
           }
+          ItemSeparatorComponent={() => (
+            <View style={{ height: 1, backgroundColor: '#e8e6dc', marginHorizontal: 16 }} />
+          )}
           renderItem={({ item }) => (
             <BookingCardPro booking={item} onActionComplete={load} />
           )}

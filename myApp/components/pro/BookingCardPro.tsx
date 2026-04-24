@@ -124,14 +124,7 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
   })
 
   return (
-    <YStack
-      backgroundColor="#fff"
-      borderRadius={12}
-      borderWidth={1}
-      borderColor="#eee"
-      overflow="hidden"
-    >
-      <YStack padding={12}>
+    <YStack paddingVertical={14} paddingHorizontal={12}>
         {/* Client name + badge */}
         <XStack justifyContent="space-between" alignItems="center" marginBottom={6}>
           <Text fontSize={15} fontWeight="700" color="#141413" flex={1} marginRight={8} numberOfLines={1}>
@@ -157,7 +150,6 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
             onActionComplete={onActionComplete ?? (() => {})}
           />
         )}
-      </YStack>
     </YStack>
   )
 }
