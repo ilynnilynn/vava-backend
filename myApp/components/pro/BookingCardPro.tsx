@@ -124,7 +124,7 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
   })
 
   return (
-    <YStack paddingVertical={14} paddingHorizontal={12}>
+    <YStack paddingVertical={14} paddingHorizontal={20}>
         {/* Client name + badge */}
         <XStack justifyContent="space-between" alignItems="center" marginBottom={6}>
           <Text fontSize={15} fontWeight="700" color="#141413" flex={1} marginRight={8} numberOfLines={1}>
