@@ -1,7 +1,7 @@
 // components/pro/BookingCardPro.tsx
 import { Alert, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 import { useState } from 'react'
 
 import { getProDisplayStatus } from '@/lib/pro-helpers'
@@ -142,11 +142,11 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
 
         {/* Service + time */}
         <XStack gap={6} alignItems="center" marginBottom={2}>
-          <FontAwesome6 name={domainIcon} size={12} color="#808868" solid />
+          <FA6ProIcon name={domainIcon} size={12} color="#808868" />
           <Text fontSize={13} color="#808868">{booking.service_label}</Text>
         </XStack>
         <XStack gap={6} alignItems="center">
-          <FontAwesome6 name="clock" size={12} color="#808868" />
+          <FA6ProIcon name="clock" size={12} color="#808868" />
           <Text fontSize={13} color="#808868">{startTime} — {endTime}</Text>
         </XStack>
 

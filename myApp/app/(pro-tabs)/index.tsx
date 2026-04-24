@@ -4,7 +4,7 @@ import { FlatList, RefreshControl, ActivityIndicator } from 'react-native'
 import { YStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { BookingCardPro } from '@/components/pro/BookingCardPro'
 import { fetchProBookings } from '@/lib/pro-bookings-api'
@@ -69,7 +69,7 @@ export default function ProHomeScreen() {
 
       {today.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24}>
-          <FontAwesome6 name="calendar-xmark" size={40} color="#e0e0d8" />
+          <FA6ProIcon name="calendar-xmark" size={40} color="#e0e0d8" />
           <Text fontSize={15} color="#808868">今天沒有預約</Text>
         </YStack>
       ) : (

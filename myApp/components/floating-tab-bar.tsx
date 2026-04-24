@@ -3,7 +3,7 @@ import { BlurView } from 'expo-blur'
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 const ACTIVE_COLOR = '#1A1A1A'
 const INACTIVE_COLOR = 'rgba(0,0,0,0.4)'
@@ -102,11 +102,11 @@ export function FloatingTabBar({ state, navigation, iconNames, labels }: BottomT
                 accessibilityLabel={label}
                 style={[styles.tab, isFocused && styles.tabActive]}
               >
-                <FontAwesome6
+                <FA6ProIcon
                   name={iconName}
                   size={22}
                   color={color}
-                  solid={isFocused}
+                  weight={isFocused ? 'solid' : 'regular'}
                 />
                 <Text
                   style={[

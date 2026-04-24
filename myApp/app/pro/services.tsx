@@ -3,7 +3,7 @@ import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 import type { ServiceItem } from '@/types/pro'
 
 // Mock services — replace with real Supabase fetch later
@@ -30,7 +30,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
         accessibilityLabel={`編輯 ${service.name}`}
         style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
       >
-        <FontAwesome6 name="pen" size={14} color="#808868" />
+        <FA6ProIcon name="pen" size={14} color="#808868" />
       </Pressable>
     </XStack>
   )
@@ -54,7 +54,7 @@ export default function ServicesScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FontAwesome6 name="chevron-left" size={16} color="#141413" />
+          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
         </Pressable>
         <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>服務項目</Text>
         <Pressable
@@ -62,7 +62,7 @@ export default function ServicesScreen() {
           accessibilityLabel="新增服務"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
         >
-          <FontAwesome6 name="plus" size={16} color="#141413" />
+          <FA6ProIcon name="plus" size={16} color="#141413" />
         </Pressable>
       </XStack>
 
