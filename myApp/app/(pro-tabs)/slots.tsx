@@ -17,8 +17,8 @@ const DAY_LABELS = ['今天', '明天', '後天']
 const WEEKDAYS_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
 const HOUR_HEIGHT = 80   // px per hour
-const START_HOUR = 9
-const END_HOUR = 18
+const START_HOUR = 11
+const END_HOUR = 20
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i)
 const SLOT_HEIGHT = HOUR_HEIGHT / 2  // 30 min = 40px
 
@@ -115,7 +115,7 @@ export default function ProSlotsScreen() {
     const m = new Date(s.starts_at).getMinutes()
     return m === 0 || m === 30
   })
-  const gridHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
+  const gridHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT + SLOT_HEIGHT
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">

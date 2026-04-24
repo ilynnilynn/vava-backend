@@ -17,9 +17,9 @@ function generateSlots(): { startsAt: string; isOpen: boolean; isBooked: boolean
   for (let day = 0; day < 3; day++) {
     const dayStart = new Date(base)
     dayStart.setDate(dayStart.getDate() + day)
-    dayStart.setHours(9, 0, 0, 0)
+    dayStart.setHours(11, 0, 0, 0)
 
-    for (let slot = 0; slot < 36; slot++) { // 09:00 – 18:00, 15-min each
+    for (let slot = 0; slot < 37; slot++) { // 11:00 – 20:00, 15-min each
       const t = new Date(dayStart.getTime() + slot * 15 * 60_000)
       const iso = t.toISOString()
       // Pre-seed some open and booked slots for visual variety
