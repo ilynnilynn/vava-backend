@@ -43,6 +43,7 @@ const GLYPHS: Record<string, string> = {
   'tags':                '\uF02C',
   'circle-plus':         '\uF055',
   'pen':                 '\uF304',
+  'pen-to-square':       '\uF044',
   'image':               '\uF03E',
   'bell':                '\uF0F3',
   'circle-check':        '\uF058',
