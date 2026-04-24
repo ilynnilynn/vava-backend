@@ -15,9 +15,9 @@ export function RoleToggle() {
   async function handleToggle(val: boolean) {
     await setActiveRole(val ? 'pro' : 'customer')
     if (val) {
-      router.replace('/(pro-tabs)/')
+      router.replace('/(pro-tabs)/account')
     } else {
-      router.replace('/(tabs)/')
+      router.replace('/(tabs)/account')
     }
   }
 
