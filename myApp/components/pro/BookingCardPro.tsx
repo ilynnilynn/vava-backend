@@ -8,6 +8,38 @@ import { getProDisplayStatus } from '@/lib/pro-helpers'
 import { markBookingComplete, markBookingNoShow } from '@/lib/pro-bookings-api'
 import type { ProBookingListItem, ProDisplayStatus } from '@/types/pro'
 
+// ── Client avatar ─────────────────────────────────────────────
+
+const AVATAR_PALETTE = [
+  { bg: '#DFF5AD', fg: '#3d3d3a' },
+  { bg: '#808868', fg: '#ffffff' },
+  { bg: '#9472DE', fg: '#ffffff' },
+  { bg: '#CDB5FF', fg: '#3d3d3a' },
+  { bg: '#A4CFFB', fg: '#3d3d3a' },
+  { bg: '#F063B4', fg: '#ffffff' },
+  { bg: '#F78B92', fg: '#3d3d3a' },
+  { bg: '#F1C9AC', fg: '#3d3d3a' },
+]
+
+function getAvatarColor(seed: string) {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0
+  }
+  return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length]
+}
+
+function ClientAvatar({ name }: { name: string }) {
+  const { bg, fg } = getAvatarColor(name)
+  return (
+    <View style={[styles.avatar, { backgroundColor: bg }]}>
+      <Text style={{ fontSize: 15, fontWeight: '700', color: fg, lineHeight: 20 }}>
+        {name[0] ?? '?'}
+      </Text>
+    </View>
+  )
+}
+
 // ── Status badge ─────────────────────────────────────────────
 
 const BADGE_CONFIG: Record<ProDisplayStatus, { label: string; bg: string; text: string }> = {
@@ -124,7 +156,10 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
   })
 
   return (
-    <YStack paddingVertical={14} paddingHorizontal={20}>
+    <XStack paddingVertical={14} paddingHorizontal={20} gap={14} alignItems="flex-start">
+      <ClientAvatar name={booking.client_display_name} />
+
+      <YStack flex={1}>
         {/* Client name + badge */}
         <XStack justifyContent="space-between" alignItems="center" marginBottom={6}>
           <Text fontSize={15} fontWeight="700" color="#141413" flex={1} marginRight={8} numberOfLines={1}>
@@ -150,11 +185,20 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
             onActionComplete={onActionComplete ?? (() => {})}
           />
         )}
-    </YStack>
+      </YStack>
+    </XStack>
   )
 }
 
 const styles = StyleSheet.create({
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
