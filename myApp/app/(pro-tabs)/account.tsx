@@ -37,7 +37,7 @@ export default function ProAccountScreen() {
         <YStack>
           <SettingsRow
             label="服務項目管理"
-            iconName="scissors"
+            iconName="flower"
             onPress={() => router.push('/pro/services')}
           />
         </YStack>
