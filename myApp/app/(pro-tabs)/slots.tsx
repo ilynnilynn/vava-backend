@@ -20,7 +20,7 @@ const HOUR_HEIGHT = 80   // px per hour
 const START_HOUR = 9
 const END_HOUR = 18
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i)
-const SLOT_HEIGHT = HOUR_HEIGHT / 4  // 15 min = 20px
+const SLOT_HEIGHT = HOUR_HEIGHT / 2  // 30 min = 40px
 
 const SLOT_CONFIG: Record<SlotState, { bg: string; border: string; text: string; label: string }> = {
   expired:   { bg: 'transparent', border: 'transparent', text: '#bbb',    label: '' },
@@ -110,7 +110,11 @@ export default function ProSlotsScreen() {
   const now = new Date()
   const dateKey = getDateKey(activeDay)
   const dayBookings = bookings.filter(b => b.starts_at.slice(0, 10) === dateKey)
-  const daySlots = slots.filter(s => getSlotDay(s.starts_at, now) === activeDay)
+  const daySlots = slots.filter(s => {
+    if (getSlotDay(s.starts_at, now) !== activeDay) return false
+    const m = new Date(s.starts_at).getMinutes()
+    return m === 0 || m === 30
+  })
   const gridHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
 
   return (
