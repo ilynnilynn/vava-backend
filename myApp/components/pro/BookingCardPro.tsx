@@ -12,7 +12,7 @@ import type { ProBookingListItem, ProDisplayStatus } from '@/types/pro'
 
 const AVATAR_PALETTE = [
   { bg: '#DFF5AD', fg: '#3d3d3a' },
-  { bg: '#858279', fg: '#ffffff' },
+  { bg: '#808868', fg: '#ffffff' },
   { bg: '#9472DE', fg: '#ffffff' },
   { bg: '#CDB5FF', fg: '#3d3d3a' },
   { bg: '#A4CFFB', fg: '#3d3d3a' },
