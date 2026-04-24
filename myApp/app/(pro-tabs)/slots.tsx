@@ -18,7 +18,7 @@ const WEEKDAYS_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
 const HOUR_HEIGHT = 80   // px per hour
 const START_HOUR = 9
-const END_HOUR = 20
+const END_HOUR = 18
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i)
 const SLOT_HEIGHT = HOUR_HEIGHT / 4  // 15 min = 20px
 
