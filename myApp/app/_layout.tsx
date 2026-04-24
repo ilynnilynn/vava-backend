@@ -33,8 +33,8 @@ export default function RootLayout() {
           <RoleProvider>
             <BookingProvider>
               <Stack screenOptions={{ contentStyle: { backgroundColor: BG } }}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="(pro-tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none' }} />
+                <Stack.Screen name="(pro-tabs)" options={{ headerShown: false, animation: 'none' }} />
                 <Stack.Screen name="pro" options={{ headerShown: false }} />
                 <Stack.Screen name="book" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
                 <Stack.Screen name="booking" options={{ headerShown: false }} />
