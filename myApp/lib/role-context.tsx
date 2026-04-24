@@ -1,5 +1,5 @@
 // lib/role-context.tsx
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { supabase } from './supabase'
 
@@ -25,6 +25,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [enabledRoles, setEnabledRoles] = useState<UserRole[]>(['customer'])
   const [activeRole, setActiveRoleState] = useState<UserRole>('customer')
   const [isRoleLoading, setIsRoleLoading] = useState(true)
+  const explicitlySet = useRef(false)
 
   useEffect(() => {
     async function init() {
@@ -45,13 +46,17 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       }
 
       setEnabledRoles(roles)
-      setActiveRoleState(roles.includes(persisted) ? persisted : 'customer')
+      // Don't override if the user already switched roles while init was running
+      if (!explicitlySet.current) {
+        setActiveRoleState(roles.includes(persisted) ? persisted : 'customer')
+      }
       setIsRoleLoading(false)
     }
     init()
   }, [])
 
   async function setActiveRole(role: UserRole) {
+    explicitlySet.current = true
     setActiveRoleState(role)
     await AsyncStorage.setItem(STORAGE_KEY, role)
   }
