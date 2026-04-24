@@ -132,7 +132,7 @@ export default function ProSlotsScreen() {
             { opacity: pressed ? 0.7 : 1 },
           ]}
         >
-          <FA6ProIcon name="pen" size={18} color={editMode ? '#fff' : '#141413'} />
+          <FA6ProIcon name="pen" size={18} color={editMode ? '#fff' : '#141413'} weight="regular" />
         </Pressable>
       </XStack>
 
