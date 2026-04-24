@@ -58,6 +58,7 @@ const GLYPHS: Record<string, string> = {
   'xmark':               '\uF00D',
   'wand-magic-sparkles': '\uE2CA',
   'at':                  '\uF1FA',
+  'arrow-right-from-bracket': '\uF08B',
   'circle-question':     '\uF059',
   'comment':             '\uF075',
   'message':             '\uF27A',

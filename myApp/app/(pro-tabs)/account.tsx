@@ -94,7 +94,7 @@ export default function ProAccountScreen() {
         <YStack marginTop={28}>
           <SettingsRow
             label="登出"
-            iconName="right-from-bracket"
+            iconName="arrow-right-from-bracket"
             showChevron={false}
             onPress={handleLogout}
           />

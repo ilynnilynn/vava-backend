@@ -4,7 +4,7 @@ import { FloatingTabBar } from '@/components/floating-tab-bar'
 
 const PRO_ICONS: Record<string, string> = {
   index: 'house',
-  slots: 'calendar-days',
+  slots: 'clock',
   bookings: 'calendar',
   account: 'user',
 }
