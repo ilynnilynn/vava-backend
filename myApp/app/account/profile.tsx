@@ -4,7 +4,7 @@ import { Alert, Pressable, TextInput, ActivityIndicator } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/lib/auth-context'
@@ -55,7 +55,7 @@ export default function ProfileScreen() {
           >
             {editing
               ? <Text fontSize={15} color="#808868">取消</Text>
-              : <FontAwesome6 name="chevron-left" size={18} color="#1F2723" />
+              : <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
             }
           </Pressable>
 
@@ -96,7 +96,7 @@ export default function ProfileScreen() {
           gap={12}
         >
           <View width={20} alignItems="center">
-            <FontAwesome6 name="user" size={14} color="#808868" />
+            <FA6ProIcon name="user" size={14} color="#808868" />
           </View>
           <YStack flex={1}>
             <Text fontSize={12} color="#808868" marginBottom={2}>姓名</Text>
@@ -132,7 +132,7 @@ export default function ProfileScreen() {
           <>
             <XStack height={52} paddingHorizontal={16} alignItems="center" gap={12}>
               <View width={20} alignItems="center">
-                <FontAwesome6 name="envelope" size={14} color="#808868" />
+                <FA6ProIcon name="envelope" size={14} color="#808868" />
               </View>
               <YStack flex={1}>
                 <Text fontSize={12} color="#808868" marginBottom={2}>電子郵件</Text>
@@ -149,7 +149,7 @@ export default function ProfileScreen() {
         {user?.phone && (
           <XStack height={52} paddingHorizontal={16} alignItems="center" gap={12}>
             <View width={20} alignItems="center">
-              <FontAwesome6 name="phone" size={14} color="#808868" />
+              <FA6ProIcon name="phone" size={14} color="#808868" />
             </View>
             <YStack flex={1}>
               <Text fontSize={12} color="#808868" marginBottom={2}>手機號碼</Text>

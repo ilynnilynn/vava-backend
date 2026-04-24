@@ -1,7 +1,7 @@
 import { Pressable, Alert } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
-import { ChevronRight } from 'lucide-react-native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { StepLayout } from '@/components/booking/StepLayout'
 import { useBookingRequest } from '@/lib/booking-context'
@@ -12,12 +12,13 @@ const CATEGORIES: {
   key: CategoryKey
   label: string
   subtitle: string
+  icon: string
   disabled?: boolean
   badge?: string
 }[] = [
-  { key: 'nails', label: '美甲', subtitle: '凝膠、卸甲、修補、保養' },
-  { key: 'lashes', label: '美睫', subtitle: '嫁接、補睫、卸睫' },
-  { key: 'makeup', label: '美妝', subtitle: '即將推出', disabled: true, badge: '即將推出' },
+  { key: 'nails', label: '美甲', subtitle: '凝膠、卸甲、修補、保養', icon: 'hand-sparkles' },
+  { key: 'lashes', label: '美睫', subtitle: '嫁接、卸睫、睫毛管理', icon: 'eye' },
+  { key: 'makeup', label: '美妝', subtitle: '即將推出', icon: 'wand-magic-sparkles', disabled: true, badge: '即將推出' },
 ]
 
 export default function CategoryScreen() {
@@ -36,29 +37,48 @@ export default function CategoryScreen() {
 
   return (
     <StepLayout
-      title="選擇類別"
-      subtitle={prefilled ? '已為你預選類別，你也可以更改' : undefined}
+      title="想預約什麼服務？"
+      subtitle={prefilled ? '已選擇此服務，你也可以更改服務' : '點選一個你需要的服務'}
       currentStep={1}
       totalSteps={6}
+      hideBack
     >
-      <YStack gap={12} paddingTop={8}>
+      <YStack gap={24} marginTop={-52}>
         {CATEGORIES.map((cat) => {
           const isSelected = state.category === cat.key
           return (
             <Pressable
               key={cat.key}
               onPress={() => handleSelect(cat.key)}
-              style={{ opacity: cat.disabled ? 0.5 : 1 }}
+              accessibilityRole="button"
+              accessibilityLabel={cat.label + (cat.disabled ? '（即將推出）' : '')}
+              accessibilityState={{ selected: state.category === cat.key, disabled: !!cat.disabled }}
+              style={({ pressed }) => ({ opacity: cat.disabled ? 0.5 : pressed ? 0.75 : 1 })}
             >
               <XStack
-                backgroundColor={isSelected ? '#1F2723' : '#F0EDE5'}
+                backgroundColor={isSelected ? '#1F2723' : '#FBFBF8'}
                 borderRadius={8}
                 height={100}
                 paddingHorizontal={20}
                 alignItems="center"
-                justifyContent="space-between"
+                gap={16}
               >
-                <YStack gap={4}>
+                {/* Hand-drawn style icon */}
+                <View
+                  width={48}
+                  height={48}
+                  borderRadius={12}
+                  backgroundColor={isSelected ? 'rgba(251,251,248,0.1)' : 'rgba(31,39,35,0.06)'}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <FA6ProIcon
+                    name={cat.icon}
+                    size={22}
+                    color={isSelected ? '#FBFBF8' : '#1F2723'}
+                  />
+                </View>
+                <YStack gap={4} flex={1}>
                   <XStack alignItems="center" gap={8}>
                     <Text
                       fontSize={20}
@@ -74,7 +94,7 @@ export default function CategoryScreen() {
                         paddingHorizontal={6}
                         paddingVertical={2}
                       >
-                        <Text fontSize={10} fontWeight="600" color="#FBFBF8">
+                        <Text fontSize={12} fontWeight="600" color="#FBFBF8">
                           {cat.badge}
                         </Text>
                       </View>
@@ -87,9 +107,10 @@ export default function CategoryScreen() {
                     {cat.subtitle}
                   </Text>
                 </YStack>
-                <ChevronRight
-                  size={20}
-                  color={isSelected ? '#FBFBF8' : '#1F2723'}
+                <FA6ProIcon
+                  name="chevron-right"
+                  size={16}
+                  color={isSelected ? 'rgba(251,251,248,0.4)' : 'rgba(31,39,35,0.4)'}
                 />
               </XStack>
             </Pressable>

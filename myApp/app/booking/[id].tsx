@@ -3,7 +3,7 @@ import { Pressable, ActivityIndicator, Alert } from 'react-native'
 import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { StatusBadge } from '@/components/booking/StatusBadge'
 import { fetchBookingDetail } from '@/lib/bookings-api'
@@ -120,9 +120,10 @@ export default function BookingDetailScreen() {
         <Pressable
           onPress={() => router.back()}
           style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+          accessibilityRole="button"
           accessibilityLabel="返回"
         >
-          <FontAwesome6 name="chevron-left" size={20} color="#1F2723" />
+          <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
         </Pressable>
         <View flex={1} alignItems="center">
           <Text fontSize={16} fontWeight="600" color="#1F2723">預約詳情</Text>
@@ -136,9 +137,9 @@ export default function BookingDetailScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24 }}
       >
         {/* Booking info card */}
-        <YStack backgroundColor="#F0EDE5" borderRadius={12} padding={20} gap={16} marginTop={16}>
+        <YStack backgroundColor="#F0EDE5" borderRadius={8} padding={20} gap={16} marginTop={16}>
           <XStack justifyContent="space-between" alignItems="center">
-            <Text fontSize={20} fontWeight="700" color="#1F2723">
+            <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723">
               {detail.pro_display_name}
             </Text>
             <StatusBadge status={detail.status} />
@@ -146,36 +147,36 @@ export default function BookingDetailScreen() {
 
           <YStack gap={8}>
             <XStack gap={8} alignItems="center">
-              <FontAwesome6 name="scissors" size={14} color="#808868" />
-              <Text fontSize={15} color="#808868">
+              <FA6ProIcon name="scissors" size={14} color="#808868" />
+              <Text fontSize={15} lineHeight={22} color="#808868">
                 {domainLabel} — {detail.service_label}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FontAwesome6 name="calendar" size={14} color="#808868" />
-              <Text fontSize={15} color="#808868">
+              <FA6ProIcon name="calendar" size={14} color="#808868" />
+              <Text fontSize={15} lineHeight={22} color="#808868">
                 {formatBookingDate(detail.starts_at)} {formatSlotTime(detail.starts_at)}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FontAwesome6 name="location-dot" size={14} color="#808868" />
-              <Text fontSize={15} color="#808868">
+              <FA6ProIcon name="location-dot" size={14} color="#808868" />
+              <Text fontSize={15} lineHeight={22} color="#808868">
                 {detail.studio_address}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FontAwesome6 name="dollar-sign" size={14} color="#808868" />
-              <Text fontSize={15} color="#808868">
+              <FA6ProIcon name="dollar-sign" size={14} color="#808868" />
+              <Text fontSize={15} lineHeight={22} color="#808868">
                 NT${detail.price_min}–{detail.price_max}
               </Text>
             </XStack>
 
             {showPhone && detail.pro_phone && (
               <XStack gap={8} alignItems="center">
-                <FontAwesome6 name="phone" size={14} color="#2E7D52" />
+                <FA6ProIcon name="phone" size={14} color="#2E7D52" />
                 <Text fontSize={15} fontWeight="600" color="#2E7D52">
                   {detail.pro_phone}
                 </Text>
@@ -190,13 +191,16 @@ export default function BookingDetailScreen() {
             {/* Cancel */}
             <Pressable
               onPress={handleCancel}
-              style={{
+              accessibilityRole="button"
+              accessibilityLabel={isInGrace ? '免責取消' : '取消預約'}
+              style={({ pressed }) => ({
                 borderRadius: 9999,
                 height: 48,
                 backgroundColor: '#1F2723',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}
+                opacity: pressed ? 0.75 : 1,
+              })}
             >
               <Text fontSize={16} fontWeight="600" color="#FBFBF8">
                 {isInGrace ? '免責取消' : '取消預約'}
@@ -207,14 +211,17 @@ export default function BookingDetailScreen() {
             {showLateButton && (
               <Pressable
                 onPress={handleLateNotify}
-                style={{
+                accessibilityRole="button"
+                accessibilityLabel="我會晚到"
+                style={({ pressed }) => ({
                   borderRadius: 9999,
                   height: 48,
                   borderWidth: 1,
                   borderColor: '#1F2723',
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}
+                  opacity: pressed ? 0.7 : 1,
+                })}
               >
                 <Text fontSize={16} fontWeight="600" color="#1F2723">我會晚到</Text>
               </Pressable>
@@ -243,13 +250,16 @@ export default function BookingDetailScreen() {
           <YStack marginTop={24}>
             <Pressable
               onPress={handleNoShow}
-              style={{
+              accessibilityRole="button"
+              accessibilityLabel="設計師未到場"
+              style={({ pressed }) => ({
                 borderRadius: 9999,
                 height: 48,
                 backgroundColor: '#C62828',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}
+                opacity: pressed ? 0.75 : 1,
+              })}
             >
               <Text fontSize={16} fontWeight="600" color="#FBFBF8">設計師未到場</Text>
             </Pressable>

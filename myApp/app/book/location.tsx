@@ -1,12 +1,16 @@
-import { useState } from 'react'
-import { Pressable, TextInput, Alert } from 'react-native'
+import { useState, useRef } from 'react'
+import { Pressable, TextInput, Keyboard, Alert, ScrollView, Linking, TouchableWithoutFeedback } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
-import { MapPin, Navigation } from 'lucide-react-native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 import * as Location from 'expo-location'
 
 import { StepLayout } from '@/components/booking/StepLayout'
 import { useBookingRequest } from '@/lib/booking-context'
+
+const PLACES_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ?? ''
+
+type Suggestion = { placeId: string; description: string }
 
 export default function LocationScreen() {
   const router = useRouter()
@@ -17,24 +21,92 @@ export default function LocationScreen() {
     state.location ? { lat: state.location.lat, lng: state.location.lng } : null,
   )
   const [loading, setLoading] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const [locationBlocked, setLocationBlocked] = useState(false)
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  async function fetchSuggestions(text: string) {
+    if (!text.trim() || !PLACES_KEY) { setSuggestions([]); return }
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(text)}&key=${PLACES_KEY}&language=zh-TW&components=country:tw`
+      const res = await fetch(url)
+      const data = await res.json()
+      setSuggestions(
+        data.status === 'OK'
+          ? (data.predictions ?? []).map((p: { place_id: string; description: string }) => ({
+              placeId: p.place_id,
+              description: p.description,
+            }))
+          : [],
+      )
+    } catch {
+      setSuggestions([])
+    }
+  }
+
+  function handleTextChange(text: string) {
+    setAddress(text)
+    setCoords(null)
+    setSuggestions([])
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => fetchSuggestions(text), 350)
+  }
+
+  async function handleSelectSuggestion(s: Suggestion) {
+    setSuggestions([])
+    setAddress(s.description)
+    Keyboard.dismiss()
+    if (!PLACES_KEY) return
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${s.placeId}&fields=geometry&key=${PLACES_KEY}`
+      const res = await fetch(url)
+      const data = await res.json()
+      if (data.status === 'OK' && data.result?.geometry?.location) {
+        const { lat, lng } = data.result.geometry.location
+        setCoords({ lat, lng })
+      }
+    } catch {
+      // coords stay null; address text is still usable
+    }
+  }
 
   async function handleUseCurrentLocation() {
     setLoading(true)
+    setSuggestions([])
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync()
+      const { status, canAskAgain } = await Location.requestForegroundPermissionsAsync()
       if (status !== 'granted') {
-        Alert.alert('需要定位權限', '請在設定中開啟位置權限以使用此功能')
+        if (!canAskAgain) setLocationBlocked(true)
         return
       }
       const pos = await Location.getCurrentPositionAsync({})
-      const [geo] = await Location.reverseGeocodeAsync({
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-      })
-      const label = geo
-        ? [geo.city, geo.district, geo.street, geo.name].filter(Boolean).join('')
-        : `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`
-      setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+      const { latitude, longitude } = pos.coords
+      setCoords({ lat: latitude, lng: longitude })
+
+      let label = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+
+      if (PLACES_KEY) {
+        try {
+          const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${PLACES_KEY}&language=zh-TW`
+          const res = await fetch(url)
+          const data = await res.json()
+          if (data.status === 'OK' && data.results?.[0]?.formatted_address) {
+            label = data.results[0].formatted_address
+          }
+        } catch {
+          // fall through to reverseGeocodeAsync
+        }
+      }
+
+      if (label.includes(',')) {
+        // Still using coordinates fallback — try expo reverse geocode
+        const [geo] = await Location.reverseGeocodeAsync({ latitude, longitude })
+        if (geo) {
+          label = [geo.city, geo.district, geo.street, geo.name].filter(Boolean).join('')
+        }
+      }
+
       setAddress(label)
     } catch {
       Alert.alert('定位失敗', '無法取得目前位置，請手動輸入地址')
@@ -59,17 +131,64 @@ export default function LocationScreen() {
     router.push('/book/when')
   }
 
-  const canProceed = address.trim().length > 0
-
   return (
     <StepLayout
-      title="服務地點"
+      title="想在哪裡預約？"
+      subtitle="會在指定地點周圍幫你尋找"
       currentStep={2}
       totalSteps={6}
       onNext={handleConfirm}
-      nextDisabled={!canProceed}
+      nextDisabled={!address.trim()}
+      noScroll
     >
-      <YStack gap={24} paddingTop={8}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <YStack flex={1} gap={0} paddingTop={16}>
+        {/* Address input */}
+        <View style={{ position: 'relative' }}>
+          <TextInput
+            value={address}
+            onChangeText={handleTextChange}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            placeholder="輸入地址"
+            placeholderTextColor="#808868"
+            style={{
+              backgroundColor: '#FBFBF8',
+              borderRadius: 8,
+              height: 56,
+              paddingHorizontal: 16,
+              paddingRight: focused && address.length > 0 ? 48 : 16,
+              fontSize: 15,
+              color: '#1F2723',
+            }}
+          />
+          {focused && address.length > 0 && (
+            <Pressable
+              onPress={() => { setAddress(''); setCoords(null); setSuggestions([]) }}
+              style={{
+                position: 'absolute',
+                right: 4,
+                top: 0,
+                bottom: 0,
+                width: 48,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <View
+                width={20}
+                height={20}
+                borderRadius={10}
+                backgroundColor="rgba(31,39,35,0.15)"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <FA6ProIcon name="xmark" size={10} color="#1F2723" />
+              </View>
+            </Pressable>
+          )}
+        </View>
+
         {/* GPS button */}
         <Pressable
           onPress={handleUseCurrentLocation}
@@ -84,64 +203,58 @@ export default function LocationScreen() {
             alignItems="center"
             gap={12}
           >
-            <Navigation size={20} color="#1F2723" />
+            <FA6ProIcon name="location-arrow" size={18} color="#1F2723" />
             <Text fontSize={15} fontWeight="600" color="#1F2723" flex={1}>
               {loading ? '定位中...' : '使用目前位置'}
             </Text>
-            <MapPin size={18} color="#808868" />
+            {locationBlocked && (
+              <Pressable
+                onPress={() => Linking.openSettings()}
+                style={{
+                  borderRadius: 9999,
+                  borderWidth: 1,
+                  borderColor: '#1F2723',
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                }}
+              >
+                <Text fontSize={13} fontWeight="600" color="#1F2723">前往設定</Text>
+              </Pressable>
+            )}
           </XStack>
         </Pressable>
 
-        {/* Resolved address display */}
-        {coords && address ? (
-          <XStack
-            backgroundColor="#EAEAE4"
-            borderRadius={8}
-            paddingHorizontal={16}
-            paddingVertical={12}
-            alignItems="center"
-            gap={8}
-          >
-            <MapPin size={16} color="#1F2723" />
-            <Text fontSize={14} color="#1F2723" flex={1}>
-              {address}
-            </Text>
-          </XStack>
-        ) : null}
-
-        {/* Divider */}
-        <XStack alignItems="center" gap={12}>
-          <View flex={1} height={1} backgroundColor="#EAEAE4" />
-          <Text fontSize={13} color="#808868">
-            或手動輸入
-          </Text>
-          <View flex={1} height={1} backgroundColor="#EAEAE4" />
-        </XStack>
-
-        {/* Manual input */}
-        <YStack gap={8}>
-          <Text fontSize={14} fontWeight="600" color="#1F2723">
-            輸入地址
-          </Text>
-          <TextInput
-            value={address}
-            onChangeText={(text) => {
-              setAddress(text)
-              setCoords(null)
-            }}
-            placeholder="輸入地址"
-            placeholderTextColor="#808868"
-            style={{
-              backgroundColor: '#F0EDE5',
-              borderRadius: 8,
-              height: 48,
-              paddingHorizontal: 16,
-              fontSize: 15,
-              color: '#1F2723',
-            }}
-          />
-        </YStack>
+        {/* Divider + scrollable suggestions fill remaining space */}
+        {suggestions.length > 0 && (
+          <YStack flex={1}>
+            <View height={1} backgroundColor="#D8D9D2" />
+            <ScrollView flex={1} showsVerticalScrollIndicator={false} bounces={false} keyboardShouldPersistTaps="always">
+              {suggestions.map((s, i) => (
+                <Pressable
+                  key={s.placeId}
+                  onPress={() => handleSelectSuggestion(s)}
+                  style={({ pressed }) => ({
+                    height: 48,
+                    paddingHorizontal: 16,
+                    borderBottomWidth: i < suggestions.length - 1 ? 1 : 0,
+                    borderBottomColor: '#D8D9D2',
+                    backgroundColor: pressed ? 'rgba(0,0,0,0.03)' : 'transparent',
+                    justifyContent: 'center',
+                  })}
+                >
+                  <XStack gap={10} alignItems="center">
+                    <FA6ProIcon name="location-dot" size={13} color="#808868" />
+                    <Text fontSize={14} color="#1F2723" flex={1} numberOfLines={1}>
+                      {s.description}
+                    </Text>
+                  </XStack>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </YStack>
+        )}
       </YStack>
+      </TouchableWithoutFeedback>
     </StepLayout>
   )
 }

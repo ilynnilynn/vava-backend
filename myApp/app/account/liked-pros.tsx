@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect, useRouter } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { fetchLikedPros } from '@/lib/liked-pros-api'
 import { LikedProCard } from '@/components/account/LikedProCard'
@@ -50,7 +50,7 @@ export default function LikedProsScreen() {
             accessibilityLabel="返回"
             accessibilityRole="button"
           >
-            <FontAwesome6 name="chevron-left" size={18} color="#1F2723" />
+            <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
           </Pressable>
           <Text flex={1} fontSize={16} fontWeight="600" color="#1F2723" textAlign="center">
             喜愛的設計師
@@ -89,7 +89,7 @@ export default function LikedProsScreen() {
       {/* Empty state */}
       {!loading && !error && pros.length === 0 && (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24}>
-          <FontAwesome6 name="heart" size={40} color="#EAEAE4" />
+          <FA6ProIcon name="heart" size={40} color="#EAEAE4" />
           <Text fontSize={16} fontWeight="600" color="#808868">還沒有喜愛的設計師</Text>
           <Text fontSize={14} color="#808868" textAlign="center">
             在搜尋結果中點擊愛心，即可收藏設計師

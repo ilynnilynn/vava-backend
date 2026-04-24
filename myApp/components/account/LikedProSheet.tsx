@@ -3,7 +3,7 @@ import { Modal, Pressable } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { useBookingRequest } from '@/lib/booking-context'
 import type { LikedPro } from '@/types/liked-pros'
@@ -53,7 +53,7 @@ export function LikedProSheet({ pro, onClose }: Props) {
                 style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
                 accessibilityLabel="關閉"
               >
-                <FontAwesome6 name="xmark" size={20} color="#1F2723" />
+                <FA6ProIcon name="xmark" size={20} color="#1F2723" />
               </Pressable>
             </View>
           </XStack>

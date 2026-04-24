@@ -3,7 +3,7 @@ import { Pressable, FlatList, Alert } from 'react-native'
 import { YStack, XStack, Text, View, Spinner } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { useBookingRequest } from '@/lib/booking-context'
 import { apiPost } from '@/lib/api'
@@ -107,9 +107,10 @@ export default function SlotsScreen() {
         <Pressable
           onPress={() => router.back()}
           style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+          accessibilityRole="button"
           accessibilityLabel="返回"
         >
-          <ChevronLeft size={24} color="#1F2723" />
+          <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
         </Pressable>
         <View flex={1} alignItems="center">
           <Text fontSize={16} fontWeight="600" color="#1F2723">可預約時段</Text>
@@ -143,14 +144,14 @@ export default function SlotsScreen() {
       <YStack flex={1} backgroundColor="#FBFBF8">
         {header}
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={32}>
-          <Text fontSize={18} fontWeight="600" color="#1F2723">
+          <Text fontSize={18} fontWeight="600" lineHeight={26} color="#1F2723">
             目前沒有符合條件的時段
           </Text>
           <Pressable
             onPress={() => router.back()}
             style={{
               borderRadius: 9999,
-              height: 44,
+              height: 48,
               paddingHorizontal: 24,
               backgroundColor: '#1F2723',
               alignItems: 'center',
@@ -170,12 +171,12 @@ export default function SlotsScreen() {
       <YStack flex={1} backgroundColor="#FBFBF8">
         {header}
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={32}>
-          <Text fontSize={18} fontWeight="600" color="#1F2723">載入失敗</Text>
+          <Text fontSize={18} fontWeight="600" lineHeight={26} color="#1F2723">載入失敗</Text>
           <Pressable
             onPress={fetchSlots}
             style={{
               borderRadius: 9999,
-              height: 44,
+              height: 48,
               paddingHorizontal: 24,
               backgroundColor: '#1F2723',
               alignItems: 'center',
@@ -199,7 +200,7 @@ export default function SlotsScreen() {
         keyExtractor={(item) => item.pro.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         renderItem={({ item: proResult }) => (
-          <YStack backgroundColor="#F0EDE5" borderRadius={12} padding={16} marginBottom={12} gap={10}>
+          <YStack backgroundColor="#F0EDE5" borderRadius={8} padding={16} marginBottom={12} gap={10}>
             {/* Pro header */}
             <XStack justifyContent="space-between" alignItems="center">
               <YStack gap={2}>
@@ -228,14 +229,18 @@ export default function SlotsScreen() {
                   <Pressable
                     key={slot.id}
                     onPress={() => selectSlot(proResult, slot)}
-                    style={{
+                    accessibilityRole="button"
+                    accessibilityLabel={formatSlotTime(slot.startsAt)}
+                    accessibilityState={{ selected: isSelected }}
+                    style={({ pressed }) => ({
                       width: 64,
-                      height: 36,
+                      height: 44,
                       borderRadius: 9999,
                       backgroundColor: isSelected ? '#1F2723' : '#EAEAE4',
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}
+                      opacity: pressed ? 0.7 : 1,
+                    })}
                   >
                     <Text
                       fontSize={14}
@@ -262,14 +267,16 @@ export default function SlotsScreen() {
         <Pressable
           onPress={handleConfirm}
           disabled={!selected}
-          style={{
+          accessibilityRole="button"
+          accessibilityLabel="選擇此時段"
+          style={({ pressed }) => ({
             borderRadius: 9999,
-            height: 44,
+            height: 48,
             backgroundColor: '#1F2723',
             alignItems: 'center',
             justifyContent: 'center',
-            opacity: selected ? 1 : 0.4,
-          }}
+            opacity: !selected ? 0.4 : pressed ? 0.75 : 1,
+          })}
         >
           <Text fontSize={16} fontWeight="600" color="#FBFBF8">選擇此時段</Text>
         </Pressable>

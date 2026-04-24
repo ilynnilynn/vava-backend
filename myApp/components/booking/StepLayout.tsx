@@ -3,9 +3,11 @@ import { Pressable } from 'react-native'
 import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
+import { useNavigation } from '@react-navigation/native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { ProgressBar } from './ProgressBar'
+import { useBookingRequest } from '@/lib/booking-context'
 
 type Props = {
   title: string
@@ -15,6 +17,8 @@ type Props = {
   onNext?: () => void
   nextLabel?: string
   nextDisabled?: boolean
+  noScroll?: boolean
+  hideBack?: boolean
   children: ReactNode
 }
 
@@ -26,61 +30,87 @@ export function StepLayout({
   onNext,
   nextLabel = '下一步',
   nextDisabled = false,
+  noScroll = false,
+  hideBack = false,
   children,
 }: Props) {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const rootNav = useNavigation().getParent()
+  const { state, dispatch } = useBookingRequest()
+
+  function handleClose() {
+    if (state.isEditing) {
+      dispatch({ type: 'SET_EDITING', payload: false })
+      router.push('/book/results')
+    } else {
+      dispatch({ type: 'RESET' })
+      rootNav?.goBack()
+    }
+  }
 
   return (
-    <YStack flex={1} backgroundColor="#FBFBF8">
-      {/* Header */}
-      <YStack paddingTop={insets.top} gap={12} paddingBottom={16}>
-        <XStack
-          height={48}
-          alignItems="center"
-          paddingHorizontal={16}
-        >
-          <Pressable
-            onPress={() => router.back()}
-            style={{
-              width: 44,
-              height: 44,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            accessibilityLabel="返回"
-          >
-            <ChevronLeft size={24} color="#1F2723" />
-          </Pressable>
+    <YStack flex={1} backgroundColor="#F0EDE5">
+      {/* Header zone: back button + progress dots + spacer */}
+      <YStack paddingTop={insets.top}>
+        <XStack height={48} alignItems="center" paddingLeft={12} paddingRight={16}>
+          {hideBack ? (
+            <View width={44} />
+          ) : (
+            <Pressable
+              onPress={() => router.back()}
+              style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+              accessibilityRole="button"
+              accessibilityLabel="返回"
+            >
+              <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
+            </Pressable>
+          )}
           <View flex={1} alignItems="center">
-            <Text fontSize={16} fontWeight="600" color="#1F2723">
-              {title}
-            </Text>
+            <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
           </View>
-          {/* Spacer to balance back button */}
-          <View width={44} />
-        </XStack>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
-        {subtitle && (
-          <Text
-            fontSize={13}
-            color="#808868"
-            textAlign="center"
-            paddingHorizontal={16}
+          <Pressable
+            onPress={handleClose}
+            style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+            accessibilityRole="button"
+            accessibilityLabel="關閉"
           >
+            <FA6ProIcon name="xmark" size={24} color="#1F2723" />
+          </Pressable>
+        </XStack>
+      </YStack>
+
+      {/* Question heading */}
+      <YStack paddingLeft={20} paddingRight={16} paddingTop={24} paddingBottom={8} gap={12}>
+        <Text fontSize={30} fontWeight="600" lineHeight={38} color="#1F2723">
+          {title}
+        </Text>
+        {subtitle && (
+          <Text fontSize={15} lineHeight={22} color="#808868">
             {subtitle}
           </Text>
         )}
       </YStack>
 
-      {/* Scrollable content */}
-      <ScrollView
-        flex={1}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-      >
-        {children}
-      </ScrollView>
+      {/* Content */}
+      {noScroll ? (
+        <YStack flex={1} paddingHorizontal={16} paddingBottom={24}>
+          {children}
+        </YStack>
+      ) : (
+        <ScrollView
+          flex={1}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            paddingHorizontal: 16,
+            paddingBottom: 24,
+          }}
+        >
+          {children}
+        </ScrollView>
+      )}
 
       {/* Bottom CTA */}
       {onNext && (
@@ -88,19 +118,21 @@ export function StepLayout({
           paddingHorizontal={16}
           paddingTop={12}
           paddingBottom={insets.bottom + 12}
-          backgroundColor="#FBFBF8"
+          backgroundColor="#F0EDE5"
         >
           <Pressable
             onPress={onNext}
             disabled={nextDisabled}
-            style={{
+            accessibilityRole="button"
+            accessibilityLabel={nextLabel}
+            style={({ pressed }) => ({
               borderRadius: 9999,
-              height: 44,
+              height: 48,
               backgroundColor: '#1F2723',
               alignItems: 'center',
               justifyContent: 'center',
-              opacity: nextDisabled ? 0.4 : 1,
-            }}
+              opacity: nextDisabled ? 0.4 : pressed ? 0.75 : 1,
+            })}
           >
             <Text fontSize={16} fontWeight="600" color="#FBFBF8">
               {nextLabel}

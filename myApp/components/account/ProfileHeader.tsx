@@ -1,78 +1,104 @@
 // components/account/ProfileHeader.tsx
-import { Alert, Pressable } from 'react-native'
+import { Alert, Pressable, View as RNView } from 'react-native'
 import { XStack, YStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { FontAwesome6 } from '@expo/vector-icons'
-import type { LayoutChangeEvent } from 'react-native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
+
+const AVATAR_ICONS = ['flower-daffodil', 'flower-tulip', 'olive', 'wheat', 'pretzel'] as const
+
+// Each entry: background + icon colour pairing
+const AVATAR_PALETTE = [
+  { bg: '#DFF5AD', fg: '#3d3d3a' },
+  { bg: '#808868', fg: '#ffffff' },
+  { bg: '#9472DE', fg: '#ffffff' },
+  { bg: '#CDB5FF', fg: '#3d3d3a' },
+  { bg: '#A4CFFB', fg: '#3d3d3a' },
+  { bg: '#F063B4', fg: '#ffffff' },
+  { bg: '#F78B92', fg: '#3d3d3a' },
+  { bg: '#F1C9AC', fg: '#3d3d3a' },
+]
+
+// Deterministic pick from `seed` so the avatar stays stable across renders
+function getAvatarStyle(seed: string) {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0
+  }
+  const n = Math.abs(h)
+  return {
+    icon: AVATAR_ICONS[n % AVATAR_ICONS.length],
+    ...AVATAR_PALETTE[(n >>> 4) % AVATAR_PALETTE.length],
+  }
+}
 
 type Props = {
   displayName: string
-  roleLabel: string
-  avatarInitial: string
-  /** Pass TOGGLE_HEIGHT when toggle is shown, 0 when hidden */
-  toggleHeight: number
-  onLayout: (event: LayoutChangeEvent) => void
+  hasUnread?: boolean
 }
 
-export function ProfileHeader({
-  displayName,
-  roleLabel,
-  avatarInitial,
-  toggleHeight,
-  onLayout,
-}: Props) {
+export function ProfileHeader({ displayName, hasUnread = false }: Props) {
   const insets = useSafeAreaInsets()
+  const avatar = getAvatarStyle(displayName)
 
   return (
     <YStack
-      backgroundColor="#F0EDE5"
-      paddingTop={insets.top + 12}
-      paddingHorizontal={16}
-      paddingBottom={toggleHeight > 0 ? toggleHeight / 2 : 16}
-      onLayout={onLayout}
+      backgroundColor="#FBFBF8"
+      paddingTop={insets.top + 16}
+      paddingHorizontal={20}
+      paddingBottom={20}
     >
       <XStack alignItems="center" justifyContent="space-between">
-        <XStack alignItems="center" gap={12}>
-          {/* Avatar — initials placeholder */}
+        {/* Left: Avatar + Name */}
+        <XStack alignItems="center" gap={14} flex={1}>
           <View
-            width={48}
-            height={48}
-            borderRadius={24}
-            backgroundColor="#d4b8a0"
+            width={64}
+            height={64}
+            borderRadius={32}
+            backgroundColor={avatar.bg}
             alignItems="center"
             justifyContent="center"
           >
-            <Text fontSize={18} fontWeight="700" color="#FBFBF8">
-              {avatarInitial}
-            </Text>
+            <FA6ProIcon name={avatar.icon} size={26} color={avatar.fg} />
           </View>
-          <YStack>
-            <Text fontSize={16} fontWeight="700" color="#1F2723">
-              {displayName}
+
+          <YStack gap={4}>
+            <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={28}>
+              林小美
             </Text>
-            <Text fontSize={13} color="#808868">
-              {roleLabel}
-            </Text>
+            <XStack alignItems="center" gap={4}>
+              <FA6ProIcon name="star" size={11} color="#141413" />
+              <Text fontSize={12} color="#141413" lineHeight={16}>
+                4.8
+              </Text>
+            </XStack>
           </YStack>
         </XStack>
 
-        {/* Notification icon — placeholder */}
+        {/* Right: Notification bell */}
         <Pressable
           onPress={() => Alert.alert('通知', '通知中心即將推出')}
-          hitSlop={8}
+          hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel="通知"
         >
-          <View
-            width={36}
-            height={36}
-            borderRadius={18}
-            backgroundColor="rgba(0,0,0,0.06)"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <FontAwesome6 name="bell" size={16} color="#1F2723" />
-          </View>
+          <RNView style={{ width: 24, height: 24 }}>
+            <FA6ProIcon name="bell" size={22} color="#87867f" />
+            {hasUnread && (
+              <RNView
+                style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -2,
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: '#c96442',
+                  borderWidth: 1.5,
+                  borderColor: '#FBFBF8',
+                }}
+              />
+            )}
+          </RNView>
         </Pressable>
       </XStack>
     </YStack>

@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Animated, Alert, Pressable } from 'react-native'
+import { Animated, Alert, Pressable, Platform, StyleSheet } from 'react-native'
 import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
-import { LinearGradient } from 'expo-linear-gradient'
-import { Search, ChevronRight, ChevronDown } from 'lucide-react-native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { VavaLogo } from '@/components/vava-logo'
 import { useBookingRequest } from '@/lib/booking-context'
@@ -14,9 +13,9 @@ import { useProCounts } from '@/hooks/use-pro-counts'
 const ROTATING_WORDS = ['美甲', '美睫', '美妝'] as const
 
 const CATEGORIES = [
-  { key: 'nails' as const, label: '美甲師', image: require('@/assets/images/home/nails.png') },
-  { key: 'lashes' as const, label: '美睫師', image: require('@/assets/images/home/lashes.png') },
-  { key: 'makeup' as const, label: '美妝師', image: require('@/assets/images/home/makeup.png') },
+  { key: 'nails' as const, label: '美甲師', image: require('@/assets/category/nails.png') },
+  { key: 'lashes' as const, label: '美睫師', image: require('@/assets/category/lashes.png') },
+  { key: 'makeup' as const, label: '美妝師', image: require('@/assets/category/makeup.png') },
 ]
 
 export default function HomeScreen() {
@@ -28,21 +27,23 @@ export default function HomeScreen() {
   // Rotating word animation
   const [wordIdx, setWordIdx] = useState(0)
   const fadeAnim = useRef(new Animated.Value(1)).current
+  const slideAnim = useRef(new Animated.Value(0)).current
 
   const cycleWord = useCallback(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
+    // Exit: slide down + fade out
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 20, duration: 150, useNativeDriver: true }),
+    ]).start(() => {
       setWordIdx((prev) => (prev + 1) % ROTATING_WORDS.length)
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 250,
-        useNativeDriver: true,
-      }).start()
+      slideAnim.setValue(-20) // reset above
+      // Enter: slide in from above + fade in
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]).start()
     })
-  }, [fadeAnim])
+  }, [fadeAnim, slideAnim])
 
   useEffect(() => {
     const interval = setInterval(cycleWord, 2500)
@@ -64,11 +65,11 @@ export default function HomeScreen() {
       backgroundColor="$background"
       showsVerticalScrollIndicator={false}
     >
-      <YStack paddingBottom={insets.bottom + 83}>
+      <YStack paddingBottom={16} marginTop={-4}>
         {/* A) Header Bar */}
         <XStack
           paddingTop={insets.top}
-          height={insets.top + 48}
+          minHeight={insets.top + 48}
           alignItems="center"
           justifyContent="space-between"
           paddingHorizontal={16}
@@ -78,273 +79,265 @@ export default function HomeScreen() {
           <Pressable
             onPress={() => Alert.alert('搜尋', '搜尋功能即將推出')}
             style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-            accessibilityLabel="Search"
+            accessibilityRole="button"
+            accessibilityLabel="搜尋"
           >
-            <Search size={22} color="#1F2723" />
+            <FA6ProIcon name="magnifying-glass" size={20} color="#1F2723" />
           </Pressable>
         </XStack>
 
         {/* B) Hero Section */}
-        <YStack alignItems="center" gap={4} paddingTop={24} paddingBottom={20}>
+        <YStack alignItems="center" gap={8} paddingBottom={16} paddingHorizontal={16}>
           <Text
-            fontSize={28}
+            fontSize={24}
             fontWeight="700"
-            lineHeight={34}
+            lineHeight={36}
             letterSpacing={-0.3}
             color="#1F2723"
+            textAlign="center"
           >
             臨時需要預約？
           </Text>
           <Text
-            fontSize={15}
-            lineHeight={20}
+            fontSize={16}
+            fontWeight="500"
+            lineHeight={22}
             color="#808868"
+            textAlign="center"
           >
             馬上找到有空又符合你需求的設計師
           </Text>
         </YStack>
 
         {/* C) Request Card */}
-        <YStack paddingHorizontal={16} paddingBottom={28}>
+        <YStack paddingHorizontal={16} paddingBottom={16}>
+          <Pressable
+          onPress={() => router.push('/book/category')}
+          accessibilityRole="button"
+          accessibilityLabel="立即預約"
+        >
           <YStack
             borderRadius={8}
             backgroundColor="#F0EDE5"
-            minHeight={280}
+            minHeight={360}
             overflow="hidden"
             position="relative"
+            {...Platform.select({
+              ios: {
+                shadowColor: '#0C0C0D',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.05,
+                shadowRadius: 8,
+              },
+              android: { elevation: 2 },
+            })}
           >
-            {/* Gradient overlay */}
-            <View position="absolute" top={0} left={0} right={0} bottom={0} zIndex={1}>
-              <LinearGradient
-                colors={['transparent', 'rgba(190,72,128,0.6)', 'rgba(220,100,100,0.4)']}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.8, y: 1 }}
-                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-              />
-            </View>
+            {/* Raster background layers — decorative, hidden from screen readers */}
+            <Image
+              source={require('@/assets/hero/gradient.png')}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              accessible={false}
+            />
+            <Image
+              source={require('@/assets/hero/noise.png')}
+              style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
+              contentFit="cover"
+              accessible={false}
+            />
+            <Image
+              source={require('@/assets/hero/riso_texture.png')}
+              style={[StyleSheet.absoluteFill, { opacity: 0.1 }]}
+              contentFit="cover"
+              accessible={false}
+            />
 
             {/* Card content */}
             <YStack
               zIndex={2}
-              padding={20}
-              flex={1}
-              justifyContent="space-between"
+              paddingTop={24}
+              paddingHorizontal={20}
+              paddingBottom={16}
+              justifyContent="flex-start"
+              gap={8}
+              height={360}
             >
               {/* Top copy */}
-              <Text
-                fontSize={13}
-                color="#1F2723"
-                opacity={0.65}
-                paddingBottom={12}
-              >
-                不再一間一間問，設計師來找你！
-              </Text>
+              <XStack alignItems="center">
+                <Text
+                  fontSize={16}
+                  fontWeight="500"
+                  lineHeight={24}
+                  color="#858279"
+                >
+                  不再一間一間問，讓設計師來找你！
+                </Text>
+              </XStack>
 
               {/* Headline */}
-              <YStack gap={4} paddingBottom={24}>
-                <Text
-                  fontSize={24}
-                  fontWeight="700"
-                  lineHeight={30}
-                  color="#1F2723"
-                >
-                  {'1分鐘填需求・不用等待\n馬上預約'}
-                  <Animated.Text style={{ opacity: fadeAnim, color: '#FF5A3C', fontSize: 24, fontWeight: '700', lineHeight: 30 }}>
-                    {ROTATING_WORDS[wordIdx]}
-                  </Animated.Text>
+              <YStack flex={1}>
+                <Text fontSize={30} fontWeight="700" color="#1F2723" lineHeight={38}>
+                  1分鐘填需求．不用等待
                 </Text>
+                <XStack alignItems="flex-start" gap={2}>
+                  <Text fontSize={30} fontWeight="700" color="#1F2723" lineHeight={38}>
+                    馬上預約
+                  </Text>
+                  <View overflow="hidden" height={38}>
+                    <Animated.View style={{ transform: [{ translateY: slideAnim }], opacity: fadeAnim }}>
+                      <Text fontSize={30} fontWeight="700" color="#FF5A3C" lineHeight={38}>
+                        {ROTATING_WORDS[wordIdx]}
+                      </Text>
+                    </Animated.View>
+                  </View>
+                </XStack>
               </YStack>
 
               {/* CTA button */}
               <Pressable
                 onPress={() => router.push('/book/category')}
-                style={{
+                accessibilityRole="button"
+                accessibilityLabel="填寫需求"
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.75 : 1,
                   borderRadius: 9999,
-                  height: 44,
-                  paddingHorizontal: 20,
+                  height: 48,
+                  paddingHorizontal: 24,
                   backgroundColor: '#1F2723',
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'center',
                   alignSelf: 'flex-start',
-                }}
+                  gap: 8,
+                })}
               >
                 <Text
                   fontSize={16}
-                  fontWeight="600"
+                  fontWeight="700"
                   color="#FBFBF8"
-                  marginRight={4}
                 >
                   填寫需求
                 </Text>
-                <ChevronRight size={18} color="#FBFBF8" />
+                <FA6ProIcon name="chevron-right" size={14} color="rgba(251,251,248,0.4)" />
               </Pressable>
             </YStack>
           </YStack>
+          </Pressable>
         </YStack>
 
-        {/* D) "現在有空" Section */}
-        <YStack paddingBottom={28}>
-          {/* Section header */}
-          <XStack
-            paddingHorizontal={16}
-            justifyContent="space-between"
-            alignItems="center"
-            paddingBottom={12}
-          >
-            <Text fontSize={16} fontWeight="700" color="#1F2723">
-              現在有空
-            </Text>
-            <Pressable
-              onPress={() => Alert.alert('選擇地區', '地區選擇功能即將推出')}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
-            >
-              <Text fontSize={13} color="#1F2723">
-                台北・大安
-              </Text>
-              <ChevronDown size={16} color="#1F2723" />
-            </Pressable>
-          </XStack>
-
-          {/* Horizontal scroll of category cards */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 10.5 }}
-          >
-            {CATEGORIES.map((cat) => (
-              <Pressable
-                key={cat.key}
-                onPress={() => handleCategoryPress(cat.key)}
-              >
-                <YStack
-                  width={116}
-                  borderRadius={8}
-                  backgroundColor="#EAEAE4"
-                  overflow="hidden"
-                >
-                  <Image
-                    source={cat.image}
-                    style={{ width: 116, height: 80 }}
-                    contentFit="cover"
-                  />
-                  <XStack
-                    height={32}
-                    alignItems="center"
-                    paddingHorizontal={8}
-                    gap={4}
-                  >
-                    <View
-                      width={6}
-                      height={6}
-                      borderRadius={3}
-                      backgroundColor="#2E7D52"
-                    />
-                    <Text fontSize={11} color="#1F2723" flex={1}>
-                      {counts[cat.key]} 位{cat.label}
-                    </Text>
-                    <ChevronRight size={12} color="#1F2723" />
-                  </XStack>
-                </YStack>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </YStack>
+        {/* D) "現在有空" Section — hidden */}
 
         {/* E) Model Opportunity Banner */}
-        <YStack paddingHorizontal={16} paddingBottom={20}>
-          {/* Section header */}
-          <XStack alignItems="center" gap={6} paddingBottom={12}>
-            <Text fontSize={16} fontWeight="700" color="#1F2723">
-              模特機會
-            </Text>
-            <View
-              backgroundColor="#FEECFB"
-              borderRadius={5}
-              height={16}
-              paddingHorizontal={5}
-              justifyContent="center"
-            >
-              <Text fontSize={10} fontWeight="600" color="#BA4C8B">
-                New
-              </Text>
-            </View>
-          </XStack>
-
-          {/* Banner card */}
-          <Pressable onPress={handleModelBannerPress}>
+        <YStack paddingHorizontal={16} paddingBottom={40}>
+          <Pressable
+          onPress={handleModelBannerPress}
+          accessibilityRole="button"
+          accessibilityLabel="模特機會 — 變美不用花大錢"
+        >
             <YStack
               borderRadius={8}
               backgroundColor="#BA4C8B"
-              height={166}
+              height={191}
               overflow="hidden"
               position="relative"
             >
-              {/* Right image */}
-              <View
-                position="absolute"
-                right={0}
-                top={0}
-                width={125}
-                height={166}
-                zIndex={1}
-              >
-                <Image
-                  source={require('@/assets/images/home/model-brushes.png')}
-                  style={{ width: 125, height: 166 }}
-                  contentFit="cover"
-                />
-              </View>
+              {/* model bundle bg on top of pink base — decorative */}
+              <Image
+                source={require('@/assets/hero/model_bg.png')}
+                style={[StyleSheet.absoluteFill, { opacity: 0.9 }]}
+                contentFit="cover"
+                contentPosition="center"
+                accessible={false}
+              />
+              <Image
+                source={require('@/assets/hero/noise.png')}
+                style={[StyleSheet.absoluteFill, { opacity: 0.1 }]}
+                contentFit="cover"
+                accessible={false}
+              />
+              <Image
+                source={require('@/assets/hero/riso_texture.png')}
+                style={[StyleSheet.absoluteFill, { opacity: 0.12 }]}
+                contentFit="cover"
+                accessible={false}
+              />
 
-              {/* Left content */}
+              {/* Content */}
               <YStack
-                maxWidth="62%"
-                paddingTop={20}
-                paddingLeft={20}
-                paddingBottom={16}
+                position="absolute"
+                top={20}
+                left={20}
+                right={20}
                 zIndex={2}
-                justifyContent="space-between"
-                flex={1}
+                gap={20}
               >
+                {/* Text block */}
                 <YStack gap={4}>
-                  <Text
-                    fontSize={13}
-                    color="rgba(255,255,255,0.85)"
-                  >
-                    不介意當練習模特？
-                  </Text>
-                  <Text
-                    fontSize={20}
-                    fontWeight="700"
-                    color="white"
-                  >
-                    變美不用花大錢！
-                  </Text>
-                  <Text
-                    fontSize={12}
-                    color="rgba(255,255,255,0.80)"
-                  >
-                    享練習價甚至免費！
-                  </Text>
+                  {/* Header: 模特機會 + New badge */}
+                  <XStack alignItems="center" gap={4} paddingVertical={4}>
+                    <Text
+                      fontSize={16}
+                      fontWeight="500"
+                      lineHeight={20}
+                      color="#FBFBF8"
+                    >
+                      模特機會
+                    </Text>
+                    <View
+                      backgroundColor="#FEECFB"
+                      borderRadius={5}
+                      paddingHorizontal={6}
+                      paddingVertical={2}
+                    >
+                      <Text fontSize={12} color="#A5088C">
+                        New
+                      </Text>
+                    </View>
+                  </XStack>
+
+                  {/* Title + subtitle */}
+                  <YStack gap={4}>
+                    <Text
+                      fontSize={24}
+                      fontWeight="700"
+                      lineHeight={32}
+                      color="#FBFBF8"
+                    >
+                      變美不用花大錢
+                    </Text>
+                    <Text
+                      fontSize={16}
+                      fontWeight="500"
+                      lineHeight={20}
+                      color="#EAEAE4"
+                    >
+                      不介意當練習模特？享練習價甚至免費！
+                    </Text>
+                  </YStack>
                 </YStack>
 
-                {/* CTA */}
-                <XStack
-                  borderRadius={9999}
-                  height={40}
-                  paddingHorizontal={16}
-                  backgroundColor="#FBFBF8"
-                  alignItems="center"
-                  justifyContent="center"
-                  alignSelf="flex-start"
-                  marginTop={12}
-                  gap={2}
+                {/* CTA button */}
+                <Pressable
+                  onPress={handleModelBannerPress}
+                  style={{
+                    borderRadius: 9999,
+                    height: 40,
+                    paddingHorizontal: 16,
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderWidth: 1,
+                    borderColor: '#d8d9d2',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    alignSelf: 'flex-start',
+                    gap: 8,
+                  }}
                 >
-                  <Text fontSize={14} fontWeight="600" color="#1F2723">
+                  <Text fontSize={16} fontWeight="700" color="#FBFBF8">
                     尋找模特機會
                   </Text>
-                  <ChevronRight size={16} color="#1F2723" />
-                </XStack>
+                  <FA6ProIcon name="chevron-right" size={14} color="rgba(251,251,248,0.4)" />
+                </Pressable>
               </YStack>
             </YStack>
           </Pressable>

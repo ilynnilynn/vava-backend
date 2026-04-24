@@ -2,7 +2,7 @@ import { Pressable } from 'react-native'
 import { YStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { CircleCheckBig } from 'lucide-react-native'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { useBookingRequest } from '@/lib/booking-context'
 import { formatBookingDate, formatSlotTime } from '@/lib/booking-helpers'
@@ -43,31 +43,31 @@ export default function SuccessScreen() {
           alignItems="center"
           justifyContent="center"
         >
-          <CircleCheckBig size={48} color="#2E7D52" />
+          <FA6ProIcon name="circle-check" size={48} color="#2E7D52" />
         </View>
 
         {/* Title */}
-        <Text fontSize={24} fontWeight="700" color="#1F2723">
+        <Text fontSize={24} fontWeight="700" lineHeight={32} color="#1F2723">
           預約成功！
         </Text>
 
         {/* Booking card */}
         <YStack
           backgroundColor="#F0EDE5"
-          borderRadius={12}
+          borderRadius={8}
           padding={20}
           gap={12}
           width="100%"
         >
-          <Text fontSize={18} fontWeight="700" color="#1F2723">
+          <Text fontSize={18} fontWeight="700" lineHeight={26} color="#1F2723">
             {params.proName}
           </Text>
 
-          <Text fontSize={14} color="#808868">
+          <Text fontSize={14} lineHeight={20} color="#808868">
             {[categoryLabel, serviceLabel].filter(Boolean).join(' - ')}
           </Text>
 
-          <Text fontSize={15} fontWeight="600" color="#1F2723">
+          <Text fontSize={15} fontWeight="600" lineHeight={22} color="#1F2723">
             {dateLabel} {timeLabel}
           </Text>
 
@@ -90,7 +90,7 @@ export default function SuccessScreen() {
           onPress={handleDismiss}
           style={{
             borderRadius: 9999,
-            height: 44,
+            height: 48,
             backgroundColor: '#1F2723',
             alignItems: 'center',
             justifyContent: 'center',

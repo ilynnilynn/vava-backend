@@ -6,7 +6,7 @@ import {
 import { YStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 import { StatusBar } from 'expo-status-bar'
 import MapView, { Marker } from 'react-native-maps'
 
@@ -388,7 +388,7 @@ export default function ResultsScreen() {
           opacity: pressed ? 0.75 : 1,
         })}
       >
-        <FontAwesome6 name="chevron-left" size={16} color="#1F2723" />
+        <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
       </Pressable>
 
       {/* ── Floating cancel (X) button ── */}
@@ -423,7 +423,7 @@ export default function ResultsScreen() {
           opacity: pressed ? 0.75 : 1,
         })}
       >
-        <FontAwesome6 name="xmark" size={16} color="#1F2723" />
+        <FA6ProIcon name="xmark" size={16} color="#1F2723" />
       </Pressable>
 
       {/* ── Draggable bottom sheet ── */}
@@ -460,7 +460,7 @@ export default function ResultsScreen() {
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                 >
-                  <FontAwesome6 name="chevron-left" size={18} color="#1F2723" />
+                  <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
                 </Pressable>
                 <Text fontSize={16} fontWeight="600" lineHeight={24} color="#1F2723" style={{ flex: 1, textAlign: 'center' }}>
                   {detailPro.pro.displayName}
@@ -486,7 +486,7 @@ export default function ResultsScreen() {
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >
-                    <FontAwesome6 name="sliders" size={14} color="#1F2723" />
+                    <FA6ProIcon name="sliders" size={14} color="#1F2723" />
                   </Pressable>
                 </RNView>
               </>
@@ -600,7 +600,7 @@ export default function ResultsScreen() {
                         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignSelf: 'flex-start' })}
                       >
                         <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <FontAwesome6 name="instagram" size={13} color="#808868" />
+                          <FA6ProIcon name="at" size={13} color="#808868" />
                           <Text fontSize={13} lineHeight={20} color="#808868">@{detailPro.pro.igHandle}</Text>
                         </RNView>
                       </Pressable>
@@ -697,7 +697,7 @@ export default function ResultsScreen() {
                   style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                   accessibilityLabel="關閉"
                 >
-                  <FontAwesome6 name="xmark" size={18} color="#1F2723" />
+                  <FA6ProIcon name="xmark" size={18} color="#1F2723" />
                 </Pressable>
               </RNView>
             </RNView>

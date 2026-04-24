@@ -1,22 +1,20 @@
 import { useState, useCallback } from 'react'
-import { SectionList, Pressable, ActivityIndicator, RefreshControl } from 'react-native'
-import { YStack, Text, View } from 'tamagui'
+import { FlatList, Pressable, ActivityIndicator, RefreshControl, Modal } from 'react-native'
+import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useFocusEffect } from 'expo-router'
-import { FontAwesome6 } from '@expo/vector-icons'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
 
 import { BookingCard } from '@/components/booking/BookingCard'
+import { BookingDetailSheet } from '@/components/booking/BookingDetailSheet'
 import { fetchBookings } from '@/lib/bookings-api'
 import type { BookingListItem } from '@/types/booking-list'
 
-type Section = {
-  title: string
-  data: BookingListItem[]
-}
+type Tab = 'upcoming' | 'history'
 
 const UPCOMING_STATUSES = new Set(['confirmed', 'reschedule_pending'])
 
-function splitBookings(bookings: BookingListItem[]): Section[] {
+function splitBookings(bookings: BookingListItem[]) {
   const now = new Date().toISOString()
   const upcoming: BookingListItem[] = []
   const history: BookingListItem[] = []
@@ -32,10 +30,7 @@ function splitBookings(bookings: BookingListItem[]): Section[] {
   upcoming.sort((a, b) => a.starts_at.localeCompare(b.starts_at))
   history.sort((a, b) => b.starts_at.localeCompare(a.starts_at))
 
-  const sections: Section[] = []
-  if (upcoming.length > 0) sections.push({ title: '即將到來', data: upcoming })
-  if (history.length > 0) sections.push({ title: '歷史紀錄', data: history })
-  return sections
+  return { upcoming, history }
 }
 
 export default function BookingsScreen() {
@@ -46,6 +41,8 @@ export default function BookingsScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('upcoming')
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -107,7 +104,7 @@ export default function BookingsScreen() {
   if (bookings.length === 0) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16} paddingHorizontal={24}>
-        <FontAwesome6 name="calendar-xmark" size={48} color="#EAEAE4" />
+        <FA6ProIcon name="calendar-xmark" size={48} color="#EAEAE4" />
         <Text fontSize={16} fontWeight="600" color="#808868">還沒有預約紀錄</Text>
         <Pressable
           onPress={() => router.push('/book/category')}
@@ -123,47 +120,109 @@ export default function BookingsScreen() {
           }}
         >
           <Text fontSize={16} fontWeight="700" color="#FBFBF8">開始預約</Text>
-          <FontAwesome6 name="chevron-right" size={14} color="rgba(251,251,248,0.4)" />
+          <FA6ProIcon name="chevron-right" size={14} color="rgba(251,251,248,0.4)" />
         </Pressable>
       </YStack>
     )
   }
 
-  const sections = splitBookings(bookings)
+  const { upcoming, history } = splitBookings(bookings)
+  const data = activeTab === 'upcoming' ? upcoming : history
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{
-          paddingTop: insets.top + 16,
-          paddingHorizontal: 16,
-          paddingBottom: insets.bottom + 80,
-        }}
-        stickySectionHeadersEnabled
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#1F2723" />
-        }
-        ListHeaderComponent={
-          <Text fontSize={24} fontWeight="700" color="#1F2723" paddingBottom={20}>
-            我的預約
+      {/* Page title */}
+      <YStack paddingTop={insets.top + 21} paddingHorizontal={16} paddingBottom={20}>
+        <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723" textAlign="center">
+          我的預約
+        </Text>
+      </YStack>
+
+      {/* Underline tab bar */}
+      <XStack
+        marginHorizontal={16}
+        marginBottom={12}
+        borderBottomWidth={1}
+        borderBottomColor="#EAEAE4"
+      >
+        <TabPill label="即將到來" active={activeTab === 'upcoming'} onPress={() => setActiveTab('upcoming')} />
+        <TabPill label="歷史紀錄" active={activeTab === 'history'} onPress={() => setActiveTab('history')} />
+      </XStack>
+
+      {/* List */}
+      {data.length === 0 ? (
+        <YStack flex={1} justifyContent="center" alignItems="center" gap={8} paddingHorizontal={24}>
+          <Text fontSize={14} color="#808868">
+            {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
-        }
-        renderSectionHeader={({ section }) => (
-          <View backgroundColor="$background" paddingVertical={8}>
-            <Text fontSize={14} fontWeight="600" color="#808868">
-              {section.title}
-            </Text>
-          </View>
+        </YStack>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: insets.bottom + 80,
+          }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#1F2723" />
+          }
+          ItemSeparatorComponent={() => (
+            <View paddingVertical={12}>
+              <View height={1} backgroundColor="#EAEAE4" />
+            </View>
+          )}
+          renderItem={({ item }) => (
+            <BookingCard booking={item} onPress={() => setSelectedBookingId(item.id)} />
+          )}
+        />
+      )}
+
+      {/* Bottom sheet modal for booking detail */}
+      <Modal
+        visible={selectedBookingId !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setSelectedBookingId(null)}
+      >
+        {selectedBookingId && (
+          <BookingDetailSheet
+            bookingId={selectedBookingId}
+            onClose={() => { setSelectedBookingId(null); load() }}
+          />
         )}
-        renderItem={({ item }) => (
-          <View paddingBottom={12}>
-            <BookingCard booking={item} />
-          </View>
-        )}
-        SectionSeparatorComponent={() => <View height={8} />}
-      />
+      </Modal>
     </YStack>
+  )
+}
+
+function TabPill({
+  label,
+  active,
+  onPress,
+}: {
+  label: string
+  active: boolean
+  onPress: () => void
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 10,
+        borderBottomWidth: 2,
+        borderBottomColor: active ? '#F9583B' : 'transparent',
+        opacity: !active && pressed ? 0.5 : 1,
+      })}
+    >
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#808868'}>
+        {label}
+      </Text>
+    </Pressable>
   )
 }
