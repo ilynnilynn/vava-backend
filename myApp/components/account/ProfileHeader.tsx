@@ -82,7 +82,7 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
           accessibilityLabel="通知"
         >
           <RNView style={{ width: 24, height: 24 }}>
-            <FA6ProIcon name="bell" size={22} color="#87867f" />
+            <FA6ProIcon name="bell" size={22} color="#87867f" weight="regular" />
             {hasUnread && (
               <RNView
                 style={{
