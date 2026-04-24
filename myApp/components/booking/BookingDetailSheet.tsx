@@ -201,8 +201,8 @@ export function BookingDetailSheet({ bookingId, onClose }: Props) {
 
             {showPhone && detail.pro_phone && (
               <XStack gap={8} alignItems="center">
-                <FA6ProIcon name="phone" size={14} color="#2E7D52" />
-                <Text fontSize={15} fontWeight="600" color="#2E7D52">
+                <FA6ProIcon name="phone" size={14} color="#808868" />
+                <Text fontSize={15} fontWeight="600" color="#808868">
                   {detail.pro_phone}
                 </Text>
               </XStack>

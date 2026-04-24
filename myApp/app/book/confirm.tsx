@@ -175,12 +175,12 @@ export default function ConfirmScreen() {
           justifyContent="center"
           gap={10}
         >
-          <FA6ProIcon name="shield-halved" size={15} color="#4A7A46" />
+          <FA6ProIcon name="shield-halved" size={15} color="#808868" />
           <YStack gap={1} alignItems="center">
-            <Text fontSize={13} fontWeight="600" lineHeight={18} color="#2E5A2B" textAlign="center">
+            <Text fontSize={13} fontWeight="600" lineHeight={18} color="#4d4c48" textAlign="center">
               確認後10分鐘內可免責取消
             </Text>
-            <Text fontSize={12} lineHeight={16} color="#4A7A46" textAlign="center">
+            <Text fontSize={12} lineHeight={16} color="#808868" textAlign="center">
               安心預約，隨時保有彈性
             </Text>
           </YStack>
