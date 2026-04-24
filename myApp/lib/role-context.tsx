@@ -13,6 +13,7 @@ type RoleState = {
 }
 
 const STORAGE_KEY = '@vava/activeRole'
+const USE_MOCK = true
 
 const RoleContext = createContext<RoleState>({
   enabledRoles: ['customer'],
@@ -32,6 +33,13 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       const stored = await AsyncStorage.getItem(STORAGE_KEY)
       const persisted: UserRole = stored === 'pro' ? 'pro' : 'customer'
 
+      if (USE_MOCK) {
+        setEnabledRoles(['customer', 'pro'])
+        if (!explicitlySet.current) setActiveRoleState(persisted)
+        setIsRoleLoading(false)
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       let roles: UserRole[] = ['customer']
 
@@ -46,7 +54,6 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       }
 
       setEnabledRoles(roles)
-      // Don't override if the user already switched roles while init was running
       if (!explicitlySet.current) {
         setActiveRoleState(roles.includes(persisted) ? persisted : 'customer')
       }
