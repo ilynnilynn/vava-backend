@@ -48,7 +48,7 @@ export default function ProBookingsScreen() {
     <YStack flex={1} backgroundColor="#FBFBF8">
       {/* Header */}
       <YStack paddingTop={insets.top + 21} paddingHorizontal={16} paddingBottom={20}>
-        <Text fontSize={20} fontWeight="700" lineHeight={28} color="#141413" textAlign="center">
+        <Text fontSize={20} fontWeight="700" lineHeight={28} color="#141413">
           預約管理
         </Text>
       </YStack>
