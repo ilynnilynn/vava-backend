@@ -1,22 +1,35 @@
 // app/(pro-tabs)/slots.tsx
 import { useCallback, useState } from 'react'
-import { FlatList, Modal, Pressable, RefreshControl, ActivityIndicator, StyleSheet, View } from 'react-native'
+import { ScrollView, Pressable, RefreshControl, ActivityIndicator, StyleSheet, View } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
 
-import { BookingCardPro } from '@/components/pro/BookingCardPro'
-import { SlotRow } from '@/components/pro/SlotRow'
 import { FA6ProIcon } from '@/components/FA6ProIcon'
 import { fetchProBookings } from '@/lib/pro-bookings-api'
 import { fetchSlots, openSlot, closeSlot } from '@/lib/slots-api'
-import type { ProBookingListItem, SlotItem } from '@/types/pro'
+import type { ProBookingListItem, SlotItem, SlotState } from '@/types/pro'
 
+// ── Constants ─────────────────────────────────────────────────
 type DayTab = 0 | 1 | 2
 
 const DAY_LABELS = ['今天', '明天', '後天']
 const WEEKDAYS_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
+const HOUR_HEIGHT = 80   // px per hour
+const START_HOUR = 9
+const END_HOUR = 20
+const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i)
+const SLOT_HEIGHT = HOUR_HEIGHT / 4  // 15 min = 20px
+
+const SLOT_CONFIG: Record<SlotState, { bg: string; border: string; text: string; label: string }> = {
+  expired:   { bg: 'transparent', border: 'transparent', text: '#bbb',    label: '' },
+  available: { bg: '#FBFBF8',     border: '#E0E0D8',     text: '#aaa',    label: '+ 開放' },
+  open:      { bg: '#ede9fe',     border: '#c4b5fd',     text: '#7c3aed', label: '開放中' },
+  booked:    { bg: '#dcfce7',     border: '#86efac',     text: '#15803d', label: '已預約' },
+}
+
+// ── Helpers ───────────────────────────────────────────────────
 function getDateStr(offsetDays: number): string {
   const d = new Date()
   d.setDate(d.getDate() + offsetDays)
@@ -39,6 +52,23 @@ function getSlotDay(startsAt: string, now: Date): number {
   return -1
 }
 
+function timeToY(isoString: string): number {
+  const d = new Date(isoString)
+  return (d.getHours() + d.getMinutes() / 60 - START_HOUR) * HOUR_HEIGHT
+}
+
+function durationToHeight(startsAt: string, endsAt: string): number {
+  const ms = new Date(endsAt).getTime() - new Date(startsAt).getTime()
+  return (ms / 3_600_000) * HOUR_HEIGHT
+}
+
+function formatTime(isoString: string): string {
+  return new Date(isoString).toLocaleTimeString('zh-TW', {
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  })
+}
+
+// ── Screen ────────────────────────────────────────────────────
 export default function ProSlotsScreen() {
   const insets = useSafeAreaInsets()
   const [bookings, setBookings] = useState<ProBookingListItem[]>([])
@@ -46,7 +76,7 @@ export default function ProSlotsScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [activeDay, setActiveDay] = useState<DayTab>(0)
-  const [slotModalVisible, setSlotModalVisible] = useState(false)
+  const [editMode, setEditMode] = useState(false)
 
   const load = useCallback(async () => {
     const [b, s] = await Promise.all([fetchProBookings(), fetchSlots()])
@@ -79,10 +109,9 @@ export default function ProSlotsScreen() {
 
   const now = new Date()
   const dateKey = getDateKey(activeDay)
-  const dayBookings = bookings
-    .filter(b => b.starts_at.slice(0, 10) === dateKey)
-    .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
-  const modalDaySlots = slots.filter(s => getSlotDay(s.starts_at, now) === activeDay)
+  const dayBookings = bookings.filter(b => b.starts_at.slice(0, 10) === dateKey)
+  const daySlots = slots.filter(s => getSlotDay(s.starts_at, now) === activeDay)
+  const gridHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">
@@ -95,16 +124,20 @@ export default function ProSlotsScreen() {
           </Text>
         </YStack>
         <Pressable
-          onPress={() => setSlotModalVisible(true)}
-          accessibilityLabel="管理時段"
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, padding: 4 })}
+          onPress={() => setEditMode(e => !e)}
+          accessibilityLabel={editMode ? '結束編輯' : '管理時段'}
+          style={({ pressed }) => [
+            styles.editBtn,
+            editMode && styles.editBtnActive,
+            { opacity: pressed ? 0.7 : 1 },
+          ]}
         >
-          <FA6ProIcon name="pen-to-square" size={20} color="#141413" />
+          <FA6ProIcon name="pen-to-square" size={18} color={editMode ? '#fff' : '#141413'} />
         </Pressable>
       </XStack>
 
       {/* Day tabs */}
-      <XStack marginHorizontal={16} marginBottom={8} borderBottomWidth={1} borderBottomColor="#EAEAE4">
+      <XStack marginHorizontal={16} borderBottomWidth={1} borderBottomColor="#EAEAE4">
         {DAY_LABELS.map((label, i) => (
           <Pressable
             key={i}
@@ -121,11 +154,9 @@ export default function ProSlotsScreen() {
         ))}
       </XStack>
 
-      {/* Booking list */}
-      <FlatList
-        data={dayBookings}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingTop: 4, paddingBottom: insets.bottom + 100 }}
+      {/* Time grid */}
+      <ScrollView
+        contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 100 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -133,67 +164,88 @@ export default function ProSlotsScreen() {
             tintColor="#141413"
           />
         }
-        ListEmptyComponent={
-          <YStack paddingVertical={48} alignItems="center">
-            <Text fontSize={14} color="#858279">這天沒有預約</Text>
-          </YStack>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.cardWrap}>
-            <BookingCardPro booking={item} onActionComplete={load} />
-          </View>
-        )}
-      />
-
-      {/* Slot management modal */}
-      <Modal
-        visible={slotModalVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setSlotModalVisible(false)}
       >
-        <YStack flex={1} backgroundColor="#FBFBF8">
-          <XStack paddingTop={20} paddingHorizontal={20} paddingBottom={12} alignItems="center">
-            <Text flex={1} fontSize={18} fontWeight="700" color="#141413" lineHeight={26}>時段管理</Text>
-            <Pressable
-              onPress={() => setSlotModalVisible(false)}
-              accessibilityLabel="關閉"
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, padding: 4 })}
-            >
-              <FA6ProIcon name="xmark" size={20} color="#141413" />
-            </Pressable>
-          </XStack>
-
-          <XStack marginHorizontal={16} marginBottom={8} borderBottomWidth={1} borderBottomColor="#EAEAE4">
-            {DAY_LABELS.map((label, i) => (
-              <Pressable
-                key={i}
-                onPress={() => setActiveDay(i as DayTab)}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: activeDay === i }}
-                style={[styles.dayTab, activeDay === i && styles.dayTabActive]}
-              >
-                <Text fontSize={14} fontWeight={activeDay === i ? '700' : '500'} color={activeDay === i ? '#141413' : '#858279'}>
-                  {label}
-                </Text>
-                <Text fontSize={11} color={activeDay === i ? '#141413' : '#aaa'}>{getDateStr(i)}</Text>
-              </Pressable>
+        <XStack>
+          {/* Hour labels */}
+          <View style={styles.timeCol}>
+            {HOURS.map(h => (
+              <View key={h} style={styles.hourLabelRow}>
+                <Text style={styles.hourLabel}>{String(h).padStart(2, '0')}:00</Text>
+              </View>
             ))}
-          </XStack>
+          </View>
 
-          <FlatList
-            data={modalDaySlots}
-            keyExtractor={item => item.starts_at}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 40 }}
-            renderItem={({ item }) => <SlotRow slot={item} onToggle={handleToggle} />}
-          />
-        </YStack>
-      </Modal>
+          {/* Grid */}
+          <View style={[styles.grid, { height: gridHeight }]}>
+            {/* Hour lines */}
+            {HOURS.map(h => (
+              <View
+                key={h}
+                style={[styles.hourLine, { top: (h - START_HOUR) * HOUR_HEIGHT }]}
+              />
+            ))}
+
+            {/* Normal mode — booking blocks */}
+            {!editMode && dayBookings.map(b => {
+              const top = timeToY(b.starts_at)
+              const height = Math.max(durationToHeight(b.starts_at, b.ends_at), 36)
+              return (
+                <View key={b.id} style={[styles.bookingBlock, { top, height }]}>
+                  <Text fontSize={12} fontWeight="700" color="#141413" numberOfLines={1} lineHeight={16}>
+                    {formatTime(b.starts_at)}  {b.client_display_name}
+                  </Text>
+                  {height > 40 && (
+                    <Text fontSize={11} color="#858279" numberOfLines={1} lineHeight={15} marginTop={1}>
+                      {b.service_label}
+                    </Text>
+                  )}
+                </View>
+              )
+            })}
+
+            {/* Edit mode — slot pills */}
+            {editMode && daySlots.map(s => {
+              if (s.state === 'expired') return null
+              const cfg = SLOT_CONFIG[s.state]
+              const top = timeToY(s.starts_at)
+              const isLocked = s.state === 'booked'
+              return (
+                <Pressable
+                  key={s.starts_at}
+                  onPress={() => !isLocked && handleToggle(s.starts_at)}
+                  disabled={isLocked}
+                  style={({ pressed }) => [
+                    styles.slotBlock,
+                    {
+                      top,
+                      height: SLOT_HEIGHT - 1,
+                      backgroundColor: cfg.bg,
+                      borderColor: cfg.border,
+                      opacity: pressed && !isLocked ? 0.7 : 1,
+                    },
+                  ]}
+                >
+                  {s.state !== 'available' && (
+                    <Text fontSize={9} color={cfg.text} numberOfLines={1}>{cfg.label}</Text>
+                  )}
+                </Pressable>
+              )
+            })}
+          </View>
+        </XStack>
+      </ScrollView>
     </YStack>
   )
 }
 
 const styles = StyleSheet.create({
+  editBtn: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  editBtnActive: {
+    backgroundColor: '#141413',
+  },
   dayTab: {
     flex: 1,
     alignItems: 'center',
@@ -205,11 +257,49 @@ const styles = StyleSheet.create({
   dayTabActive: {
     borderBottomColor: '#141413',
   },
-  cardWrap: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    backgroundColor: '#F5F5F0',
-    borderRadius: 12,
-    overflow: 'hidden',
+  timeCol: {
+    width: 52,
+  },
+  hourLabelRow: {
+    height: HOUR_HEIGHT,
+    justifyContent: 'flex-start',
+    paddingTop: 4,
+    paddingLeft: 8,
+  },
+  hourLabel: {
+    fontSize: 11,
+    color: '#aaa',
+  },
+  grid: {
+    flex: 1,
+    position: 'relative',
+    marginRight: 16,
+  },
+  hourLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#EAEAE4',
+  },
+  bookingBlock: {
+    position: 'absolute',
+    left: 2,
+    right: 0,
+    backgroundColor: '#F0EBE5',
+    borderLeftWidth: 3,
+    borderLeftColor: '#c96442',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  slotBlock: {
+    position: 'absolute',
+    left: 2,
+    right: 0,
+    borderRadius: 3,
+    borderWidth: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
 })
