@@ -36,7 +36,7 @@ export function RoleToggle() {
     >
       <XStack alignItems="center" justifyContent="space-between">
         <Text fontSize={15} fontWeight="600" color="#141413" lineHeight={22}>
-          {isProMode ? '設計師模式' : '顧客模式'}
+          設計師模式
         </Text>
         <ModeSwitch value={isProMode} onValueChange={handleToggle} />
       </XStack>
