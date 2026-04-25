@@ -46,15 +46,15 @@ export default function ProAccountScreen() {
         <Text style={styles.sectionHeader}>營業設定</Text>
         <YStack>
           <SettingsRow
-            label="預約設定"
-            iconName="calendar-check"
-            onPress={() => Alert.alert('預約設定', '即將推出')}
+            label="營業基本資料"
+            iconName="store"
+            onPress={() => router.push('/pro/business-info')}
           />
           <View style={styles.divider} />
           <SettingsRow
-            label="休假設定"
-            iconName="umbrella-beach"
-            onPress={() => Alert.alert('休假設定', '即將推出')}
+            label="預約設定"
+            iconName="calendar-check"
+            onPress={() => router.push('/pro/booking-settings')}
           />
         </YStack>
 
@@ -64,13 +64,13 @@ export default function ProAccountScreen() {
           <SettingsRow
             label="個人資料"
             iconName="user"
-            onPress={() => Alert.alert('個人資料', '即將推出')}
+            onPress={() => router.push('/pro/profile')}
           />
           <View style={styles.divider} />
           <SettingsRow
             label="通知設定"
             iconName="bell"
-            onPress={() => Alert.alert('通知設定', '即將推出')}
+            onPress={() => router.push('/pro/notifications')}
           />
         </YStack>
 

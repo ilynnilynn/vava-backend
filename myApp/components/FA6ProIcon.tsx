@@ -56,6 +56,7 @@ const GLYPHS: Record<string, string> = {
   'phone':               '\uF095',
   'shield-halved':       '\uE23B',
   'sliders':             '\uF1DE',
+  'store':               '\uF54E',
   'xmark':               '\uF00D',
   'wand-magic-sparkles': '\uE2CA',
   'at':                  '\uF1FA',
