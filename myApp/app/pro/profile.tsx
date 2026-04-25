@@ -4,7 +4,15 @@ import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { FA6ProIcon } from '@/components/FA6ProIcon'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+
+type ProfileData = {
+  name: string
+  bio: string
+  phone: string
+  instagram: string
+  lineId: string
+}
 
 const AVATAR_PALETTE = [
   { bg: '#DFF5AD', fg: '#3d3d3a' },
@@ -26,13 +34,36 @@ function getAvatarColor(seed: string) {
 export default function ProProfileScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const [name, setName] = useState('林小姐美甲')
-  const [bio, setBio] = useState('專業美甲師，10年經驗，擅長凝膠光療與法式設計。')
-  const [phone, setPhone] = useState('0912-345-678')
-  const [instagram, setInstagram] = useState('@linmei_nails')
-  const [lineId, setLineId] = useState('linmei2024')
+  const [isEditing, setIsEditing] = useState(false)
+  const [profile, setProfile] = useState<ProfileData>({
+    name: '林小姐美甲',
+    bio: '專業美甲師，10年經驗，擅長凝膠光療與法式設計。',
+    phone: '0912-345-678',
+    instagram: '@linmei_nails',
+    lineId: 'linmei2024',
+  })
+  const snapshot = useRef<ProfileData | null>(null)
 
-  const { bg, fg } = getAvatarColor(name)
+  function startEditing() {
+    snapshot.current = { ...profile }
+    setIsEditing(true)
+  }
+
+  function handleCancel() {
+    if (snapshot.current) setProfile(snapshot.current)
+    setIsEditing(false)
+  }
+
+  function handleSave() {
+    snapshot.current = null
+    setIsEditing(false)
+  }
+
+  function set<K extends keyof ProfileData>(key: K, value: string) {
+    setProfile(prev => ({ ...prev, [key]: value }))
+  }
+
+  const { bg, fg } = getAvatarColor(profile.name)
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">
@@ -50,6 +81,15 @@ export default function ProProfileScreen() {
           <FA6ProIcon name="chevron-left" size={16} color="#141413" />
         </Pressable>
         <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>個人資料</Text>
+        {isEditing ? (
+          <Pressable onPress={handleCancel} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+            <Text fontSize={15} color="#858279">取消</Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={startEditing} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+            <Text fontSize={15} fontWeight="600" color="#c96442">編輯</Text>
+          </Pressable>
+        )}
       </XStack>
 
       <ScrollView
@@ -63,7 +103,7 @@ export default function ProProfileScreen() {
           style={({ pressed }) => [styles.photoRow, { opacity: pressed ? 0.7 : 1 }]}
         >
           <View style={[styles.avatar, { backgroundColor: bg }]}>
-            <Text style={{ fontSize: 20, fontWeight: '700', color: fg }}>{name[0] ?? '?'}</Text>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: fg }}>{profile.name[0] ?? '?'}</Text>
           </View>
           <Text fontSize={14} fontWeight="600" color="#c96442">更換大頭照</Text>
         </Pressable>
@@ -74,10 +114,11 @@ export default function ProProfileScreen() {
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
             <Text fontSize={15} color="#858279" width={72}>顯示名稱</Text>
             <TextInput
-              value={name}
-              onChangeText={setName}
+              value={profile.name}
+              onChangeText={v => set('name', v)}
               placeholder="請輸入顯示名稱"
               placeholderTextColor="#aaa"
+              editable={isEditing}
               style={styles.input}
             />
           </XStack>
@@ -85,12 +126,13 @@ export default function ProProfileScreen() {
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="flex-start">
             <Text fontSize={15} color="#858279" width={72} paddingTop={2}>簡介</Text>
             <TextInput
-              value={bio}
-              onChangeText={setBio}
+              value={profile.bio}
+              onChangeText={v => set('bio', v)}
               placeholder="介紹自己和你的服務風格"
               placeholderTextColor="#aaa"
               multiline
               numberOfLines={3}
+              editable={isEditing}
               style={[styles.input, { height: 64, textAlignVertical: 'top' }]}
             />
           </XStack>
@@ -101,11 +143,12 @@ export default function ProProfileScreen() {
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
             <Text fontSize={15} color="#858279" width={72}>電話</Text>
             <TextInput
-              value={phone}
-              onChangeText={setPhone}
+              value={profile.phone}
+              onChangeText={v => set('phone', v)}
               placeholder="09XX-XXX-XXX"
               placeholderTextColor="#aaa"
               keyboardType="phone-pad"
+              editable={isEditing}
               style={styles.input}
             />
           </XStack>
@@ -113,11 +156,12 @@ export default function ProProfileScreen() {
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
             <Text fontSize={15} color="#858279" width={72}>Instagram</Text>
             <TextInput
-              value={instagram}
-              onChangeText={setInstagram}
+              value={profile.instagram}
+              onChangeText={v => set('instagram', v)}
               placeholder="@yourhandle"
               placeholderTextColor="#aaa"
               autoCapitalize="none"
+              editable={isEditing}
               style={styles.input}
             />
           </XStack>
@@ -125,23 +169,26 @@ export default function ProProfileScreen() {
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
             <Text fontSize={15} color="#858279" width={72}>Line ID</Text>
             <TextInput
-              value={lineId}
-              onChangeText={setLineId}
+              value={profile.lineId}
+              onChangeText={v => set('lineId', v)}
               placeholder="your_line_id"
               placeholderTextColor="#aaa"
               autoCapitalize="none"
+              editable={isEditing}
               style={styles.input}
             />
           </XStack>
         </View>
 
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityLabel="儲存"
-          style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
-        >
-          <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
-        </Pressable>
+        {isEditing && (
+          <Pressable
+            onPress={handleSave}
+            accessibilityLabel="儲存"
+            style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
+          >
+            <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </YStack>
   )

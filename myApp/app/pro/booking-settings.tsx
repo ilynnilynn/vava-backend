@@ -4,7 +4,7 @@ import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { FA6ProIcon } from '@/components/FA6ProIcon'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 type BookingSettings = {
   minAdvanceHours: string
@@ -19,11 +19,12 @@ const MAX_ADVANCE_OPTIONS = ['7天', '14天', '30天', '60天']
 const BUFFER_OPTIONS = ['0分鐘', '15分鐘', '30分鐘', '60分鐘']
 const CANCEL_DEADLINE_OPTIONS = ['1小時前', '4小時前', '24小時前', '48小時前']
 
-function PickerRow({ label, value, options, onChange }: {
+function PickerRow({ label, value, options, onChange, disabled }: {
   label: string
   value: string
   options: string[]
   onChange: (v: string) => void
+  disabled?: boolean
 }) {
   function showPicker() {
     Alert.alert(label, undefined, [
@@ -33,12 +34,12 @@ function PickerRow({ label, value, options, onChange }: {
   }
   return (
     <Pressable
-      onPress={showPicker}
-      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}
+      onPress={disabled ? undefined : showPicker}
+      style={({ pressed }) => [styles.row, { opacity: !disabled && pressed ? 0.7 : 1 }]}
     >
       <Text fontSize={15} color="#141413" flex={1}>{label}</Text>
       <Text fontSize={15} color="#858279" marginRight={6}>{value}</Text>
-      <FA6ProIcon name="chevron-right" size={12} color="#c8c6be" />
+      {!disabled && <FA6ProIcon name="chevron-right" size={12} color="#c8c6be" />}
     </Pressable>
   )
 }
@@ -46,6 +47,7 @@ function PickerRow({ label, value, options, onChange }: {
 export default function BookingSettingsScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const [isEditing, setIsEditing] = useState(false)
   const [settings, setSettings] = useState<BookingSettings>({
     minAdvanceHours: '1小時',
     maxAdvanceDays: '30天',
@@ -53,6 +55,22 @@ export default function BookingSettingsScreen() {
     autoConfirm: true,
     cancelDeadline: '24小時前',
   })
+  const snapshot = useRef<BookingSettings | null>(null)
+
+  function startEditing() {
+    snapshot.current = { ...settings }
+    setIsEditing(true)
+  }
+
+  function handleCancel() {
+    if (snapshot.current) setSettings(snapshot.current)
+    setIsEditing(false)
+  }
+
+  function handleSave() {
+    snapshot.current = null
+    setIsEditing(false)
+  }
 
   function set<K extends keyof BookingSettings>(key: K, value: BookingSettings[K]) {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -74,6 +92,15 @@ export default function BookingSettingsScreen() {
           <FA6ProIcon name="chevron-left" size={16} color="#141413" />
         </Pressable>
         <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>預約設定</Text>
+        {isEditing ? (
+          <Pressable onPress={handleCancel} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+            <Text fontSize={15} color="#858279">取消</Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={startEditing} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+            <Text fontSize={15} fontWeight="600" color="#c96442">編輯</Text>
+          </Pressable>
+        )}
       </XStack>
 
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
@@ -84,6 +111,7 @@ export default function BookingSettingsScreen() {
             value={settings.minAdvanceHours}
             options={ADVANCE_HOURS_OPTIONS}
             onChange={v => set('minAdvanceHours', v)}
+            disabled={!isEditing}
           />
           <View style={styles.divider} />
           <PickerRow
@@ -91,6 +119,7 @@ export default function BookingSettingsScreen() {
             value={settings.maxAdvanceDays}
             options={MAX_ADVANCE_OPTIONS}
             onChange={v => set('maxAdvanceDays', v)}
+            disabled={!isEditing}
           />
           <View style={styles.divider} />
           <PickerRow
@@ -98,6 +127,7 @@ export default function BookingSettingsScreen() {
             value={settings.bufferMins}
             options={BUFFER_OPTIONS}
             onChange={v => set('bufferMins', v)}
+            disabled={!isEditing}
           />
         </View>
 
@@ -110,6 +140,7 @@ export default function BookingSettingsScreen() {
               onValueChange={v => set('autoConfirm', v)}
               trackColor={{ false: '#d8d6ce', true: '#c96442' }}
               thumbColor="#fff"
+              disabled={!isEditing}
             />
           </XStack>
           <View style={styles.divider} />
@@ -118,16 +149,19 @@ export default function BookingSettingsScreen() {
             value={settings.cancelDeadline}
             options={CANCEL_DEADLINE_OPTIONS}
             onChange={v => set('cancelDeadline', v)}
+            disabled={!isEditing}
           />
         </View>
 
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityLabel="儲存"
-          style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
-        >
-          <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
-        </Pressable>
+        {isEditing && (
+          <Pressable
+            onPress={handleSave}
+            accessibilityLabel="儲存"
+            style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
+          >
+            <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </YStack>
   )
