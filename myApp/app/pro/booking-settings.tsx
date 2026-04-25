@@ -74,13 +74,6 @@ export default function BookingSettingsScreen() {
           <FA6ProIcon name="chevron-left" size={16} color="#141413" />
         </Pressable>
         <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>預約設定</Text>
-        <Pressable
-          onPress={() => Alert.alert('已儲存')}
-          accessibilityLabel="儲存"
-          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-        >
-          <Text fontSize={15} fontWeight="600" color="#c96442">儲存</Text>
-        </Pressable>
       </XStack>
 
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
@@ -127,6 +120,14 @@ export default function BookingSettingsScreen() {
             onChange={v => set('cancelDeadline', v)}
           />
         </View>
+
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityLabel="儲存"
+          style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
+        >
+          <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
+        </Pressable>
       </ScrollView>
     </YStack>
   )
@@ -159,5 +160,14 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#e8e6dc',
     marginHorizontal: 14,
+  },
+  saveBtn: {
+    height: 48,
+    backgroundColor: '#c96442',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

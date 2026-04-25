@@ -82,20 +82,12 @@ export default function BusinessInfoScreen() {
         </Pressable>
         <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>營業基本資料</Text>
         {isEditing ? (
-          <XStack gap={16} alignItems="center">
-            <Pressable
-              onPress={handleCancel}
-              style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-            >
-              <Text fontSize={15} color="#858279">取消</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleSave}
-              style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-            >
-              <Text fontSize={15} fontWeight="600" color="#c96442">儲存</Text>
-            </Pressable>
-          </XStack>
+          <Pressable
+            onPress={handleCancel}
+            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+          >
+            <Text fontSize={15} color="#858279">取消</Text>
+          </Pressable>
         ) : (
           <Pressable
             onPress={startEditing}
@@ -177,6 +169,16 @@ export default function BusinessInfoScreen() {
             </View>
           ))}
         </View>
+
+        {isEditing && (
+          <Pressable
+            onPress={handleSave}
+            accessibilityLabel="儲存"
+            style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
+          >
+            <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </YStack>
   )
@@ -216,5 +218,14 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#e8e6dc',
     marginHorizontal: 14,
+  },
+  saveBtn: {
+    height: 48,
+    backgroundColor: '#c96442',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })
