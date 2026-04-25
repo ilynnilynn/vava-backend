@@ -24,7 +24,7 @@ const SLOT_HEIGHT = HOUR_HEIGHT / 2  // 30 min = 40px
 
 const SLOT_CONFIG: Record<SlotState, { bg: string; border: string; text: string; label: string }> = {
   expired:   { bg: 'transparent', border: 'transparent', text: '#bbb',    label: '' },
-  available: { bg: '#FBFBF8',     border: '#E0E0D8',     text: '#aaa',    label: '+ 開放' },
+  available: { bg: '#FBFBF8',     border: '#E8E9E9',     text: '#787D7B', label: '+ 開放' },
   open:      { bg: '#ede9fe',     border: '#c4b5fd',     text: '#7c3aed', label: '開放中' },
   booked:    { bg: '#dcfce7',     border: '#86efac',     text: '#15803d', label: '已預約' },
 }
@@ -102,7 +102,7 @@ export default function ProSlotsScreen() {
   if (loading && !refreshing) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="#FBFBF8">
-        <ActivityIndicator size="large" color="#141413" />
+        <ActivityIndicator size="large" color="#1F2723" />
       </YStack>
     )
   }
@@ -122,8 +122,8 @@ export default function ProSlotsScreen() {
       {/* Header */}
       <XStack paddingTop={insets.top + 20} paddingHorizontal={20} paddingBottom={12} alignItems="center">
         <YStack flex={1}>
-          <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={30}>時段管理</Text>
-          <Text fontSize={13} color="#858279" marginTop={2}>
+          <Text fontSize={22} fontWeight="700" color="#1F2723" lineHeight={30}>時段管理</Text>
+          <Text fontSize={13} color="#626765" marginTop={2}>
             週{WEEKDAYS_ZH[now.getDay()]} {getDateStr(0)} — {getDateStr(2)}
           </Text>
         </YStack>
@@ -136,12 +136,12 @@ export default function ProSlotsScreen() {
             { opacity: pressed ? 0.7 : 1 },
           ]}
         >
-          <FA6ProIcon name="pen" size={18} color={editMode ? '#fff' : '#141413'} weight="regular" />
+          <FA6ProIcon name="pen" size={18} color={editMode ? '#fff' : '#1F2723'} weight="regular" />
         </Pressable>
       </XStack>
 
       {/* Day tabs */}
-      <XStack marginHorizontal={16} borderBottomWidth={1} borderBottomColor="#EAEAE4">
+      <XStack marginHorizontal={16} borderBottomWidth={1} borderBottomColor="#E8E9E9">
         {DAY_LABELS.map((label, i) => (
           <Pressable
             key={i}
@@ -150,10 +150,10 @@ export default function ProSlotsScreen() {
             accessibilityState={{ selected: activeDay === i }}
             style={[styles.dayTab, activeDay === i && styles.dayTabActive]}
           >
-            <Text fontSize={14} fontWeight={activeDay === i ? '700' : '500'} color={activeDay === i ? '#141413' : '#858279'}>
+            <Text fontSize={14} fontWeight={activeDay === i ? '700' : '500'} color={activeDay === i ? '#1F2723' : '#626765'}>
               {label}
             </Text>
-            <Text fontSize={11} color={activeDay === i ? '#141413' : '#aaa'}>{getDateStr(i)}</Text>
+            <Text fontSize={11} color={activeDay === i ? '#1F2723' : '#787D7B'}>{getDateStr(i)}</Text>
           </Pressable>
         ))}
       </XStack>
@@ -165,7 +165,7 @@ export default function ProSlotsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => { setRefreshing(true); load() }}
-            tintColor="#141413"
+            tintColor="#1F2723"
           />
         }
       >
@@ -195,11 +195,11 @@ export default function ProSlotsScreen() {
               const height = Math.max(durationToHeight(b.starts_at, b.ends_at), 36)
               return (
                 <View key={b.id} style={[styles.bookingBlock, { top, height }]}>
-                  <Text fontSize={12} fontWeight="700" color="#141413" numberOfLines={1} lineHeight={16}>
+                  <Text fontSize={12} fontWeight="700" color="#1F2723" numberOfLines={1} lineHeight={16}>
                     {formatTime(b.starts_at)}  {b.client_display_name}
                   </Text>
                   {height > 40 && (
-                    <Text fontSize={11} color="#858279" numberOfLines={1} lineHeight={15} marginTop={1}>
+                    <Text fontSize={11} color="#626765" numberOfLines={1} lineHeight={15} marginTop={1}>
                       {b.service_label}
                     </Text>
                   )}
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   editBtnActive: {
-    backgroundColor: '#141413',
+    backgroundColor: '#1F2723',
   },
   dayTab: {
     flex: 1,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   dayTabActive: {
-    borderBottomColor: '#141413',
+    borderBottomColor: '#1F2723',
   },
   timeCol: {
     width: 52,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   hourLabel: {
     fontSize: 11,
-    color: '#aaa',
+    color: '#787D7B',
   },
   grid: {
     flex: 1,
@@ -284,15 +284,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#EAEAE4',
+    backgroundColor: '#E8E9E9',
   },
   bookingBlock: {
     position: 'absolute',
     left: 2,
     right: 0,
-    backgroundColor: '#F0EBE5',
+    backgroundColor: '#F0EDE5',
     borderLeftWidth: 3,
-    borderLeftColor: '#c96442',
+    borderLeftColor: '#FF5A3C',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 5,

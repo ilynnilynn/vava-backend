@@ -86,7 +86,7 @@ export function StepLayout({
           {title}
         </Text>
         {subtitle && (
-          <Text fontSize={15} lineHeight={22} color="#858279">
+          <Text fontSize={15} lineHeight={22} color="#626765">
             {subtitle}
           </Text>
         )}

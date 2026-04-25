@@ -31,9 +31,9 @@ export default function NotificationsScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
+          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>通知設定</Text>
+        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>通知設定</Text>
       </XStack>
 
       <ScrollView
@@ -45,13 +45,13 @@ export default function NotificationsScreen() {
       >
         {!pushEnabled ? (
           <View style={styles.emptyCard}>
-            <FA6ProIcon name="bell" size={28} color="#858279" weight="regular" />
-            <Text fontSize={16} fontWeight="700" color="#141413" marginTop={12} marginBottom={6}>
+            <FA6ProIcon name="bell" size={28} color="#626765" weight="regular" />
+            <Text fontSize={16} fontWeight="700" color="#1F2723" marginTop={12} marginBottom={6}>
               推播通知已關閉
             </Text>
             <Text
               fontSize={13}
-              color="#858279"
+              color="#626765"
               textAlign="center"
               lineHeight={20}
               marginBottom={16}
@@ -69,31 +69,31 @@ export default function NotificationsScreen() {
         ) : (
           <View style={styles.card}>
             <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
-              <Text fontSize={15} color="#141413" flex={1}>新預約</Text>
+              <Text fontSize={15} color="#1F2723" flex={1}>新預約</Text>
               <Switch
                 value={newBooking}
                 onValueChange={setNewBooking}
-                trackColor={{ false: '#d8d6ce', true: '#c96442' }}
+                trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
                 thumbColor="#fff"
               />
             </XStack>
             <View style={styles.divider} />
             <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
-              <Text fontSize={15} color="#141413" flex={1}>取消通知</Text>
+              <Text fontSize={15} color="#1F2723" flex={1}>取消通知</Text>
               <Switch
                 value={cancellation}
                 onValueChange={setCancellation}
-                trackColor={{ false: '#d8d6ce', true: '#c96442' }}
+                trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
                 thumbColor="#fff"
               />
             </XStack>
             <View style={styles.divider} />
             <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
-              <Text fontSize={15} color="#141413" flex={1}>服務提醒</Text>
+              <Text fontSize={15} color="#1F2723" flex={1}>服務提醒</Text>
               <Switch
                 value={reminder}
                 onValueChange={setReminder}
-                trackColor={{ false: '#d8d6ce', true: '#c96442' }}
+                trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
                 thumbColor="#fff"
               />
             </XStack>
@@ -106,23 +106,23 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   emptyCard: {
-    backgroundColor: '#F5F5F0',
+    backgroundColor: '#F6F4EF',
     borderRadius: 12,
     padding: 28,
     alignItems: 'center',
   },
   card: {
-    backgroundColor: '#F5F5F0',
+    backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 14,
   },
   ctaButton: {
-    backgroundColor: '#141413',
+    backgroundColor: '#1F2723',
     borderRadius: 10,
     paddingHorizontal: 24,
     paddingVertical: 13,

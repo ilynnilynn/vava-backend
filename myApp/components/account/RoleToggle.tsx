@@ -28,14 +28,14 @@ export function RoleToggle() {
         marginTop: 0,
         marginBottom: 12,
         height: TOGGLE_HEIGHT,
-        backgroundColor: '#F5F5F0',
+        backgroundColor: '#F6F4EF',
         borderRadius: 12,
         paddingHorizontal: 16,
         justifyContent: 'center',
       }}
     >
       <XStack alignItems="center" justifyContent="space-between">
-        <Text fontSize={15} fontWeight="600" color="#141413" lineHeight={22}>
+        <Text fontSize={15} fontWeight="600" color="#1F2723" lineHeight={22}>
           設計師模式
         </Text>
         <ModeSwitch value={isProMode} onValueChange={handleToggle} />

@@ -41,7 +41,7 @@ export function SelectionChip({ label, selected, onPress, disabled, subtitle }: 
           <Text
             fontSize={11}
             lineHeight={16}
-            color={selected ? 'rgba(255,255,255,0.6)' : '#858279'}
+            color={selected ? 'rgba(255,255,255,0.6)' : '#626765'}
           >
             {subtitle}
           </Text>

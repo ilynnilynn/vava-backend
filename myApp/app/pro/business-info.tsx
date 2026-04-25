@@ -78,22 +78,22 @@ export default function BusinessInfoScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
+          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>營業基本資料</Text>
+        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>營業基本資料</Text>
         {isEditing ? (
           <Pressable
             onPress={handleCancel}
             style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
           >
-            <Text fontSize={15} color="#858279">取消</Text>
+            <Text fontSize={15} color="#626765">取消</Text>
           </Pressable>
         ) : (
           <Pressable
             onPress={startEditing}
             style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
           >
-            <Text fontSize={15} fontWeight="600" color="#c96442">編輯</Text>
+            <Text fontSize={15} fontWeight="600" color="#FF5A3C">編輯</Text>
           </Pressable>
         )}
       </XStack>
@@ -110,11 +110,11 @@ export default function BusinessInfoScreen() {
               value={address}
               onChangeText={setAddress}
               placeholder="請輸入營業地址"
-              placeholderTextColor="#aaa"
-              style={{ fontSize: 15, color: '#141413' }}
+              placeholderTextColor="#787D7B"
+              style={{ fontSize: 15, color: '#1F2723' }}
             />
           ) : (
-            <Text fontSize={15} color="#141413">{address || '—'}</Text>
+            <Text fontSize={15} color="#1F2723">{address || '—'}</Text>
           )}
         </View>
 
@@ -125,7 +125,7 @@ export default function BusinessInfoScreen() {
             <View key={day.key}>
               {i > 0 && <View style={styles.divider} />}
               <XStack paddingHorizontal={14} paddingVertical={13} alignItems="center">
-                <Text fontSize={15} color="#141413" width={42}>{day.label}</Text>
+                <Text fontSize={15} color="#1F2723" width={42}>{day.label}</Text>
 
                 {/* Time display — same position in both modes */}
                 <XStack flex={1} alignItems="center">
@@ -140,7 +140,7 @@ export default function BusinessInfoScreen() {
                         maxLength={5}
                         selectTextOnFocus
                       />
-                      <Text fontSize={14} color="#858279" marginHorizontal={4}>–</Text>
+                      <Text fontSize={14} color="#626765" marginHorizontal={4}>–</Text>
                       <TextInput
                         value={day.ranges[0]?.end ?? '20:00'}
                         onChangeText={v => updateRange(day.key, 0, 'end', v)}
@@ -152,7 +152,7 @@ export default function BusinessInfoScreen() {
                       />
                     </>
                   ) : (
-                    <Text fontSize={15} color="#c96442">休息</Text>
+                    <Text fontSize={15} color="#FF5A3C">休息</Text>
                   )}
                 </XStack>
 
@@ -161,7 +161,7 @@ export default function BusinessInfoScreen() {
                   <Switch
                     value={day.isOpen}
                     onValueChange={v => updateDay(day.key, { isOpen: v })}
-                    trackColor={{ false: '#d8d6ce', true: '#c96442' }}
+                    trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
                     thumbColor="#fff"
                   />
                 )}
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#858279',
+    color: '#626765',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 8,
@@ -197,31 +197,31 @@ const styles = StyleSheet.create({
   },
   card: {
     marginHorizontal: 16,
-    backgroundColor: '#F5F5F0',
+    backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
   },
   timeCell: {
     fontSize: 15,
-    color: '#858279',
+    color: '#626765',
     width: 52,
     textAlign: 'center',
   },
   timeCellActive: {
-    color: '#141413',
-    backgroundColor: '#E8E6DC',
+    color: '#1F2723',
+    backgroundColor: '#F0EDE5',
     borderRadius: 6,
     paddingVertical: 4,
     paddingHorizontal: 2,
   },
   divider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 14,
   },
   saveBtn: {
     height: 48,
-    backgroundColor: '#c96442',
+    backgroundColor: '#1F2723',
     borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 32,

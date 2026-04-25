@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   timeLabel: {
     width: 40,
     fontSize: 11,
-    color: '#888',
+    color: '#787D7B',
     flexShrink: 0,
   },
   pill: {

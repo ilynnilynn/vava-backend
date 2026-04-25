@@ -501,7 +501,7 @@ export default function ResultsScreen() {
         )}
         {status === 'empty' && (
           <RNView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 }}>
-            <Text fontSize={16} color="#858279" textAlign="center">目前沒有符合條件的{categoryLabel}</Text>
+            <Text fontSize={16} color="#626765" textAlign="center">目前沒有符合條件的{categoryLabel}</Text>
             <Pressable onPress={() => router.back()} style={{ borderRadius: 9999, height: 48, paddingHorizontal: 24, backgroundColor: '#1F2723', alignItems: 'center', justifyContent: 'center' }}>
               <Text fontSize={16} fontWeight="600" color="#FBFBF8">修改需求</Text>
             </Pressable>
@@ -509,7 +509,7 @@ export default function ResultsScreen() {
         )}
         {status === 'error' && (
           <RNView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 }}>
-            <Text fontSize={16} color="#858279">載入失敗</Text>
+            <Text fontSize={16} color="#626765">載入失敗</Text>
             <Pressable onPress={fetchResults} style={{ borderRadius: 9999, height: 48, paddingHorizontal: 24, backgroundColor: '#1F2723', alignItems: 'center', justifyContent: 'center' }}>
               <Text fontSize={16} fontWeight="600" color="#FBFBF8">重試</Text>
             </Pressable>
@@ -557,13 +557,13 @@ export default function ResultsScreen() {
                       <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723">
                         {detailPro?.pro.displayName ?? ''}
                       </Text>
-                      <FA6ProIcon name="star" size={11} color="#858279" weight="solid" />
-                      <Text fontSize={13} lineHeight={20} color="#858279">4.9 (176)</Text>
+                      <FA6ProIcon name="star" size={11} color="#626765" weight="solid" />
+                      <Text fontSize={13} lineHeight={20} color="#626765">4.9 (176)</Text>
                     </RNView>
                     {detailPro?.pro.district ? (
                       <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <FA6ProIcon name="location-dot" size={12} color="#858279" weight="solid" />
-                        <Text fontSize={13} lineHeight={20} color="#858279">
+                        <FA6ProIcon name="location-dot" size={12} color="#626765" weight="solid" />
+                        <Text fontSize={13} lineHeight={20} color="#626765">
                           {detailPro.pro.district}
                           {detailPro.distanceKm != null ? `　${detailPro.distanceKm.toFixed(1)}km` : ''}
                         </Text>
@@ -599,22 +599,22 @@ export default function ResultsScreen() {
                         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignSelf: 'flex-start' })}
                       >
                         <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <FA6ProIcon name="at" size={13} color="#858279" />
-                          <Text fontSize={13} lineHeight={20} color="#858279">@{detailPro.pro.igHandle}</Text>
+                          <FA6ProIcon name="at" size={13} color="#626765" />
+                          <Text fontSize={13} lineHeight={20} color="#626765">@{detailPro.pro.igHandle}</Text>
                         </RNView>
                       </Pressable>
                     ) : null}
                   </RNView>
 
                   {/* Divider */}
-                  <RNView style={{ height: 1, backgroundColor: '#EAEAE4', marginHorizontal: 16, marginTop: 16 }} />
+                  <RNView style={{ height: 1, backgroundColor: '#E8E9E9', marginHorizontal: 16, marginTop: 16 }} />
 
                   {/* Slots */}
                   <RNView style={{ paddingHorizontal: 16, paddingTop: 16, gap: 10 }}>
                     <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                       <Text fontSize={15} fontWeight="600" lineHeight={22} color="#1F2723">可預約時段</Text>
                       {state.date ? (
-                        <Text fontSize={12} lineHeight={20} color="#858279">
+                        <Text fontSize={12} lineHeight={20} color="#626765">
                           {state.date === 'now' ? '現在（2小時內）' : state.date}
                         </Text>
                       ) : null}
@@ -651,7 +651,7 @@ export default function ResultsScreen() {
             </Animated.View>
 
             {/* ── Bottom CTA ── */}
-            <RNView style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: insets.bottom + 12, borderTopWidth: 1, borderTopColor: '#EAEAE4', backgroundColor: '#FBFBF8' }}>
+            <RNView style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: insets.bottom + 12, borderTopWidth: 1, borderTopColor: '#E8E9E9', backgroundColor: '#FBFBF8' }}>
               <Pressable
                 onPress={handleConfirm}
                 disabled={!selected}
@@ -735,11 +735,11 @@ export default function ResultsScreen() {
                       paddingRight: 16,
                       paddingVertical: 13,
                       borderBottomWidth: i < arr.length - 1 ? 1 : 0,
-                      borderBottomColor: '#EAEAE4',
+                      borderBottomColor: '#E8E9E9',
                     }}
                   >
                     <RNView style={{ width: 32, alignItems: 'center' }}>
-                      <FA6ProIcon name={row!.icon} size={15} color="#858279" weight={row!.icon === 'flower' || row!.icon === 'location-dot' ? 'solid' : 'regular'} />
+                      <FA6ProIcon name={row!.icon} size={15} color="#626765" weight={row!.icon === 'flower' || row!.icon === 'location-dot' ? 'solid' : 'regular'} />
                     </RNView>
                     {row!.value === '__photo__' ? (
                       <Image
@@ -820,8 +820,8 @@ function ProCard({
             {proResult.pro.displayName}
           </Text>
           <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 }}>
-            <FA6ProIcon name="star" size={10} color="#858279" weight="solid" />
-            <Text fontSize={12} lineHeight={16} color="#858279">4.9 (176)</Text>
+            <FA6ProIcon name="star" size={10} color="#626765" weight="solid" />
+            <Text fontSize={12} lineHeight={16} color="#626765">4.9 (176)</Text>
           </RNView>
           <HeartButton isLiked={isLiked} onToggle={onHeartToggle} size={18} />
         </RNView>

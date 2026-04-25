@@ -17,9 +17,9 @@ export function SettingsRow({
   label,
   onPress,
   disabled = false,
-  labelColor = '#141413',
+  labelColor = '#1F2723',
   iconName,
-  iconColor = '#141413',
+  iconColor = '#1F2723',
   showChevron = true,
 }: Props) {
   return (
@@ -43,7 +43,7 @@ export function SettingsRow({
           </Text>
         </XStack>
         {showChevron && !disabled && (
-          <FA6ProIcon name="chevron-right" size={13} color="#87867f" />
+          <FA6ProIcon name="chevron-right" size={13} color="#787D7B" />
         )}
       </XStack>
     </Pressable>

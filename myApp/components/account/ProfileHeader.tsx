@@ -8,14 +8,15 @@ const AVATAR_ICONS = ['flower-daffodil', 'flower-tulip', 'olive', 'wheat', 'pret
 
 // Each entry: background + icon colour pairing
 const AVATAR_PALETTE = [
-  { bg: '#DFF5AD', fg: '#3d3d3a' },
-  { bg: '#808868', fg: '#ffffff' },
-  { bg: '#9472DE', fg: '#ffffff' },
-  { bg: '#CDB5FF', fg: '#3d3d3a' },
-  { bg: '#A4CFFB', fg: '#3d3d3a' },
-  { bg: '#F063B4', fg: '#ffffff' },
-  { bg: '#F78B92', fg: '#3d3d3a' },
-  { bg: '#F1C9AC', fg: '#3d3d3a' },
+  { bg: '#C0E8BA', fg: '#1F2723' },  // mint
+  { bg: '#8FD3D1', fg: '#1F2723' },  // teal
+  { bg: '#8DC2E6', fg: '#1F2723' },  // sky
+  { bg: '#A8AFFF', fg: '#1F2723' },  // periwinkle
+  { bg: '#CDB5FF', fg: '#1F2723' },  // lavender
+  { bg: '#F98486', fg: '#1F2723' },  // pink
+  { bg: '#FD6B59', fg: '#1F2723' },  // coral
+  { bg: '#FFA46E', fg: '#1F2723' },  // peach
+  { bg: '#DFF5AD', fg: '#1F2723' },  // lime
 ]
 
 // Deterministic pick from `seed` so the avatar stays stable across renders
@@ -62,12 +63,12 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
           </View>
 
           <YStack gap={4}>
-            <Text fontSize={22} fontWeight="700" color="#141413" lineHeight={28}>
+            <Text fontSize={22} fontWeight="700" color="#1F2723" lineHeight={28}>
               林小美
             </Text>
             <XStack alignItems="center" gap={4}>
-              <FA6ProIcon name="star" size={11} color="#141413" />
-              <Text fontSize={12} color="#141413" lineHeight={16}>
+              <FA6ProIcon name="star" size={11} color="#1F2723" />
+              <Text fontSize={12} color="#1F2723" lineHeight={16}>
                 4.8
               </Text>
             </XStack>
@@ -82,7 +83,7 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
           accessibilityLabel="通知"
         >
           <RNView style={{ width: 24, height: 24 }}>
-            <FA6ProIcon name="bell" size={22} color="#87867f" weight="regular" />
+            <FA6ProIcon name="bell" size={22} color="#787D7B" weight="regular" />
             {hasUnread && (
               <RNView
                 style={{
@@ -92,7 +93,7 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: '#c96442',
+                  backgroundColor: '#FF5A3C',
                   borderWidth: 1.5,
                   borderColor: '#FBFBF8',
                 }}

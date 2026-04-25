@@ -63,7 +63,7 @@ export default function SuccessScreen() {
             {params.proName}
           </Text>
 
-          <Text fontSize={14} lineHeight={20} color="#858279">
+          <Text fontSize={14} lineHeight={20} color="#626765">
             {[categoryLabel, serviceLabel].filter(Boolean).join(' - ')}
           </Text>
 
@@ -72,14 +72,14 @@ export default function SuccessScreen() {
           </Text>
 
           {params.studioAddress ? (
-            <Text fontSize={14} color="#858279">
+            <Text fontSize={14} color="#626765">
               {params.studioAddress}
             </Text>
           ) : null}
         </YStack>
 
         {/* Grace period note */}
-        <Text fontSize={13} color="#858279" textAlign="center">
+        <Text fontSize={13} color="#626765" textAlign="center">
           10分鐘內可免責取消
         </Text>
       </YStack>

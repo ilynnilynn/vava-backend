@@ -140,7 +140,7 @@ export default function WhenScreen() {
 
         {/* Hint when "now" selected */}
         {isNow && (
-          <Text fontSize={13} color="#858279">
+          <Text fontSize={13} color="#626765">
             選擇「現在」表示你希望在 2 小時內開始服務
           </Text>
         )}

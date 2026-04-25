@@ -102,7 +102,7 @@ export default function HomeScreen() {
             fontSize={16}
             fontWeight="500"
             lineHeight={22}
-            color="#858279"
+            color="#626765"
             textAlign="center"
           >
             馬上找到有空又符合你需求的設計師
@@ -168,7 +168,7 @@ export default function HomeScreen() {
                   fontSize={16}
                   fontWeight="500"
                   lineHeight={24}
-                  color="#858279"
+                  color="#626765"
                 >
                   不再一間一間問，讓設計師來找你！
                 </Text>
@@ -309,7 +309,7 @@ export default function HomeScreen() {
                       fontSize={16}
                       fontWeight="500"
                       lineHeight={20}
-                      color="#EAEAE4"
+                      color="#E8E9E9"
                     >
                       不介意當練習模特？享練習價甚至免費！
                     </Text>

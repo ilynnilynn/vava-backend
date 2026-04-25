@@ -37,9 +37,9 @@ function PickerRow({ label, value, options, onChange, disabled }: {
       onPress={disabled ? undefined : showPicker}
       style={({ pressed }) => [styles.row, { opacity: !disabled && pressed ? 0.7 : 1 }]}
     >
-      <Text fontSize={15} color="#141413" flex={1}>{label}</Text>
-      <Text fontSize={15} color="#858279" marginRight={6}>{value}</Text>
-      {!disabled && <FA6ProIcon name="chevron-right" size={12} color="#c8c6be" />}
+      <Text fontSize={15} color="#1F2723" flex={1}>{label}</Text>
+      <Text fontSize={15} color="#626765" marginRight={6}>{value}</Text>
+      {!disabled && <FA6ProIcon name="chevron-right" size={12} color="#BBBEBD" />}
     </Pressable>
   )
 }
@@ -89,16 +89,16 @@ export default function BookingSettingsScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
+          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>預約設定</Text>
+        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>預約設定</Text>
         {isEditing ? (
           <Pressable onPress={handleCancel} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text fontSize={15} color="#858279">取消</Text>
+            <Text fontSize={15} color="#626765">取消</Text>
           </Pressable>
         ) : (
           <Pressable onPress={startEditing} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text fontSize={15} fontWeight="600" color="#c96442">編輯</Text>
+            <Text fontSize={15} fontWeight="600" color="#FF5A3C">編輯</Text>
           </Pressable>
         )}
       </XStack>
@@ -134,11 +134,11 @@ export default function BookingSettingsScreen() {
         <Text style={styles.sectionLabel}>確認方式</Text>
         <View style={styles.card}>
           <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
-            <Text fontSize={15} color="#141413" flex={1}>自動確認預約</Text>
+            <Text fontSize={15} color="#1F2723" flex={1}>自動確認預約</Text>
             <Switch
               value={settings.autoConfirm}
               onValueChange={v => set('autoConfirm', v)}
-              trackColor={{ false: '#d8d6ce', true: '#c96442' }}
+              trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
               thumbColor="#fff"
               disabled={!isEditing}
             />
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#858279',
+    color: '#626765',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 8,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginHorizontal: 16,
-    backgroundColor: '#F5F5F0',
+    backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -192,12 +192,12 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 14,
   },
   saveBtn: {
     height: 48,
-    backgroundColor: '#c96442',
+    backgroundColor: '#1F2723',
     borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 32,

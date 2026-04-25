@@ -36,7 +36,7 @@ export default function ProBookingsScreen() {
   if (loading && !refreshing) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="#FBFBF8">
-        <ActivityIndicator size="large" color="#141413" />
+        <ActivityIndicator size="large" color="#1F2723" />
       </YStack>
     )
   }
@@ -48,7 +48,7 @@ export default function ProBookingsScreen() {
     <YStack flex={1} backgroundColor="#FBFBF8">
       {/* Header */}
       <YStack paddingTop={insets.top + 21} paddingHorizontal={16} paddingBottom={20}>
-        <Text fontSize={22} fontWeight="700" lineHeight={30} color="#141413">
+        <Text fontSize={22} fontWeight="700" lineHeight={30} color="#1F2723">
           預約管理
         </Text>
       </YStack>
@@ -58,7 +58,7 @@ export default function ProBookingsScreen() {
         marginHorizontal={16}
         marginBottom={12}
         borderBottomWidth={1}
-        borderBottomColor="#EAEAE4"
+        borderBottomColor="#E8E9E9"
       >
         <TabPill label="即將到來" active={activeTab === 'upcoming'} onPress={() => setActiveTab('upcoming')} />
         <TabPill label="歷史紀錄" active={activeTab === 'history'} onPress={() => setActiveTab('history')} />
@@ -67,7 +67,7 @@ export default function ProBookingsScreen() {
       {/* List */}
       {data.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" paddingHorizontal={24}>
-          <Text fontSize={14} color="#858279">
+          <Text fontSize={14} color="#626765">
             {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
         </YStack>
@@ -79,10 +79,10 @@ export default function ProBookingsScreen() {
             paddingBottom: insets.bottom + 100,
           }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load() }} tintColor="#141413" />
+            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load() }} tintColor="#1F2723" />
           }
           ItemSeparatorComponent={() => (
-            <View style={{ height: 1, backgroundColor: '#e8e6dc', marginHorizontal: 16 }} />
+            <View style={{ height: 1, backgroundColor: '#E8E9E9', marginHorizontal: 16 }} />
           )}
           renderItem={({ item }) => (
             <BookingCardPro booking={item} onActionComplete={load} />
@@ -105,11 +105,11 @@ function TabPill({ label, active, onPress }: { label: string; active: boolean; o
         alignItems: 'center',
         paddingVertical: 10,
         borderBottomWidth: 2,
-        borderBottomColor: active ? '#F9583B' : 'transparent',
+        borderBottomColor: active ? '#FF5A3C' : 'transparent',
         opacity: !active && pressed ? 0.5 : 1,
       })}
     >
-      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#141413' : '#858279'}>
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#626765'}>
         {label}
       </Text>
     </Pressable>

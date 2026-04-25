@@ -115,11 +115,11 @@ export default function SearchingScreen() {
           正在尋找{categoryLabel}…
         </Text>
         <XStack alignItems="baseline" gap={4}>
-          <Text fontSize={16} color="#87867f">已有</Text>
-          <Text fontSize={20} fontWeight="700" lineHeight={28} color="#141413">
+          <Text fontSize={16} color="#787D7B">已有</Text>
+          <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723">
             {count}
           </Text>
-          <Text fontSize={16} color="#87867f">位符合需求</Text>
+          <Text fontSize={16} color="#787D7B">位符合需求</Text>
         </XStack>
       </YStack>
     </YStack>

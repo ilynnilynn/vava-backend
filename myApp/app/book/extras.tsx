@@ -237,7 +237,7 @@ export default function ExtrasScreen() {
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <XStack
-                backgroundColor="#EAEAE4"
+                backgroundColor="#E8E9E9"
                 borderRadius={8}
                 height={56}
                 borderWidth={1}
@@ -250,9 +250,9 @@ export default function ExtrasScreen() {
                 <FA6ProIcon
                   name="image-polaroid"
                   size={18}
-                  color={photoDenied ? '#B0B0A8' : '#858279'}
+                  color={photoDenied ? '#B0B0A8' : '#626765'}
                 />
-                <Text fontSize={15} color={photoDenied ? '#B0B0A8' : '#858279'}>
+                <Text fontSize={15} color={photoDenied ? '#B0B0A8' : '#626765'}>
                   上傳圖片
                 </Text>
               </XStack>
@@ -271,7 +271,7 @@ export default function ExtrasScreen() {
             value={note}
             onChangeText={setNote}
             placeholder="有什麼想跟設計師說的嗎？"
-            placeholderTextColor="#858279"
+            placeholderTextColor="#626765"
             multiline
             accessibilityLabel="備註"
             style={{
@@ -341,7 +341,7 @@ function ToggleRow({
             {label}
           </Text>
           {subtitle && (
-            <Text fontSize={12} lineHeight={18} color="#858279">
+            <Text fontSize={12} lineHeight={18} color="#626765">
               {subtitle}
             </Text>
           )}

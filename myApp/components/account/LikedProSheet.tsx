@@ -40,7 +40,7 @@ export function LikedProSheet({ pro, onClose }: Props) {
         <YStack flex={1} backgroundColor="#FBFBF8">
           {/* Handle */}
           <YStack alignItems="center" paddingTop={8} paddingBottom={4}>
-            <View width={36} height={4} borderRadius={2} backgroundColor="#EAEAE4" />
+            <View width={36} height={4} borderRadius={2} backgroundColor="#E8E9E9" />
           </YStack>
 
           {/* Nav bar */}
@@ -64,7 +64,7 @@ export function LikedProSheet({ pro, onClose }: Props) {
               width={80}
               height={80}
               borderRadius={40}
-              backgroundColor="#e8e6dc"
+              backgroundColor="#E8E9E9"
               alignItems="center"
               justifyContent="center"
             >
@@ -74,7 +74,7 @@ export function LikedProSheet({ pro, onClose }: Props) {
             </View>
             <YStack alignItems="center" gap={4}>
               <Text fontSize={20} fontWeight="700" color="#1F2723">{pro.pro_display_name}</Text>
-              <Text fontSize={15} color="#858279">
+              <Text fontSize={15} color="#626765">
                 {pro.service_domain === 'nails' ? '美甲師' : '美睫師'}
               </Text>
             </YStack>

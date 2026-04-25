@@ -69,7 +69,7 @@ export default function LikedProsScreen() {
       {/* Error */}
       {!loading && error && (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24}>
-          <Text fontSize={15} color="#858279" textAlign="center">{error}</Text>
+          <Text fontSize={15} color="#626765" textAlign="center">{error}</Text>
           <Pressable
             onPress={() => { setLoading(true); load() }}
             style={{
@@ -89,9 +89,9 @@ export default function LikedProsScreen() {
       {/* Empty state */}
       {!loading && !error && pros.length === 0 && (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24}>
-          <FA6ProIcon name="heart" size={40} color="#EAEAE4" />
-          <Text fontSize={16} fontWeight="600" color="#858279">還沒有喜愛的設計師</Text>
-          <Text fontSize={14} color="#858279" textAlign="center">
+          <FA6ProIcon name="heart" size={40} color="#E8E9E9" />
+          <Text fontSize={16} fontWeight="600" color="#626765">還沒有喜愛的設計師</Text>
+          <Text fontSize={14} color="#626765" textAlign="center">
             在搜尋結果中點擊愛心，即可收藏設計師
           </Text>
         </YStack>

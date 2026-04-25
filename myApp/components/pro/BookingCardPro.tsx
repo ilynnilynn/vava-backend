@@ -11,14 +11,15 @@ import type { ProBookingListItem, ProDisplayStatus } from '@/types/pro'
 // ── Client avatar ─────────────────────────────────────────────
 
 const AVATAR_PALETTE = [
-  { bg: '#DFF5AD', fg: '#3d3d3a' },
-  { bg: '#808868', fg: '#ffffff' },
-  { bg: '#9472DE', fg: '#ffffff' },
-  { bg: '#CDB5FF', fg: '#3d3d3a' },
-  { bg: '#A4CFFB', fg: '#3d3d3a' },
-  { bg: '#F063B4', fg: '#ffffff' },
-  { bg: '#F78B92', fg: '#3d3d3a' },
-  { bg: '#F1C9AC', fg: '#3d3d3a' },
+  { bg: '#C0E8BA', fg: '#1F2723' },  // mint
+  { bg: '#8FD3D1', fg: '#1F2723' },  // teal
+  { bg: '#8DC2E6', fg: '#1F2723' },  // sky
+  { bg: '#A8AFFF', fg: '#1F2723' },  // periwinkle
+  { bg: '#CDB5FF', fg: '#1F2723' },  // lavender
+  { bg: '#F98486', fg: '#1F2723' },  // pink
+  { bg: '#FD6B59', fg: '#1F2723' },  // coral
+  { bg: '#FFA46E', fg: '#1F2723' },  // peach
+  { bg: '#DFF5AD', fg: '#1F2723' },  // lime
 ]
 
 function getAvatarColor(seed: string) {
@@ -45,7 +46,7 @@ function ClientAvatar({ name }: { name: string }) {
 const BADGE_CONFIG: Record<ProDisplayStatus, { label: string; bg: string; text: string }> = {
   awaiting:    { label: '待到場', bg: '#e0f2fe', text: '#0369a1' },
   in_progress: { label: '進行中', bg: '#dcfce7', text: '#15803d' },
-  completed:   { label: '已完成', bg: '#f0f0f0', text: '#888' },
+  completed:   { label: '已完成', bg: '#f0f0f0', text: '#787D7B' },
   no_show:     { label: '未到場', bg: '#fee2e2', text: '#b91c1c' },
 }
 
@@ -102,7 +103,7 @@ function ActionButtons({ bookingId, onActionComplete }: ActionButtonsProps) {
   if (loading) {
     return (
       <View style={styles.actionsRow}>
-        <ActivityIndicator size="small" color="#141413" />
+        <ActivityIndicator size="small" color="#1F2723" />
       </View>
     )
   }
@@ -121,7 +122,7 @@ function ActionButtons({ bookingId, onActionComplete }: ActionButtonsProps) {
         accessibilityLabel="客戶未到場"
         style={({ pressed }) => [styles.actionBtn, styles.actionBtnDanger, { opacity: pressed ? 0.8 : 1 }]}
       >
-        <Text fontSize={13} fontWeight="500" color="#b53333">客戶未到場</Text>
+        <Text fontSize={13} fontWeight="500" color="#CC3352">客戶未到場</Text>
       </Pressable>
     </YStack>
   )
@@ -162,7 +163,7 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
       <YStack flex={1}>
         {/* Client name + badge */}
         <XStack justifyContent="space-between" alignItems="center" marginBottom={6}>
-          <Text fontSize={16} fontWeight="700" color="#141413" flex={1} marginRight={8} numberOfLines={1}>
+          <Text fontSize={16} fontWeight="700" color="#1F2723" flex={1} marginRight={8} numberOfLines={1}>
             {booking.client_display_name}
           </Text>
           <ProStatusBadge displayStatus={displayStatus} />
@@ -170,12 +171,12 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
 
         {/* Service + time */}
         <XStack gap={6} alignItems="center" marginBottom={2}>
-          <FA6ProIcon name={domainIcon} size={12} color="#858279" />
-          <Text fontSize={14} color="#858279">{booking.service_label}</Text>
+          <FA6ProIcon name={domainIcon} size={12} color="#626765" />
+          <Text fontSize={14} color="#626765">{booking.service_label}</Text>
         </XStack>
         <XStack gap={6} alignItems="center">
-          <FA6ProIcon name="clock" size={12} color="#858279" />
-          <Text fontSize={14} color="#858279">{startTime} — {endTime}</Text>
+          <FA6ProIcon name="clock" size={12} color="#626765" />
+          <Text fontSize={14} color="#626765">{startTime} — {endTime}</Text>
         </XStack>
 
         {/* Action buttons — only for in_progress */}
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionBtnPrimary: {
-    backgroundColor: '#141413',
+    backgroundColor: '#1F2723',
   },
   actionBtnDanger: {
     backgroundColor: '#fff',

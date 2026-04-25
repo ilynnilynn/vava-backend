@@ -82,7 +82,7 @@ export default function BookingsScreen() {
   if (error) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16} paddingHorizontal={24}>
-        <Text fontSize={15} color="#858279" textAlign="center">{error}</Text>
+        <Text fontSize={15} color="#626765" textAlign="center">{error}</Text>
         <Pressable
           onPress={() => { setLoading(true); load() }}
           style={{
@@ -104,8 +104,8 @@ export default function BookingsScreen() {
   if (bookings.length === 0) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16} paddingHorizontal={24}>
-        <FA6ProIcon name="calendar-xmark" size={48} color="#EAEAE4" />
-        <Text fontSize={16} fontWeight="600" color="#858279">還沒有預約紀錄</Text>
+        <FA6ProIcon name="calendar-xmark" size={48} color="#E8E9E9" />
+        <Text fontSize={16} fontWeight="600" color="#626765">還沒有預約紀錄</Text>
         <Pressable
           onPress={() => router.push('/book/category')}
           style={{
@@ -143,7 +143,7 @@ export default function BookingsScreen() {
         marginHorizontal={16}
         marginBottom={12}
         borderBottomWidth={1}
-        borderBottomColor="#EAEAE4"
+        borderBottomColor="#E8E9E9"
       >
         <TabPill label="即將到來" active={activeTab === 'upcoming'} onPress={() => setActiveTab('upcoming')} />
         <TabPill label="歷史紀錄" active={activeTab === 'history'} onPress={() => setActiveTab('history')} />
@@ -152,7 +152,7 @@ export default function BookingsScreen() {
       {/* List */}
       {data.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={8} paddingHorizontal={24}>
-          <Text fontSize={14} color="#858279">
+          <Text fontSize={14} color="#626765">
             {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
         </YStack>
@@ -169,7 +169,7 @@ export default function BookingsScreen() {
           }
           ItemSeparatorComponent={() => (
             <View paddingVertical={12}>
-              <View height={1} backgroundColor="#EAEAE4" />
+              <View height={1} backgroundColor="#E8E9E9" />
             </View>
           )}
           renderItem={({ item }) => (
@@ -216,11 +216,11 @@ function TabPill({
         alignItems: 'center',
         paddingVertical: 10,
         borderBottomWidth: 2,
-        borderBottomColor: active ? '#F9583B' : 'transparent',
+        borderBottomColor: active ? '#FF5A3C' : 'transparent',
         opacity: !active && pressed ? 0.5 : 1,
       })}
     >
-      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#858279'}>
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#626765'}>
         {label}
       </Text>
     </Pressable>

@@ -19,7 +19,7 @@ export function HeartButton({ isLiked, onToggle, size = 20 }: Props) {
       <FA6ProIcon
         name="heart"
         size={size}
-        color={isLiked ? '#b53333' : '#EAEAE4'}
+        color={isLiked ? '#CC3352' : '#E8E9E9'}
         weight={isLiked ? 'solid' : 'regular'}
       />
     </Pressable>

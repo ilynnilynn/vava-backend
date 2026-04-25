@@ -15,14 +15,15 @@ type ProfileData = {
 }
 
 const AVATAR_PALETTE = [
-  { bg: '#DFF5AD', fg: '#3d3d3a' },
-  { bg: '#808868', fg: '#ffffff' },
-  { bg: '#9472DE', fg: '#ffffff' },
-  { bg: '#CDB5FF', fg: '#3d3d3a' },
-  { bg: '#A4CFFB', fg: '#3d3d3a' },
-  { bg: '#F063B4', fg: '#ffffff' },
-  { bg: '#F78B92', fg: '#3d3d3a' },
-  { bg: '#F1C9AC', fg: '#3d3d3a' },
+  { bg: '#C0E8BA', fg: '#1F2723' },  // mint
+  { bg: '#8FD3D1', fg: '#1F2723' },  // teal
+  { bg: '#8DC2E6', fg: '#1F2723' },  // sky
+  { bg: '#A8AFFF', fg: '#1F2723' },  // periwinkle
+  { bg: '#CDB5FF', fg: '#1F2723' },  // lavender
+  { bg: '#F98486', fg: '#1F2723' },  // pink
+  { bg: '#FD6B59', fg: '#1F2723' },  // coral
+  { bg: '#FFA46E', fg: '#1F2723' },  // peach
+  { bg: '#DFF5AD', fg: '#1F2723' },  // lime
 ]
 
 function getAvatarColor(seed: string) {
@@ -78,16 +79,16 @@ export default function ProProfileScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
+          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>個人資料</Text>
+        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>個人資料</Text>
         {isEditing ? (
           <Pressable onPress={handleCancel} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text fontSize={15} color="#858279">取消</Text>
+            <Text fontSize={15} color="#626765">取消</Text>
           </Pressable>
         ) : (
           <Pressable onPress={startEditing} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text fontSize={15} fontWeight="600" color="#c96442">編輯</Text>
+            <Text fontSize={15} fontWeight="600" color="#FF5A3C">編輯</Text>
           </Pressable>
         )}
       </XStack>
@@ -105,31 +106,31 @@ export default function ProProfileScreen() {
           <View style={[styles.avatar, { backgroundColor: bg }]}>
             <Text style={{ fontSize: 20, fontWeight: '700', color: fg }}>{profile.name[0] ?? '?'}</Text>
           </View>
-          <Text fontSize={14} fontWeight="600" color="#c96442">更換大頭照</Text>
+          <Text fontSize={14} fontWeight="600" color="#FF5A3C">更換大頭照</Text>
         </Pressable>
         <View style={styles.fullDivider} />
 
         <Text style={styles.sectionLabel}>基本資訊</Text>
         <View style={styles.card}>
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#858279" width={72}>顯示名稱</Text>
+            <Text fontSize={15} color="#626765" width={72}>顯示名稱</Text>
             <TextInput
               value={profile.name}
               onChangeText={v => set('name', v)}
               placeholder="請輸入顯示名稱"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#787D7B"
               editable={isEditing}
               style={styles.input}
             />
           </XStack>
           <View style={styles.divider} />
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="flex-start">
-            <Text fontSize={15} color="#858279" width={72} paddingTop={2}>簡介</Text>
+            <Text fontSize={15} color="#626765" width={72} paddingTop={2}>簡介</Text>
             <TextInput
               value={profile.bio}
               onChangeText={v => set('bio', v)}
               placeholder="介紹自己和你的服務風格"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#787D7B"
               multiline
               numberOfLines={3}
               editable={isEditing}
@@ -141,12 +142,12 @@ export default function ProProfileScreen() {
         <Text style={styles.sectionLabel}>聯絡方式</Text>
         <View style={styles.card}>
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#858279" width={72}>電話</Text>
+            <Text fontSize={15} color="#626765" width={72}>電話</Text>
             <TextInput
               value={profile.phone}
               onChangeText={v => set('phone', v)}
               placeholder="09XX-XXX-XXX"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#787D7B"
               keyboardType="phone-pad"
               editable={isEditing}
               style={styles.input}
@@ -154,12 +155,12 @@ export default function ProProfileScreen() {
           </XStack>
           <View style={styles.divider} />
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#858279" width={72}>Instagram</Text>
+            <Text fontSize={15} color="#626765" width={72}>Instagram</Text>
             <TextInput
               value={profile.instagram}
               onChangeText={v => set('instagram', v)}
               placeholder="@yourhandle"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#787D7B"
               autoCapitalize="none"
               editable={isEditing}
               style={styles.input}
@@ -167,12 +168,12 @@ export default function ProProfileScreen() {
           </XStack>
           <View style={styles.divider} />
           <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#858279" width={72}>Line ID</Text>
+            <Text fontSize={15} color="#626765" width={72}>Line ID</Text>
             <TextInput
               value={profile.lineId}
               onChangeText={v => set('lineId', v)}
               placeholder="your_line_id"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#787D7B"
               autoCapitalize="none"
               editable={isEditing}
               style={styles.input}
@@ -211,12 +212,12 @@ const styles = StyleSheet.create({
   },
   fullDivider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
   },
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#858279',
+    color: '#626765',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 8,
@@ -225,24 +226,24 @@ const styles = StyleSheet.create({
   },
   card: {
     marginHorizontal: 16,
-    backgroundColor: '#F5F5F0',
+    backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#141413',
+    color: '#1F2723',
     textAlign: 'right',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 14,
   },
   saveBtn: {
     height: 48,
-    backgroundColor: '#c96442',
+    backgroundColor: '#1F2723',
     borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 32,

@@ -11,7 +11,7 @@ export function ModeSwitch({ value, onValueChange }: Props) {
     <Switch
       value={value}
       onValueChange={onValueChange}
-      trackColor={{ false: '#b0aea5', true: '#141413' }}
+      trackColor={{ false: '#b0aea5', true: '#1F2723' }}
       thumbColor="#ffffff"
     />
   )

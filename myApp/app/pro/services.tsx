@@ -107,15 +107,15 @@ export default function ServicesScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
+          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>服務項目</Text>
+        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>服務項目</Text>
         <Pressable
           onPress={openAdd}
           accessibilityLabel="新增服務"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
         >
-          <FA6ProIcon name="plus" size={16} color="#141413" />
+          <FA6ProIcon name="plus" size={16} color="#1F2723" />
         </Pressable>
       </XStack>
 
@@ -128,8 +128,8 @@ export default function ServicesScreen() {
         renderItem={({ item }) => (
           <XStack paddingVertical={14} paddingHorizontal={16} justifyContent="space-between" alignItems="center">
             <YStack flex={1} gap={3}>
-              <Text fontSize={15} fontWeight="600" color="#141413">{item.name}</Text>
-              <Text fontSize={13} color="#858279">{item.duration_minutes} 分鐘 · NT${item.price}</Text>
+              <Text fontSize={15} fontWeight="600" color="#1F2723">{item.name}</Text>
+              <Text fontSize={13} color="#626765">{item.duration_minutes} 分鐘 · NT${item.price}</Text>
             </YStack>
             <Pressable
               onPress={() => openEdit(item)}
@@ -137,7 +137,7 @@ export default function ServicesScreen() {
               hitSlop={12}
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
-              <FA6ProIcon name="pen" size={14} color="#858279" />
+              <FA6ProIcon name="pen" size={14} color="#626765" />
             </Pressable>
           </XStack>
         )}
@@ -160,9 +160,9 @@ export default function ServicesScreen() {
               onPress={closeSheet}
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
-              <Text fontSize={15} color="#858279">取消</Text>
+              <Text fontSize={15} color="#626765">取消</Text>
             </Pressable>
-            <Text fontSize={18} fontWeight="700" color="#141413" flex={1} textAlign="center">
+            <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1} textAlign="center">
               {editing ? '編輯服務' : '新增服務'}
             </Text>
             {/* Spacer to visually centre the title */}
@@ -177,12 +177,12 @@ export default function ServicesScreen() {
             <View style={styles.card}>
               {/* Name */}
               <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-                <Text fontSize={15} color="#858279" width={56}>名稱</Text>
+                <Text fontSize={15} color="#626765" width={56}>名稱</Text>
                 <TextInput
                   value={draft.name}
                   onChangeText={v => setDraft(prev => ({ ...prev, name: v }))}
                   placeholder="請輸入服務名稱"
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor="#787D7B"
                   style={styles.input}
                 />
               </XStack>
@@ -194,25 +194,25 @@ export default function ServicesScreen() {
                 onPress={pickDuration}
                 style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}
               >
-                <Text fontSize={15} color="#858279" width={56}>時長</Text>
-                <Text fontSize={15} color="#141413" flex={1} textAlign="right" marginRight={6}>
+                <Text fontSize={15} color="#626765" width={56}>時長</Text>
+                <Text fontSize={15} color="#1F2723" flex={1} textAlign="right" marginRight={6}>
                   {draft.duration_minutes} 分鐘
                 </Text>
-                <FA6ProIcon name="chevron-right" size={12} color="#c8c6be" />
+                <FA6ProIcon name="chevron-right" size={12} color="#BBBEBD" />
               </Pressable>
 
               <View style={styles.rowDivider} />
 
               {/* Price */}
               <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-                <Text fontSize={15} color="#858279" width={56}>價格</Text>
+                <Text fontSize={15} color="#626765" width={56}>價格</Text>
                 <XStack flex={1} justifyContent="flex-end" alignItems="center" gap={4}>
-                  <Text fontSize={15} color="#858279">NT$</Text>
+                  <Text fontSize={15} color="#626765">NT$</Text>
                   <TextInput
                     value={draft.price}
                     onChangeText={v => setDraft(prev => ({ ...prev, price: v.replace(/[^0-9]/g, '') }))}
                     placeholder="0"
-                    placeholderTextColor="#aaa"
+                    placeholderTextColor="#787D7B"
                     keyboardType="number-pad"
                     style={[styles.input, { textAlign: 'right' }]}
                   />
@@ -234,7 +234,7 @@ export default function ServicesScreen() {
                 accessibilityLabel="刪除服務"
                 style={({ pressed }) => [styles.deleteBtn, { opacity: pressed ? 0.7 : 1 }]}
               >
-                <Text fontSize={15} fontWeight="600" color="#c0392b">刪除服務</Text>
+                <Text fontSize={15} fontWeight="600" color="#CC3352">刪除服務</Text>
               </Pressable>
             )}
           </ScrollView>
@@ -247,13 +247,13 @@ export default function ServicesScreen() {
 const styles = StyleSheet.create({
   divider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 16,
   },
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#858279',
+    color: '#626765',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 8,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginHorizontal: 16,
-    backgroundColor: '#F5F5F0',
+    backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -274,18 +274,18 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 14,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#141413',
+    color: '#1F2723',
     textAlign: 'right',
   },
   saveBtn: {
     height: 48,
-    backgroundColor: '#c96442',
+    backgroundColor: '#1F2723',
     borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 32,

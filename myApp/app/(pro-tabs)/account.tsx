@@ -108,14 +108,14 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#141413',
+    color: '#1F2723',
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 10,
   },
   divider: {
     height: 1,
-    backgroundColor: '#e8e6dc',
+    backgroundColor: '#E8E9E9',
     marginHorizontal: 16,
   },
 })
