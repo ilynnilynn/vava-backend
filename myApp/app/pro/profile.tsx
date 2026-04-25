@@ -1,0 +1,195 @@
+// app/pro/profile.tsx
+import { Alert, ScrollView, TextInput, Pressable, StyleSheet, View } from 'react-native'
+import { YStack, XStack, Text } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
+import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { useState } from 'react'
+
+const AVATAR_PALETTE = [
+  { bg: '#DFF5AD', fg: '#3d3d3a' },
+  { bg: '#808868', fg: '#ffffff' },
+  { bg: '#9472DE', fg: '#ffffff' },
+  { bg: '#CDB5FF', fg: '#3d3d3a' },
+  { bg: '#A4CFFB', fg: '#3d3d3a' },
+  { bg: '#F063B4', fg: '#ffffff' },
+  { bg: '#F78B92', fg: '#3d3d3a' },
+  { bg: '#F1C9AC', fg: '#3d3d3a' },
+]
+
+function getAvatarColor(seed: string) {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0
+  return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length]
+}
+
+export default function ProProfileScreen() {
+  const insets = useSafeAreaInsets()
+  const router = useRouter()
+  const [name, setName] = useState('林小姐美甲')
+  const [bio, setBio] = useState('專業美甲師，10年經驗，擅長凝膠光療與法式設計。')
+  const [phone, setPhone] = useState('0912-345-678')
+  const [instagram, setInstagram] = useState('@linmei_nails')
+  const [lineId, setLineId] = useState('linmei2024')
+
+  const { bg, fg } = getAvatarColor(name)
+
+  return (
+    <YStack flex={1} backgroundColor="#FBFBF8">
+      <XStack
+        paddingTop={insets.top + 16}
+        paddingHorizontal={16}
+        paddingBottom={12}
+        alignItems="center"
+      >
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityLabel="返回"
+          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
+        >
+          <FA6ProIcon name="chevron-left" size={16} color="#141413" />
+        </Pressable>
+        <Text fontSize={18} fontWeight="700" color="#141413" flex={1}>個人資料</Text>
+        <Pressable
+          onPress={() => Alert.alert('已儲存')}
+          accessibilityLabel="儲存"
+          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+        >
+          <Text fontSize={15} fontWeight="600" color="#c96442">儲存</Text>
+        </Pressable>
+      </XStack>
+
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Photo row */}
+        <Pressable
+          onPress={() => Alert.alert('更換大頭照', '即將推出')}
+          accessibilityLabel="更換大頭照"
+          style={({ pressed }) => [styles.photoRow, { opacity: pressed ? 0.7 : 1 }]}
+        >
+          <View style={[styles.avatar, { backgroundColor: bg }]}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: fg }}>{name[0] ?? '?'}</Text>
+          </View>
+          <Text fontSize={14} fontWeight="600" color="#c96442">更換大頭照</Text>
+        </Pressable>
+        <View style={styles.fullDivider} />
+
+        <Text style={styles.sectionLabel}>基本資訊</Text>
+        <View style={styles.card}>
+          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
+            <Text fontSize={15} color="#858279" width={72}>顯示名稱</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="請輸入顯示名稱"
+              placeholderTextColor="#aaa"
+              style={styles.input}
+            />
+          </XStack>
+          <View style={styles.divider} />
+          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="flex-start">
+            <Text fontSize={15} color="#858279" width={72} paddingTop={2}>簡介</Text>
+            <TextInput
+              value={bio}
+              onChangeText={setBio}
+              placeholder="介紹自己和你的服務風格"
+              placeholderTextColor="#aaa"
+              multiline
+              numberOfLines={3}
+              style={[styles.input, { height: 64, textAlignVertical: 'top' }]}
+            />
+          </XStack>
+        </View>
+
+        <Text style={styles.sectionLabel}>聯絡方式</Text>
+        <View style={styles.card}>
+          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
+            <Text fontSize={15} color="#858279" width={72}>電話</Text>
+            <TextInput
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="09XX-XXX-XXX"
+              placeholderTextColor="#aaa"
+              keyboardType="phone-pad"
+              style={styles.input}
+            />
+          </XStack>
+          <View style={styles.divider} />
+          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
+            <Text fontSize={15} color="#858279" width={72}>Instagram</Text>
+            <TextInput
+              value={instagram}
+              onChangeText={setInstagram}
+              placeholder="@yourhandle"
+              placeholderTextColor="#aaa"
+              autoCapitalize="none"
+              style={styles.input}
+            />
+          </XStack>
+          <View style={styles.divider} />
+          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
+            <Text fontSize={15} color="#858279" width={72}>Line ID</Text>
+            <TextInput
+              value={lineId}
+              onChangeText={setLineId}
+              placeholder="your_line_id"
+              placeholderTextColor="#aaa"
+              autoCapitalize="none"
+              style={styles.input}
+            />
+          </XStack>
+        </View>
+      </ScrollView>
+    </YStack>
+  )
+}
+
+const styles = StyleSheet.create({
+  photoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 14,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullDivider: {
+    height: 1,
+    backgroundColor: '#e8e6dc',
+  },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#858279',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  card: {
+    marginHorizontal: 16,
+    backgroundColor: '#F5F5F0',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#141413',
+    textAlign: 'right',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#e8e6dc',
+    marginHorizontal: 14,
+  },
+})
