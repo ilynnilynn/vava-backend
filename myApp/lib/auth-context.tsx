@@ -52,15 +52,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('[auth] onAuthStateChange event:', _event, 'hasUser:', !!session?.user)
       setSession(session)
       if (session?.user) {
-        // Mark loading so index.tsx waits for user data before routing
+        // Mark loading so login.tsx waits for user data before routing
         setIsLoading(true)
-        fetchUserData(session.user.id).finally(() => {
-          console.log('[auth] fetchUserData done, setIsLoading(false)')
-          setIsLoading(false)
-        })
+        fetchUserData(session.user.id).finally(() => setIsLoading(false))
       } else {
         setUser(null)
         setPro(null)

@@ -39,7 +39,6 @@ export default function LoginScreen() {
       // ASWebAuthenticationSession intercepts custom-scheme redirects natively —
       // works in both Expo Go and standalone builds without needing exp:// URLs.
       const redirectTo = 'myapp://auth/callback'
-      console.log('[login] redirectTo:', redirectTo)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -50,12 +49,9 @@ export default function LoginScreen() {
         Alert.alert('登入失敗', error?.message ?? '請稍後再試')
         return
       }
-      console.log('[login] opening browser with url:', data.url.slice(0, 80))
 
       // Open OAuth in a browser and wait for redirect back to redirectTo
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
-      console.log('[login] browser result type:', result.type)
-      if (result.type === 'success') console.log('[login] result.url:', result.url)
 
       if (result.type === 'success') {
         // supabase.auth.exchangeCodeForSession() passes authCode directly as
@@ -63,15 +59,12 @@ export default function LoginScreen() {
         // Extract just the code UUID from myapp://auth/callback?code=UUID
         const params = new URLSearchParams(result.url.split('?')[1] ?? '')
         const code = params.get('code')
-        console.log('[login] extracted code:', code ? code.slice(0, 8) + '...' : 'null')
-
         if (!code) {
           Alert.alert('登入失敗', '無法取得授權碼，請再試一次')
           return
         }
 
         const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
-        console.log('[login] exchangeCodeForSession error:', sessionError?.message ?? 'none')
         if (sessionError) {
           Alert.alert('登入失敗', sessionError.message)
         }

@@ -12,14 +12,12 @@ export default function IndexScreen() {
   const { isLoading, session, user, pro } = useSession()
 
   useEffect(() => {
-    console.log('[index] state - isLoading:', isLoading, 'hasSession:', !!session, 'user:', user?.display_name ?? 'none')
     if (isLoading) return
     const route = deriveRoute(
       !!session,
       user?.display_name ?? null,
       pro ? pro.is_approved : null
     )
-    console.log('[index] routing to:', route)
     router.replace(route as never)
   }, [isLoading, session, user, pro])
 
