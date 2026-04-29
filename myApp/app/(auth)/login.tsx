@@ -58,10 +58,19 @@ export default function LoginScreen() {
       if (result.type === 'success') console.log('[login] result.url:', result.url)
 
       if (result.type === 'success') {
-        // Exchange the PKCE code for a session — fires onAuthStateChange,
-        // which sets isLoading=true and fetches user data. The useEffect above
-        // will navigate once isLoading returns to false with a valid session.
-        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url)
+        // supabase.auth.exchangeCodeForSession() passes authCode directly as
+        // `auth_code` to the server — it does NOT parse URLs with custom schemes.
+        // Extract just the code UUID from myapp://auth/callback?code=UUID
+        const params = new URLSearchParams(result.url.split('?')[1] ?? '')
+        const code = params.get('code')
+        console.log('[login] extracted code:', code ? code.slice(0, 8) + '...' : 'null')
+
+        if (!code) {
+          Alert.alert('登入失敗', '無法取得授權碼，請再試一次')
+          return
+        }
+
+        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
         console.log('[login] exchangeCodeForSession error:', sessionError?.message ?? 'none')
         if (sessionError) {
           Alert.alert('登入失敗', sessionError.message)
