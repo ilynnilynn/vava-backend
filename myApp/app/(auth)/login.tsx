@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Alert, Pressable, StyleSheet, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '@/lib/supabase'
@@ -11,40 +12,42 @@ import { VavaLogo } from '@/components/vava-logo'
 // redirectTo is generated dynamically so it works in Expo Go and standalone
 // — no hardcoded URLs, no ngrok required.
 
-async function signInWith(provider: 'google' | 'apple') {
-  const redirectTo = Linking.createURL('/auth/callback')
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: { redirectTo, skipBrowserRedirect: true },
-  })
-
-  if (error || !data.url) {
-    Alert.alert('登入失敗', error?.message ?? '請稍後再試')
-    return
-  }
-
-  // Open OAuth in a browser and wait for redirect back to redirectTo
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
-
-  if (result.type === 'success') {
-    // Exchange the PKCE code for a session
-    const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url)
-    if (sessionError) {
-      Alert.alert('登入失敗', sessionError.message)
-    }
-    // Auth state change fires → index.tsx re-routes to correct screen
-  }
-}
-
 export default function LoginScreen() {
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   async function handleSignIn(provider: 'google' | 'apple') {
     setLoading(true)
-    await signInWith(provider)
-    setLoading(false)
+    try {
+      const redirectTo = Linking.createURL('/auth/callback')
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo, skipBrowserRedirect: true },
+      })
+
+      if (error || !data.url) {
+        Alert.alert('登入失敗', error?.message ?? '請稍後再試')
+        return
+      }
+
+      // Open OAuth in a browser and wait for redirect back to redirectTo
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
+
+      if (result.type === 'success') {
+        // Exchange the PKCE code for a session
+        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url)
+        if (sessionError) {
+          Alert.alert('登入失敗', sessionError.message)
+          return
+        }
+        // Navigate to index — auth context will fetch user data and route correctly
+        router.replace('/' as never)
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
