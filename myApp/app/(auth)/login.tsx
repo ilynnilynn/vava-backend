@@ -3,14 +3,16 @@ import { useState } from 'react'
 import { Alert, Pressable, StyleSheet, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '@/lib/supabase'
 import { VavaLogo } from '@/components/vava-logo'
 
-// After OAuth redirect, Supabase auth state change fires and index.tsx re-routes.
+// redirectTo is generated dynamically so it works in Expo Go and standalone
+// — no hardcoded URLs, no ngrok required.
 
 async function signInWith(provider: 'google' | 'apple') {
-  const redirectTo = 'myapp://auth-callback'
+  const redirectTo = Linking.createURL('/auth/callback')
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -22,14 +24,16 @@ async function signInWith(provider: 'google' | 'apple') {
     return
   }
 
+  // Open OAuth in a browser and wait for redirect back to redirectTo
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
 
   if (result.type === 'success') {
+    // Exchange the PKCE code for a session
     const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url)
     if (sessionError) {
       Alert.alert('登入失敗', sessionError.message)
     }
-    // Auth state change fires → index.tsx will redirect to correct screen
+    // Auth state change fires → index.tsx re-routes to correct screen
   }
 }
 
