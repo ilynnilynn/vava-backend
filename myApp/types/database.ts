@@ -54,19 +54,20 @@ export type NoShowReporter = 'customer' | 'pro'
 
 export type RaterType = 'customer' | 'pro'
 
-export type ServiceDomain = 'nails' | 'lashes'
+export type ServiceDomain = 'nails' | 'lashes' | 'makeup'
 
 // ── Table: users ─────────────────────────────────────────────
 
 export type User = {
-  id: string                       // uuid PK, auto-generated
-  line_user_id: string             // from LINE Login OAuth. UNIQUE.
-  name: string                     // editable by user (deployed column is 'name', not 'display_name')
-  phone: string                    // required at onboarding
-  birth_year: number               // required, read-only after set
-  profile_photo_url: string | null // from LINE profile
-  auth_provider: 'line'            // 'line' only in MVP 1
-  line_notifications: boolean      // default true
+  id: string                       // uuid PK = auth.users.id
+  display_name: string | null      // set during customer onboarding
+  phone: string | null             // set during customer onboarding
+  birthday: string | null          // date ISO 'YYYY-MM-DD'
+  gender: string | null            // 'female' | 'male' | 'other' | 'prefer_not'
+  profile_photo_url: string | null
+  auth_provider: string            // 'google' | 'apple'
+  line_notifications: boolean
+  push_token_expo: string | null
   created_at: string
   updated_at: string
 }
@@ -79,6 +80,7 @@ export type Pro = {
   display_name: string             // public-facing. Triggers re-review if changed.
   phone: string                    // internal/ops only. NEVER exposed to customers.
   ig_handle: string                // required
+  domains: string[]                // e.g. ['nails', 'lashes', 'makeup']
   studio_address: string           // triggers re-review if changed
   studio_lat: number | null        // geocoded from address
   studio_lng: number | null        // geocoded from address
