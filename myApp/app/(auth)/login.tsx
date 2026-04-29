@@ -1,5 +1,5 @@
 // app/(auth)/login.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Alert, Pressable, StyleSheet, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -7,6 +7,8 @@ import { useRouter } from 'expo-router'
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '@/lib/supabase'
+import { useSession } from '@/lib/auth-context'
+import { deriveRoute } from '@/lib/auth-routing'
 import { VavaLogo } from '@/components/vava-logo'
 
 // redirectTo is generated dynamically so it works in Expo Go and standalone
@@ -16,6 +18,21 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const { isLoading, session, user, pro } = useSession()
+
+  // When auth state settles after login, navigate to the correct screen.
+  // Using a useEffect (reactive) avoids the race condition of calling
+  // router.replace() before React commits the updated context values.
+  useEffect(() => {
+    if (!isLoading && session) {
+      const route = deriveRoute(
+        true,
+        user?.display_name ?? null,
+        pro ? pro.is_approved : null
+      )
+      router.replace(route as never)
+    }
+  }, [isLoading, session, user, pro])
 
   async function handleSignIn(provider: 'google' | 'apple') {
     setLoading(true)
@@ -36,14 +53,13 @@ export default function LoginScreen() {
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
 
       if (result.type === 'success') {
-        // Exchange the PKCE code for a session
+        // Exchange the PKCE code for a session — fires onAuthStateChange,
+        // which sets isLoading=true and fetches user data. The useEffect above
+        // will navigate once isLoading returns to false with a valid session.
         const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url)
         if (sessionError) {
           Alert.alert('登入失敗', sessionError.message)
-          return
         }
-        // Navigate to index — auth context will fetch user data and route correctly
-        router.replace('/' as never)
       }
     } finally {
       setLoading(false)
