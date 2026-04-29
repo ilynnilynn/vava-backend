@@ -4,7 +4,6 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/lib/auth-context'
@@ -37,7 +36,10 @@ export default function LoginScreen() {
   async function handleSignIn(provider: 'google' | 'apple') {
     setLoading(true)
     try {
-      const redirectTo = Linking.createURL('/auth/callback')
+      // ASWebAuthenticationSession intercepts custom-scheme redirects natively —
+      // works in both Expo Go and standalone builds without needing exp:// URLs.
+      const redirectTo = 'myapp://auth/callback'
+      console.log('[login] redirectTo:', redirectTo)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -48,15 +50,19 @@ export default function LoginScreen() {
         Alert.alert('登入失敗', error?.message ?? '請稍後再試')
         return
       }
+      console.log('[login] opening browser with url:', data.url.slice(0, 80))
 
       // Open OAuth in a browser and wait for redirect back to redirectTo
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
+      console.log('[login] browser result type:', result.type)
+      if (result.type === 'success') console.log('[login] result.url:', result.url)
 
       if (result.type === 'success') {
         // Exchange the PKCE code for a session — fires onAuthStateChange,
         // which sets isLoading=true and fetches user data. The useEffect above
         // will navigate once isLoading returns to false with a valid session.
         const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url)
+        console.log('[login] exchangeCodeForSession error:', sessionError?.message ?? 'none')
         if (sessionError) {
           Alert.alert('登入失敗', sessionError.message)
         }
