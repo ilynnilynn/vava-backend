@@ -1,4 +1,9 @@
 // app/(onboarding)/pro/instagram.tsx
+// ⚠️  DO NOT change the Instagram verification endpoint or approach.
+//     LOCKED: www.instagram.com/api/v1/users/web_profile_info/ + X-IG-App-ID: 936619743392459
+//     - i.instagram.com returns 401 (requires auth session)
+//     - HTML scraping is unreliable (Instagram uses client-side rendering)
+//     - This endpoint returns real JSON (is_private, 404 for non-existent)
 import { useState } from 'react'
 import { ActivityIndicator, Linking, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { Text } from 'tamagui'
