@@ -5,6 +5,11 @@
  * @param hasSession   true if Supabase session exists
  * @param displayName  users.display_name (null = customer onboarding incomplete)
  * @param isApproved   pros.is_approved (null = no pro row, false = pending, true = approved)
+ *
+ * Pending pros (is_approved === false) go straight to pro mode — they can
+ * use the app while waiting for admin approval. The submitted.tsx screen
+ * only shows immediately after the onboarding flow completes, then
+ * navigates away after 3 seconds.
  */
 export function deriveRoute(
   hasSession: boolean,
@@ -13,7 +18,6 @@ export function deriveRoute(
 ): string {
   if (!hasSession) return '/(auth)/login'
   if (!displayName) return '/(onboarding)/customer/name'
-  if (isApproved === true) return '/(pro-tabs)/'
-  if (isApproved === false) return '/(onboarding)/pro/submitted'
+  if (isApproved === true || isApproved === false) return '/(pro-tabs)/'
   return '/(tabs)/'
 }

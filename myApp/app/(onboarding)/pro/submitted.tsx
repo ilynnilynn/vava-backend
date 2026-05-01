@@ -21,6 +21,14 @@ export default function ProSubmittedScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace('/(pro-tabs)/account' as never)
+    }, 3000)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   async function submitIfDraftExists() {
     const raw = await AsyncStorage.getItem(DRAFT_KEY)
     if (!raw || !session) {
