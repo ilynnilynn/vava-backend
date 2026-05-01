@@ -15,7 +15,7 @@ type Props = {
   onNext: () => void
   nextLabel?: string
   nextDisabled?: boolean
-  onSkip?: () => void  // renders a "略過" link when provided
+  onSkip?: () => void
   children: ReactNode
 }
 
@@ -35,18 +35,25 @@ export function OnboardingStepLayout({
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header: back + progress */}
+      {/* Header: back + progress + exit */}
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
-          style={styles.backBtn}
+          style={styles.headerBtn}
           accessibilityRole="button"
           accessibilityLabel="返回"
         >
           <AppIcon name="back" size={20} color="#1F2723" />
         </Pressable>
         <ProgressBar currentStep={step} totalSteps={totalSteps} />
-        <View style={styles.headerRight} />
+        <Pressable
+          onPress={() => router.replace('/(tabs)/account' as never)}
+          style={styles.headerBtn}
+          accessibilityRole="button"
+          accessibilityLabel="離開申請"
+        >
+          <AppIcon name="close" size={20} color="#626765" />
+        </Pressable>
       </View>
 
       {/* Title */}
@@ -98,8 +105,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
   },
-  backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  headerRight: { width: 44 },
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   titleBlock: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 16 },
   content: { flex: 1, paddingHorizontal: 20 },
   cta: { paddingHorizontal: 20, paddingTop: 12, gap: 12 },
