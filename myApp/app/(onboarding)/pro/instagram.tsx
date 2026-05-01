@@ -1,6 +1,6 @@
 // app/(onboarding)/pro/instagram.tsx
 import { useState } from 'react'
-import { Linking, Pressable, StyleSheet, TextInput, View } from 'react-native'
+import { ActivityIndicator, Linking, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -9,20 +9,76 @@ import { AppIcon } from '@/components/AppIcon'
 
 const DRAFT_KEY = '@vava/proWizardDraft'
 
+// Public profile page — no auth required, contains "is_private":true/false in HTML
+const IG_PROFILE_BASE = 'https://www.instagram.com'
+
+type CheckState = 'idle' | 'checking' | 'verified' | 'not_found' | 'private' | 'manual'
+
 export default function ProInstagramScreen() {
   const router = useRouter()
   const [handle, setHandle] = useState('')
-  const [verified, setVerified] = useState(false)
+  const [checkState, setCheckState] = useState<CheckState>('idle')
 
   const trimmedHandle = handle.trim().replace(/^@/, '')
   const hasHandle = trimmedHandle.length > 0
+  const verified = checkState === 'verified'
+
+  function onHandleChange(t: string) {
+    setHandle(t)
+    if (checkState !== 'idle') setCheckState('idle')
+  }
+
+  async function verifyAccount() {
+    if (!trimmedHandle) return
+    setCheckState('checking')
+    try {
+      const res = await fetch(`${IG_PROFILE_BASE}/${encodeURIComponent(trimmedHandle)}/`, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram/271.0.0.0.0',
+          'Accept': 'text/html,application/xhtml+xml',
+          'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
+        },
+      })
+
+      if (!res.ok) {
+        // Hard 4xx/5xx — fall back to manual
+        setCheckState('manual')
+        return
+      }
+
+      const html = await res.text()
+
+      // Instagram embeds user data as JSON in the page HTML
+      const privateMatch = html.match(/"is_private":(true|false)/)
+      if (!privateMatch) {
+        // Pattern absent — account doesn't exist or Instagram returned a login wall
+        // Distinguish: non-existent accounts omit the pattern entirely
+        setCheckState('manual')
+        return
+      }
+
+      if (privateMatch[1] === 'true') {
+        setCheckState('private')
+        return
+      }
+
+      setCheckState('verified')
+    } catch {
+      // Network error — fall back to manual
+      setCheckState('manual')
+    }
+  }
 
   async function openInstagram() {
-    // Try the Instagram app deep link first; fall back to web URL
     const appUrl = `instagram://user?username=${trimmedHandle}`
     const webUrl = `https://www.instagram.com/${trimmedHandle}/`
-    const canOpen = await Linking.canOpenURL(appUrl)
-    await Linking.openURL(canOpen ? appUrl : webUrl)
+    try {
+      const canOpen = await Linking.canOpenURL(appUrl)
+      await Linking.openURL(canOpen ? appUrl : webUrl)
+    } catch {
+      await Linking.openURL(webUrl)
+    }
   }
 
   async function saveAndNext(value: string | null) {
@@ -48,7 +104,7 @@ export default function ProInstagramScreen() {
         <Text style={styles.atSign}>@</Text>
         <TextInput
           value={handle}
-          onChangeText={(t) => { setHandle(t); setVerified(false) }}
+          onChangeText={onHandleChange}
           placeholder="your_account"
           placeholderTextColor="#AEADA6"
           autoCapitalize="none"
@@ -58,36 +114,77 @@ export default function ProInstagramScreen() {
         />
       </View>
 
-      {/* Open Instagram button — appears once handle is typed */}
-      {hasHandle && !verified && (
+      {/* Failure badges */}
+      {checkState === 'not_found' && (
+        <View style={styles.failBadge}>
+          <Text style={styles.failBadgeText}>✕ 找不到此帳號，請確認用戶名稱</Text>
+        </View>
+      )}
+      {checkState === 'private' && (
+        <View style={styles.failBadge}>
+          <Text style={styles.failBadgeText}>✕ 私人帳號，請先將帳號設為公開</Text>
+        </View>
+      )}
+
+      {/* Verify button */}
+      {hasHandle && checkState === 'idle' && (
         <Pressable
-          onPress={openInstagram}
+          onPress={verifyAccount}
           style={({ pressed }) => [styles.verifyBtn, { opacity: pressed ? 0.75 : 1 }]}
           accessibilityRole="button"
         >
-          <AppIcon name="forward" size={14} color="#FF5A3C" />
-          <Text style={styles.verifyBtnText}>前往 Instagram 確認</Text>
+          <Text style={styles.verifyBtnText}>驗證帳號</Text>
         </Pressable>
       )}
 
-      {/* Confirm button — appears after user has opened Instagram */}
-      {hasHandle && !verified && (
+      {/* Re-verify after error */}
+      {hasHandle && (checkState === 'not_found' || checkState === 'private') && (
         <Pressable
-          onPress={() => setVerified(true)}
-          style={({ pressed }) => [styles.confirmBtn, { opacity: pressed ? 0.75 : 1 }]}
+          onPress={() => setCheckState('idle')}
+          style={({ pressed }) => [styles.retryBtn, { opacity: pressed ? 0.75 : 1 }]}
           accessibilityRole="button"
         >
-          <Text style={styles.confirmBtnText}>✓ 確認是我的帳號</Text>
+          <Text style={styles.retryBtnText}>重新輸入</Text>
         </Pressable>
       )}
 
-      {/* Verified state */}
-      {verified && (
-        <View style={styles.verifiedRow}>
-          <Text style={styles.checkMark}>✓</Text>
-          <Text style={styles.verifiedText}>@{trimmedHandle} 已連結</Text>
+      {/* Loading */}
+      {checkState === 'checking' && (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator size="small" color="#FF5A3C" />
+          <Text style={styles.loadingText}>驗證中…</Text>
         </View>
       )}
+
+      {/* Manual fallback — Instagram blocked the check */}
+      {checkState === 'manual' && (
+        <View style={styles.manualBlock}>
+          <Text style={styles.manualHint}>無法自動驗證，請前往 Instagram 確認帳號為公開</Text>
+          <Pressable
+            onPress={openInstagram}
+            style={({ pressed }) => [styles.verifyBtn, { opacity: pressed ? 0.75 : 1 }]}
+            accessibilityRole="button"
+          >
+            <AppIcon name="forward" size={14} color="#FF5A3C" />
+            <Text style={styles.verifyBtnText}>前往 Instagram</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setCheckState('verified')}
+            style={({ pressed }) => [styles.confirmBtn, { opacity: pressed ? 0.75 : 1 }]}
+            accessibilityRole="button"
+          >
+            <Text style={styles.confirmBtnText}>✓ 確認是公開帳號</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Auto-verified badge */}
+      {checkState === 'verified' && (
+        <View style={styles.verifiedBadge}>
+          <Text style={styles.verifiedBadgeText}>✓ 公開帳號已驗證</Text>
+        </View>
+      )}
+
     </OnboardingStepLayout>
   )
 }
@@ -99,7 +196,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1.5,
     borderBottomColor: '#E8E9E9',
     paddingVertical: 4,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   atSign: { fontSize: 20, color: '#AEADA6', marginRight: 4 },
   input: {
@@ -108,19 +205,30 @@ const styles = StyleSheet.create({
     color: '#1F2723',
     paddingVertical: 8,
   },
+  errorText: { fontSize: 13, color: '#CC3352', marginBottom: 14 },
+  loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  loadingText: { fontSize: 14, color: '#626765' },
   verifyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    height: 44,
     borderWidth: 1.5,
     borderColor: '#FF5A3C',
     borderRadius: 9999,
-    height: 44,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     alignSelf: 'flex-start',
-    marginBottom: 12,
+    justifyContent: 'center',
   },
   verifyBtnText: { fontSize: 15, fontWeight: '600', color: '#FF5A3C' },
+  retryBtn: {
+    height: 36,
+    alignSelf: 'flex-start',
+    justifyContent: 'center',
+  },
+  retryBtnText: { fontSize: 14, color: '#626765', textDecorationLine: 'underline' },
+  manualBlock: { gap: 12 },
+  manualHint: { fontSize: 13, color: '#626765', marginBottom: 4 },
   confirmBtn: {
     backgroundColor: '#F6F4EF',
     borderRadius: 9999,
@@ -131,12 +239,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmBtnText: { fontSize: 15, color: '#626765' },
-  verifiedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 4,
+  verifiedBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E8FAF2',
+    borderRadius: 9999,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
-  checkMark: { fontSize: 16, color: '#33CC87' },
-  verifiedText: { fontSize: 15, color: '#33CC87', fontWeight: '600' },
+  verifiedBadgeText: { fontSize: 14, fontWeight: '600', color: '#33CC87' },
+  failBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FDEEF2',
+    borderRadius: 9999,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  failBadgeText: { fontSize: 14, fontWeight: '600', color: '#CC3352' },
 })
