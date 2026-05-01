@@ -9,8 +9,9 @@ import { AppIcon } from '@/components/AppIcon'
 
 const DRAFT_KEY = '@vava/proWizardDraft'
 
-// Public profile page — no auth required, contains "is_private":true/false in HTML
-const IG_PROFILE_BASE = 'https://www.instagram.com'
+// Instagram's web profile API — returns JSON with is_private field without OAuth
+const IG_API_URL = 'https://www.instagram.com/api/v1/users/web_profile_info/'
+const IG_APP_ID = '936619743392459'
 
 type CheckState = 'idle' | 'checking' | 'verified' | 'not_found' | 'private' | 'manual'
 
@@ -32,38 +33,44 @@ export default function ProInstagramScreen() {
     if (!trimmedHandle) return
     setCheckState('checking')
     try {
-      const res = await fetch(`${IG_PROFILE_BASE}/${encodeURIComponent(trimmedHandle)}/`, {
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram/271.0.0.0.0',
-          'Accept': 'text/html,application/xhtml+xml',
-          'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
-        },
-      })
+      const res = await fetch(
+        `${IG_API_URL}?username=${encodeURIComponent(trimmedHandle)}`,
+        {
+          headers: {
+            'X-IG-App-ID': IG_APP_ID,
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json',
+          },
+        }
+      )
+
+      if (res.status === 404) {
+        setCheckState('not_found')
+        return
+      }
 
       if (!res.ok) {
-        // Hard 4xx/5xx — fall back to manual
+        // 401/403/other — Instagram blocked; fall back to manual
         setCheckState('manual')
         return
       }
 
-      const html = await res.text()
-
-      // Instagram embeds user data as JSON in the page HTML
-      const privateMatch = html.match(/"is_private":(true|false)/)
-      if (!privateMatch) {
-        // Pattern absent — account doesn't exist or Instagram returned a login wall
-        // Distinguish: non-existent accounts omit the pattern entirely
+      try {
+        const json = await res.json()
+        const user = json?.data?.user
+        if (!user) {
+          setCheckState('manual')
+          return
+        }
+        if (user.is_private) {
+          setCheckState('private')
+          return
+        }
+        setCheckState('verified')
+      } catch {
         setCheckState('manual')
-        return
       }
-
-      if (privateMatch[1] === 'true') {
-        setCheckState('private')
-        return
-      }
-
-      setCheckState('verified')
     } catch {
       // Network error — fall back to manual
       setCheckState('manual')
