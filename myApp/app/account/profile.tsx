@@ -4,7 +4,7 @@ import { Alert, Pressable, TextInput, ActivityIndicator } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/lib/auth-context'
@@ -43,10 +43,10 @@ export default function ProfileScreen() {
   }
 
   return (
-    <YStack flex={1} backgroundColor="#f5f4ed">
+    <YStack flex={1} backgroundColor="#FBFBF8">
       {/* Nav bar */}
-      <YStack paddingTop={insets.top} backgroundColor="#f5f4ed">
-        <XStack height={48} alignItems="center" paddingHorizontal={4}>
+      <YStack paddingTop={insets.top} backgroundColor="#FBFBF8">
+        <XStack height={48} alignItems="center" paddingHorizontal={20}>
           <Pressable
             onPress={editing ? handleCancel : () => router.back()}
             style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
@@ -55,28 +55,37 @@ export default function ProfileScreen() {
           >
             {editing
               ? <Text fontSize={15} color="#626765">取消</Text>
-              : <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
+              : <AppIcon name="back" size={20} color="#1F2723" />
             }
           </Pressable>
 
-          <Text flex={1} fontSize={16} fontWeight="600" color="#1F2723" textAlign="center">
+          <Text flex={1} fontSize={20} fontWeight="700" color="#1F2723" textAlign="center">
             基本資料
           </Text>
 
-          <Pressable
-            onPress={editing ? handleSave : () => setEditing(true)}
-            disabled={saving}
-            style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-            accessibilityLabel={editing ? '儲存' : '編輯'}
-            accessibilityRole="button"
-          >
-            {saving
-              ? <ActivityIndicator size="small" color="#1F2723" />
-              : <Text fontSize={15} fontWeight="600" color="#1F2723">
-                  {editing ? '儲存' : '編輯'}
-                </Text>
-            }
-          </Pressable>
+          {editing ? (
+            <Pressable
+              onPress={saving ? undefined : handleSave}
+              disabled={saving}
+              style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+              accessibilityLabel="儲存"
+              accessibilityRole="button"
+            >
+              {saving
+                ? <ActivityIndicator size="small" color="#1F2723" />
+                : <Text fontSize={15} fontWeight="600" color="#1F2723">儲存</Text>
+              }
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => setEditing(true)}
+              style={({ pressed }) => ({ padding: 10, borderRadius: 8, opacity: pressed ? 0.5 : 1 })}
+              accessibilityLabel="編輯"
+              accessibilityRole="button"
+            >
+              <AppIcon name="edit" size={18} color="#626765" weight="regular" />
+            </Pressable>
+          )}
         </XStack>
       </YStack>
 
@@ -91,12 +100,12 @@ export default function ProfileScreen() {
         {/* Display name */}
         <XStack
           height={52}
-          paddingHorizontal={16}
+          paddingHorizontal={20}
           alignItems="center"
           gap={12}
         >
           <View width={20} alignItems="center">
-            <FA6ProIcon name="user" size={14} color="#626765" />
+            <AppIcon name="user" size={14} color="#626765" />
           </View>
           <YStack flex={1}>
             <Text fontSize={12} color="#626765" marginBottom={2}>姓名</Text>
@@ -124,15 +133,15 @@ export default function ProfileScreen() {
 
         {/* Divider */}
         {(user?.email || user?.phone) && (
-          <View height={1} backgroundColor="#F0EDE5" marginLeft={48} />
+          <View height={1} backgroundColor="#F0EDE5" marginLeft={52} />
         )}
 
         {/* Email */}
         {user?.email && (
           <>
-            <XStack height={52} paddingHorizontal={16} alignItems="center" gap={12}>
+            <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
               <View width={20} alignItems="center">
-                <FA6ProIcon name="envelope" size={14} color="#626765" />
+                <AppIcon name="email" size={14} color="#626765" />
               </View>
               <YStack flex={1}>
                 <Text fontSize={12} color="#626765" marginBottom={2}>電子郵件</Text>
@@ -140,16 +149,16 @@ export default function ProfileScreen() {
               </YStack>
             </XStack>
             {user?.phone && (
-              <View height={1} backgroundColor="#F0EDE5" marginLeft={48} />
+              <View height={1} backgroundColor="#F0EDE5" marginLeft={52} />
             )}
           </>
         )}
 
         {/* Phone */}
         {user?.phone && (
-          <XStack height={52} paddingHorizontal={16} alignItems="center" gap={12}>
+          <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
             <View width={20} alignItems="center">
-              <FA6ProIcon name="phone" size={14} color="#626765" />
+              <AppIcon name="phone" size={14} color="#626765" />
             </View>
             <YStack flex={1}>
               <Text fontSize={12} color="#626765" marginBottom={2}>手機號碼</Text>

@@ -3,7 +3,7 @@ import { Alert, ScrollView, Switch, Pressable, StyleSheet, View } from 'react-na
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 import { useRef, useState } from 'react'
 
 type BookingSettings = {
@@ -39,7 +39,7 @@ function PickerRow({ label, value, options, onChange, disabled }: {
     >
       <Text fontSize={15} color="#1F2723" flex={1}>{label}</Text>
       <Text fontSize={15} color="#626765" marginRight={6}>{value}</Text>
-      {!disabled && <FA6ProIcon name="chevron-right" size={12} color="#BBBEBD" />}
+      {!disabled && <AppIcon name="forward" size={12} color="#BBBEBD" />}
     </Pressable>
   )
 }
@@ -80,7 +80,7 @@ export default function BookingSettingsScreen() {
     <YStack flex={1} backgroundColor="#FBFBF8">
       <XStack
         paddingTop={insets.top + 16}
-        paddingHorizontal={16}
+        paddingHorizontal={20}
         paddingBottom={12}
         alignItems="center"
       >
@@ -89,16 +89,20 @@ export default function BookingSettingsScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
+          <AppIcon name="back" size={20} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>預約設定</Text>
+        <Text fontSize={20} fontWeight="700" color="#1F2723" flex={1}>預約設定</Text>
         {isEditing ? (
           <Pressable onPress={handleCancel} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
             <Text fontSize={15} color="#626765">取消</Text>
           </Pressable>
         ) : (
-          <Pressable onPress={startEditing} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text fontSize={15} fontWeight="600" color="#FF5A3C">編輯</Text>
+          <Pressable
+            onPress={startEditing}
+            style={({ pressed }) => ({ padding: 10, borderRadius: 8, opacity: pressed ? 0.5 : 1 })}
+            accessibilityLabel="編輯"
+          >
+            <AppIcon name="edit" size={18} color="#626765" weight="regular" />
           </Pressable>
         )}
       </XStack>
@@ -179,7 +183,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   card: {
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
@@ -199,7 +203,7 @@ const styles = StyleSheet.create({
     height: 48,
     backgroundColor: '#1F2723',
     borderRadius: 12,
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginTop: 32,
     alignItems: 'center',
     justifyContent: 'center',
