@@ -1,49 +1,50 @@
-// app/pro/profile.tsx
-import { Alert, ScrollView, TextInput, Pressable, StyleSheet, View } from 'react-native'
+// app/pro/profile.tsx — Pro-only profile info (display name, IG handle)
+// Shared personal info (auth name, email, phone) is in /account/profile
+import { useEffect, useRef, useState } from 'react'
+import { Alert, ScrollView, TextInput, Pressable, ActivityIndicator, StyleSheet, View } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
-import { useRef, useState } from 'react'
+import { AppIcon } from '@/components/AppIcon'
+import { supabase } from '@/lib/supabase'
+import { useSession } from '@/lib/auth-context'
 
-type ProfileData = {
-  name: string
-  bio: string
-  phone: string
-  instagram: string
-  lineId: string
-}
-
-const AVATAR_PALETTE = [
-  { bg: '#C0E8BA', fg: '#1F2723' },  // mint
-  { bg: '#8FD3D1', fg: '#1F2723' },  // teal
-  { bg: '#8DC2E6', fg: '#1F2723' },  // sky
-  { bg: '#A8AFFF', fg: '#1F2723' },  // periwinkle
-  { bg: '#CDB5FF', fg: '#1F2723' },  // lavender
-  { bg: '#F98486', fg: '#1F2723' },  // pink
-  { bg: '#FD6B59', fg: '#1F2723' },  // coral
-  { bg: '#FFA46E', fg: '#1F2723' },  // peach
-  { bg: '#DFF5AD', fg: '#1F2723' },  // lime
-]
-
-function getAvatarColor(seed: string) {
-  let h = 0
-  for (let i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0
-  return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length]
+type ProProfile = {
+  display_name: string
+  ig_handle: string
 }
 
 export default function ProProfileScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const { session } = useSession()
+
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState<ProfileData>({
-    name: '林小姐美甲',
-    bio: '專業美甲師，10年經驗，擅長凝膠光療與法式設計。',
-    phone: '0912-345-678',
-    instagram: '@linmei_nails',
-    lineId: 'linmei2024',
-  })
-  const snapshot = useRef<ProfileData | null>(null)
+  const [profile, setProfile] = useState<ProProfile>({ display_name: '', ig_handle: '' })
+  const snapshot = useRef<ProProfile | null>(null)
+
+  useEffect(() => {
+    loadProfile()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function loadProfile() {
+    if (!session) return
+    const { data } = await supabase
+      .from('pros')
+      .select('display_name, ig_handle')
+      .eq('user_id', session.user.id)
+      .single()
+    if (data) {
+      setProfile({
+        display_name: data.display_name ?? '',
+        ig_handle: data.ig_handle ?? '',
+      })
+    }
+    setLoading(false)
+  }
 
   function startEditing() {
     snapshot.current = { ...profile }
@@ -55,22 +56,48 @@ export default function ProProfileScreen() {
     setIsEditing(false)
   }
 
-  function handleSave() {
-    snapshot.current = null
-    setIsEditing(false)
+  async function handleSave() {
+    if (!session) return
+    const trimmedName = profile.display_name.trim()
+    if (!trimmedName) {
+      Alert.alert('請輸入顯示名稱')
+      return
+    }
+    setSaving(true)
+    const { error } = await supabase
+      .from('pros')
+      .update({
+        display_name: trimmedName,
+        ig_handle: profile.ig_handle.trim().replace(/^@/, '') || null,
+      })
+      .eq('user_id', session.user.id)
+    setSaving(false)
+    if (error) {
+      Alert.alert('儲存失敗', error.message)
+    } else {
+      setProfile(prev => ({
+        display_name: trimmedName,
+        ig_handle: prev.ig_handle.trim().replace(/^@/, ''),
+      }))
+      snapshot.current = null
+      setIsEditing(false)
+    }
   }
 
-  function set<K extends keyof ProfileData>(key: K, value: string) {
-    setProfile(prev => ({ ...prev, [key]: value }))
+  if (loading) {
+    return (
+      <YStack flex={1} backgroundColor="#FBFBF8" alignItems="center" justifyContent="center">
+        <ActivityIndicator color="#1F2723" />
+      </YStack>
+    )
   }
-
-  const { bg, fg } = getAvatarColor(profile.name)
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">
+      {/* Header */}
       <XStack
         paddingTop={insets.top + 16}
-        paddingHorizontal={16}
+        paddingHorizontal={20}
         paddingBottom={12}
         alignItems="center"
       >
@@ -79,15 +106,21 @@ export default function ProProfileScreen() {
           accessibilityLabel="返回"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, marginRight: 12 })}
         >
-          <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
+          <AppIcon name="back" size={20} color="#1F2723" />
         </Pressable>
-        <Text fontSize={18} fontWeight="700" color="#1F2723" flex={1}>個人資料</Text>
+        <Text fontSize={20} fontWeight="700" color="#1F2723" flex={1}>個人簡介</Text>
         {isEditing ? (
-          <Pressable onPress={handleCancel} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+          <Pressable
+            onPress={handleCancel}
+            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+          >
             <Text fontSize={15} color="#626765">取消</Text>
           </Pressable>
         ) : (
-          <Pressable onPress={startEditing} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+          <Pressable
+            onPress={startEditing}
+            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+          >
             <Text fontSize={15} fontWeight="600" color="#FF5A3C">編輯</Text>
           </Pressable>
         )}
@@ -97,97 +130,63 @@ export default function ProProfileScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Photo row */}
-        <Pressable
-          onPress={() => Alert.alert('更換大頭照', '即將推出')}
-          accessibilityLabel="更換大頭照"
-          style={({ pressed }) => [styles.photoRow, { opacity: pressed ? 0.7 : 1 }]}
-        >
-          <View style={[styles.avatar, { backgroundColor: bg }]}>
-            <Text style={{ fontSize: 20, fontWeight: '700', color: fg }}>{profile.name[0] ?? '?'}</Text>
-          </View>
-          <Text fontSize={14} fontWeight="600" color="#FF5A3C">更換大頭照</Text>
-        </Pressable>
-        <View style={styles.fullDivider} />
-
-        <Text style={styles.sectionLabel}>基本資訊</Text>
+        <Text style={styles.sectionLabel}>公開資料</Text>
         <View style={styles.card}>
-          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#626765" width={72}>顯示名稱</Text>
-            <TextInput
-              value={profile.name}
-              onChangeText={v => set('name', v)}
-              placeholder="請輸入顯示名稱"
-              placeholderTextColor="#787D7B"
-              editable={isEditing}
-              style={styles.input}
-            />
+          {/* Display name */}
+          <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
+            <Text fontSize={15} color="#626765" width={88}>顯示名稱</Text>
+            {isEditing ? (
+              <TextInput
+                value={profile.display_name}
+                onChangeText={v => setProfile(p => ({ ...p, display_name: v }))}
+                placeholder="請輸入顯示名稱"
+                placeholderTextColor="#AEADA6"
+                returnKeyType="done"
+                style={styles.input}
+              />
+            ) : (
+              <Text flex={1} fontSize={15} color="#1F2723" textAlign="right">
+                {profile.display_name || '—'}
+              </Text>
+            )}
           </XStack>
           <View style={styles.divider} />
-          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="flex-start">
-            <Text fontSize={15} color="#626765" width={72} paddingTop={2}>簡介</Text>
-            <TextInput
-              value={profile.bio}
-              onChangeText={v => set('bio', v)}
-              placeholder="介紹自己和你的服務風格"
-              placeholderTextColor="#787D7B"
-              multiline
-              numberOfLines={3}
-              editable={isEditing}
-              style={[styles.input, { height: 64, textAlignVertical: 'top' }]}
-            />
-          </XStack>
-        </View>
-
-        <Text style={styles.sectionLabel}>聯絡方式</Text>
-        <View style={styles.card}>
-          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#626765" width={72}>電話</Text>
-            <TextInput
-              value={profile.phone}
-              onChangeText={v => set('phone', v)}
-              placeholder="09XX-XXX-XXX"
-              placeholderTextColor="#787D7B"
-              keyboardType="phone-pad"
-              editable={isEditing}
-              style={styles.input}
-            />
-          </XStack>
-          <View style={styles.divider} />
-          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#626765" width={72}>Instagram</Text>
-            <TextInput
-              value={profile.instagram}
-              onChangeText={v => set('instagram', v)}
-              placeholder="@yourhandle"
-              placeholderTextColor="#787D7B"
-              autoCapitalize="none"
-              editable={isEditing}
-              style={styles.input}
-            />
-          </XStack>
-          <View style={styles.divider} />
-          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-            <Text fontSize={15} color="#626765" width={72}>Line ID</Text>
-            <TextInput
-              value={profile.lineId}
-              onChangeText={v => set('lineId', v)}
-              placeholder="your_line_id"
-              placeholderTextColor="#787D7B"
-              autoCapitalize="none"
-              editable={isEditing}
-              style={styles.input}
-            />
+          {/* Instagram */}
+          <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
+            <Text fontSize={15} color="#626765" width={88}>Instagram</Text>
+            {isEditing ? (
+              <XStack flex={1} alignItems="center" justifyContent="flex-end">
+                <Text fontSize={15} color="#AEADA6">@</Text>
+                <TextInput
+                  value={profile.ig_handle.replace(/^@/, '')}
+                  onChangeText={v => setProfile(p => ({ ...p, ig_handle: v.replace(/^@/, '') }))}
+                  placeholder="your_account"
+                  placeholderTextColor="#AEADA6"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  style={styles.input}
+                />
+              </XStack>
+            ) : (
+              <Text flex={1} fontSize={15} color={profile.ig_handle ? '#1F2723' : '#AEADA6'} textAlign="right">
+                {profile.ig_handle ? `@${profile.ig_handle}` : '—'}
+              </Text>
+            )}
           </XStack>
         </View>
 
         {isEditing && (
           <Pressable
             onPress={handleSave}
+            disabled={saving}
             accessibilityLabel="儲存"
-            style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
+            style={({ pressed }) => [styles.saveBtn, { opacity: pressed || saving ? 0.75 : 1 }]}
           >
-            <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
+            {saving
+              ? <ActivityIndicator color="#fff" />
+              : <Text fontSize={16} fontWeight="700" color="#fff">儲存</Text>
+            }
           </Pressable>
         )}
       </ScrollView>
@@ -196,24 +195,6 @@ export default function ProProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  photoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 14,
-  },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fullDivider: {
-    height: 1,
-    backgroundColor: '#E8E9E9',
-  },
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
@@ -225,7 +206,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   card: {
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     backgroundColor: '#F6F4EF',
     borderRadius: 12,
     overflow: 'hidden',
@@ -235,6 +216,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1F2723',
     textAlign: 'right',
+    padding: 0,
   },
   divider: {
     height: 1,
@@ -245,7 +227,7 @@ const styles = StyleSheet.create({
     height: 48,
     backgroundColor: '#1F2723',
     borderRadius: 12,
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginTop: 32,
     alignItems: 'center',
     justifyContent: 'center',

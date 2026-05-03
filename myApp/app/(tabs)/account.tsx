@@ -61,7 +61,7 @@ export default function AccountScreen() {
         <Text style={styles.sectionHeader}>設定</Text>
         <YStack>
           <SettingsRow
-            label="帳號"
+            label="基本資料"
             iconName="user"
             onPress={() => router.push('/account/profile')}
           />
@@ -81,7 +81,7 @@ export default function AccountScreen() {
               <SettingsRow
                 label="申請成為設計師"
                 iconName="user"
-                onPress={() => router.push('/(onboarding)/pro/display-name' as never)}
+                onPress={() => router.push('/(onboarding)/pro/domains' as never)}
               />
             </YStack>
           </>
