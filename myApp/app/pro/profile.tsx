@@ -170,7 +170,7 @@ export default function ProProfileScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                   returnKeyType="done"
-                  style={styles.input}
+                  style={styles.igInput}
                 />
               </XStack>
             ) : (
@@ -246,6 +246,12 @@ const styles = StyleSheet.create({
     color: '#1F2723',
     textAlign: 'right',
     padding: 0,
+  },
+  igInput: {
+    fontSize: 15,
+    color: '#1F2723',
+    padding: 0,
+    minWidth: 80,
   },
   bioInput: {
     fontSize: 15,
