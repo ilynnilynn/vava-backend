@@ -12,6 +12,7 @@ import { useSession } from '@/lib/auth-context'
 type ProProfile = {
   display_name: string
   ig_handle: string
+  bio: string
 }
 
 export default function ProProfileScreen() {
@@ -22,7 +23,7 @@ export default function ProProfileScreen() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState<ProProfile>({ display_name: '', ig_handle: '' })
+  const [profile, setProfile] = useState<ProProfile>({ display_name: '', ig_handle: '', bio: '' })
   const snapshot = useRef<ProProfile | null>(null)
 
   useEffect(() => {
@@ -34,13 +35,14 @@ export default function ProProfileScreen() {
     if (!session) return
     const { data } = await supabase
       .from('pros')
-      .select('display_name, ig_handle')
+      .select('display_name, ig_handle, bio')
       .eq('user_id', session.user.id)
       .single()
     if (data) {
       setProfile({
         display_name: data.display_name ?? '',
         ig_handle: data.ig_handle ?? '',
+        bio: data.bio ?? '',
       })
     }
     setLoading(false)
@@ -69,6 +71,7 @@ export default function ProProfileScreen() {
       .update({
         display_name: trimmedName,
         ig_handle: profile.ig_handle.trim().replace(/^@/, '') || null,
+        bio: profile.bio.trim() || null,
       })
       .eq('user_id', session.user.id)
     setSaving(false)
@@ -78,6 +81,7 @@ export default function ProProfileScreen() {
       setProfile(prev => ({
         display_name: trimmedName,
         ig_handle: prev.ig_handle.trim().replace(/^@/, ''),
+        bio: prev.bio.trim(),
       }))
       snapshot.current = null
       setIsEditing(false)
@@ -177,6 +181,30 @@ export default function ProProfileScreen() {
           </XStack>
         </View>
 
+        <Text style={styles.sectionLabel}>自我介紹</Text>
+        <View style={styles.card}>
+          {isEditing ? (
+            <TextInput
+              value={profile.bio}
+              onChangeText={v => setProfile(p => ({ ...p, bio: v }))}
+              placeholder="介紹你的服務風格、專長或理念…"
+              placeholderTextColor="#AEADA6"
+              multiline
+              returnKeyType="default"
+              style={styles.bioInput}
+            />
+          ) : (
+            <Text
+              fontSize={15}
+              color={profile.bio ? '#1F2723' : '#AEADA6'}
+              padding={14}
+              lineHeight={22}
+            >
+              {profile.bio || '尚未填寫'}
+            </Text>
+          )}
+        </View>
+
         {isEditing && (
           <Pressable
             onPress={handleSave}
@@ -218,6 +246,14 @@ const styles = StyleSheet.create({
     color: '#1F2723',
     textAlign: 'right',
     padding: 0,
+  },
+  bioInput: {
+    fontSize: 15,
+    color: '#1F2723',
+    padding: 14,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    lineHeight: 22,
   },
   divider: {
     height: 1,
