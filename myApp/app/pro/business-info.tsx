@@ -84,7 +84,7 @@ export default function BusinessInfoScreen() {
         {isEditing ? (
           <Pressable
             onPress={handleCancel}
-            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+            style={({ pressed }) => ({ padding: 10, opacity: pressed ? 0.5 : 1 })}
           >
             <Text fontSize={15} color="#626765">取消</Text>
           </Pressable>
