@@ -19,3 +19,4 @@ supabase/.temp/
 # misc
 .DS_Store
 *.tsbuildinfo
+.vercel
