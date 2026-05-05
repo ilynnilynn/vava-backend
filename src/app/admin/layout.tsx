@@ -41,6 +41,9 @@ export default async function AdminLayout({
             <a href="/admin/pros" className="text-muted-foreground hover:text-foreground transition-colors">
               Pending Pros
             </a>
+            <a href="/admin/verification" className="text-muted-foreground hover:text-foreground transition-colors">
+              Verification
+            </a>
           </nav>
         </div>
       </header>

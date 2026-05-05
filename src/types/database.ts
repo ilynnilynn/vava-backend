@@ -97,6 +97,10 @@ export type Pro = {
   no_show_window_minutes: 10 | 15 | 20  // minutes before pro can mark no-show. Default 15.
   work_start_hour: number               // 0–23, default 10
   work_end_hour: number                 // 1–24, default 20
+  verification_status: 'pending' | 'approved' | 'rejected'
+  rejection_reasons: string[] | null
+  rejection_note: string | null
+  reviewed_at: string | null
   created_at: string
   updated_at: string
 }
