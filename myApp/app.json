@@ -11,7 +11,18 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "backgroundColor": "#FBFBF8"
+      "backgroundColor": "#FBFBF8",
+      "bundleIdentifier": "com.ilynn.vava",
+      "usesAppleSignIn": true,
+      "config": {
+        "googleMapsApiKey": "AIzaSyCmBVHouxfFd2jDSBFOe2ndLo4SPQ9xQB0"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["instagram"],
+        "NSLocationWhenInUseUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。",
+        "NSLocationAlwaysUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +32,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.vava.app"
     },
     "web": {
       "output": "static",
@@ -30,21 +42,46 @@
     "plugins": [
       "expo-router",
       [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.469445215641-g5k6vfghfs39d873i7loiaklsted95fg"
+        }
+      ],
+      "expo-location",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#1F2723",
+          "sounds": [],
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FF5A3C",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#FF5A3C"
           }
         }
-      ]
+      ],
+      "expo-apple-authentication",
+      "expo-image-picker",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "28d26bae-7d82-444b-99b1-3f68e81f48b5"
+      }
     }
   }
 }

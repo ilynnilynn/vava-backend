@@ -1,11 +1,20 @@
 // app/(onboarding)/customer/birthday.tsx
-import { useState } from 'react'
-import { Alert, TextInput, StyleSheet, View } from 'react-native'
+import { useRef, useState } from 'react'
+import { InputAccessoryView, Platform, Pressable, TextInput, StyleSheet, View } from 'react-native'
+
+const ACCESSORY_ID = 'birthday-input-accessory'
 import { Text } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { useSession } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { OnboardingStepLayout } from '@/components/onboarding/OnboardingStepLayout'
+
+// Format 8 raw digits into YYYY-MM-DD, inserting dashes automatically
+function formatBirthday(digits: string): string {
+  if (digits.length <= 4) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`
+}
 
 function isValidDate(str: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false
@@ -16,63 +25,68 @@ function isValidDate(str: string): boolean {
 export default function CustomerBirthdayScreen() {
   const router = useRouter()
   const { session } = useSession()
+  const inputRef = useRef<TextInput>(null)
   const [birthday, setBirthday] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [touched, setTouched] = useState(false)
 
   const isValid = isValidDate(birthday)
 
-  async function handleNext() {
+  function handleChangeText(text: string) {
+    // Strip all non-digits, cap at 8 digits, then reformat
+    const digits = text.replace(/\D/g, '').slice(0, 8)
+    setBirthday(formatBirthday(digits))
+  }
+
+  function handleNext() {
     if (!isValid || !session) return
-    setSaving(true)
-    const { error } = await supabase
-      .from('users')
-      .upsert({ id: session.user.id, birthday }, { onConflict: 'id' })
-    setSaving(false)
-    if (error) {
-      Alert.alert('儲存失敗', error.message)
-      return
-    }
     router.push('/(onboarding)/customer/gender')
+    supabase.from('users').upsert({ id: session.user.id, birthday }, { onConflict: 'id' })
+      .then(({ error }) => { if (error) console.error('birthday save failed:', error) })
   }
 
   return (
     <OnboardingStepLayout
       title="你的生日？"
-      subtitle="格式：YYYY-MM-DD"
       step={3}
       totalSteps={4}
       onNext={handleNext}
-      nextDisabled={!isValid || saving}
+      nextDisabled={!isValid}
     >
-      <View>
+      <Pressable style={{ flex: 1 }} onPress={() => inputRef.current?.focus()}>
         <TextInput
+          ref={inputRef}
           value={birthday}
-          onChangeText={setBirthday}
+          onChangeText={handleChangeText}
           placeholder="1995-06-15"
           placeholderTextColor="#AEADA6"
-          keyboardType="numbers-and-punctuation"
+          keyboardType="number-pad"
           maxLength={10}
           autoFocus
-          returnKeyType="done"
+          inputAccessoryViewID={Platform.OS === 'ios' ? ACCESSORY_ID : undefined}
           onSubmitEditing={handleNext}
+          onBlur={() => setTouched(true)}
           style={styles.input}
         />
-        {birthday.length > 0 && !isValid && (
+        {Platform.OS === 'ios' && (
+          <InputAccessoryView nativeID={ACCESSORY_ID}>
+            <View />
+          </InputAccessoryView>
+        )}
+        {touched && birthday.length > 0 && !isValid && (
           <Text fontSize={13} color="#CC3352" marginTop={8}>
-            請輸入正確日期格式（YYYY-MM-DD）
+            請輸入正確日期（年月日）
           </Text>
         )}
-      </View>
+      </Pressable>
     </OnboardingStepLayout>
   )
 }
 
 const styles = StyleSheet.create({
   input: {
-    fontSize: 20,
+    fontSize: 30,
+    fontWeight: '400',
     color: '#1F2723',
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#E8E9E9',
     paddingVertical: 12,
     paddingHorizontal: 0,
   },

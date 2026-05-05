@@ -37,7 +37,7 @@ export default function ProNailScopeScreen() {
     <OnboardingStepLayout
       title="美甲服務範圍？"
       subtitle="可複選"
-      step={3}
+      step={2}
       totalSteps={6}
       onNext={handleNext}
       nextDisabled={selected.length === 0}

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Pressable, TextInput, Keyboard, Alert, ScrollView, Linking, TouchableWithoutFeedback } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 import * as Location from 'expo-location'
 
 import { StepLayout } from '@/components/booking/StepLayout'
@@ -183,7 +183,7 @@ export default function LocationScreen() {
                 alignItems="center"
                 justifyContent="center"
               >
-                <FA6ProIcon name="xmark" size={10} color="#1F2723" />
+                <AppIcon name="close" size={10} color="#1F2723" />
               </View>
             </Pressable>
           )}
@@ -203,7 +203,7 @@ export default function LocationScreen() {
             alignItems="center"
             gap={12}
           >
-            <FA6ProIcon name="location-arrow" size={18} color="#1F2723" />
+            <AppIcon name="locateMe" size={18} color="#1F2723" />
             <Text fontSize={15} fontWeight="600" color="#1F2723" flex={1}>
               {loading ? '定位中...' : '使用目前位置'}
             </Text>
@@ -243,7 +243,7 @@ export default function LocationScreen() {
                   })}
                 >
                   <XStack gap={10} alignItems="center">
-                    <FA6ProIcon name="location-dot" size={13} color="#626765" />
+                    <AppIcon name="location" size={13} color="#626765" />
                     <Text fontSize={14} color="#1F2723" flex={1} numberOfLines={1}>
                       {s.description}
                     </Text>

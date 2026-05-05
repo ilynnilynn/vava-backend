@@ -1,0 +1,201 @@
+<h2>Pro Home Screen — Layout Options</h2>
+<p class="subtitle">All three drive slot-opening + show performance. Which direction feels right?</p>
+
+<style>
+  .phone-row { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .phone { width: 220px; border-radius: 36px; background: #FBFBF8; border: 2px solid #d8d6ce; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+  .phone-bar { height: 28px; background: #FBFBF8; display: flex; align-items: center; justify-content: center; }
+  .phone-notch { width: 60px; height: 14px; background: #d8d6ce; border-radius: 8px; }
+  .phone-body { padding: 0 0 20px; }
+  .ph { padding: 0 12px; }
+  .screen-header { padding: 16px 12px 10px; }
+  .screen-title { font-size: 17px; font-weight: 700; color: #141413; margin: 0; }
+  .screen-sub { font-size: 10px; color: #858279; margin: 2px 0 0; }
+
+  /* Cards */
+  .stat-row { display: flex; gap: 6px; padding: 0 12px; margin-bottom: 10px; }
+  .stat-card { flex: 1; background: #F5F5F0; border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .stat-num { font-size: 18px; font-weight: 700; color: #141413; line-height: 1.2; }
+  .stat-label { font-size: 9px; color: #858279; margin-top: 2px; }
+
+  .slot-cta { margin: 0 12px 10px; background: #141413; border-radius: 12px; padding: 14px 14px; }
+  .slot-cta-warm { margin: 0 12px 10px; background: #c96442; border-radius: 12px; padding: 14px 14px; }
+  .cta-label { font-size: 10px; color: rgba(255,255,255,0.65); margin-bottom: 2px; }
+  .cta-main { font-size: 14px; font-weight: 700; color: #fff; }
+  .cta-sub { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+  .cta-arrow { font-size: 11px; color: rgba(255,255,255,0.7); float: right; margin-top: -22px; }
+
+  .section-label { font-size: 10px; font-weight: 600; color: #858279; padding: 0 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .alert-card { margin: 0 12px 10px; background: #F5F5F0; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+  .alert-dot { width: 8px; height: 8px; background: #c96442; border-radius: 50%; flex-shrink: 0; }
+  .alert-text { font-size: 10px; color: #141413; }
+
+  .avail-card { margin: 0 12px 10px; background: #F5F5F0; border-radius: 12px; padding: 12px; }
+  .avail-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .avail-title { font-size: 12px; font-weight: 600; color: #141413; }
+  .avail-badge { font-size: 9px; background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 99px; font-weight: 600; }
+  .avail-badge-off { font-size: 9px; background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 99px; font-weight: 600; }
+  .slot-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+  .dot { width: 10px; height: 10px; border-radius: 2px; }
+  .dot-open { background: #141413; }
+  .dot-avail { background: #E0E0D8; border: 1px solid #c8c6be; }
+  .dot-booked { background: #c96442; opacity: 0.6; }
+  .avail-sub { font-size: 9px; color: #858279; margin-top: 6px; }
+
+  .perf-card { margin: 0 12px 10px; background: #F5F5F0; border-radius: 10px; padding: 10px 12px; }
+  .perf-row { display: flex; justify-content: space-between; }
+  .perf-item { text-align: center; }
+  .perf-num { font-size: 14px; font-weight: 700; color: #141413; }
+  .perf-lbl { font-size: 9px; color: #858279; }
+
+  .option-label { text-align: center; padding: 10px 0 4px; font-size: 12px; font-weight: 600; color: #141413; }
+  .option-desc { text-align: center; font-size: 10px; color: #858279; padding: 0 8px 8px; line-height: 1.4; }
+
+  .divider { height: 1px; background: #e8e6dc; margin: 6px 12px; }
+</style>
+
+<div class="cards" style="justify-content:center;">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)" style="width:240px;">
+    <div class="card-image" style="padding:16px 16px 8px; background:#f0ede5;">
+      <div class="phone">
+        <div class="phone-bar"><div class="phone-notch"></div></div>
+        <div class="phone-body">
+          <div class="screen-header">
+            <p class="screen-title">總覽</p>
+            <p class="screen-sub">4/24 週四</p>
+          </div>
+
+          <div class="section-label">立即開放時段</div>
+          <div class="slot-cta">
+            <div class="cta-label">今日可開放</div>
+            <div class="cta-main">開放更多時段 →</div>
+            <div class="cta-sub">讓新客戶找到你</div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-label" style="margin-top:8px;">本週表現</div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-num">12</div>
+              <div class="stat-label">曝光次數</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">4.9</div>
+              <div class="stat-label">評分</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">3</div>
+              <div class="stat-label">本週預約</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Action-first</h3>
+      <p>CTA to open slots is the hero. Stats are secondary below. Simple and direct.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)" style="width:240px;">
+    <div class="card-image" style="padding:16px 16px 8px; background:#f0ede5;">
+      <div class="phone">
+        <div class="phone-bar"><div class="phone-notch"></div></div>
+        <div class="phone-body">
+          <div class="screen-header">
+            <p class="screen-title">總覽</p>
+            <p class="screen-sub">4/24 週四</p>
+          </div>
+
+          <div class="section-label">今日時段</div>
+          <div class="avail-card">
+            <div class="avail-top">
+              <span class="avail-title">開放中 · 3 個時段</span>
+              <span class="avail-badge">接客中</span>
+            </div>
+            <div class="slot-dots">
+              <div class="dot dot-booked"></div>
+              <div class="dot dot-booked"></div>
+              <div class="dot dot-open"></div>
+              <div class="dot dot-avail"></div>
+              <div class="dot dot-open"></div>
+              <div class="dot dot-avail"></div>
+              <div class="dot dot-avail"></div>
+              <div class="dot dot-open"></div>
+              <div class="dot dot-avail"></div>
+              <div class="dot dot-avail"></div>
+            </div>
+            <div class="avail-sub">● 已預約 &nbsp;■ 開放 &nbsp;□ 可開放 &nbsp;→ 點此管理</div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-num">12</div>
+              <div class="stat-label">本週曝光</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">4.9★</div>
+              <div class="stat-label">評分</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">3</div>
+              <div class="stat-label">本週預約</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Slot status card</h3>
+      <p>Visual slot grid shows today's availability at a glance. Tap to go to slots screen. Stats below.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)" style="width:240px;">
+    <div class="card-image" style="padding:16px 16px 8px; background:#f0ede5;">
+      <div class="phone">
+        <div class="phone-bar"><div class="phone-notch"></div></div>
+        <div class="phone-body">
+          <div class="screen-header">
+            <p class="screen-title">總覽</p>
+            <p class="screen-sub">4/24 週四</p>
+          </div>
+
+          <div class="alert-card">
+            <div class="alert-dot"></div>
+            <div class="alert-text">你今日沒有開放時段 — 立即開放，讓客戶預約</div>
+          </div>
+
+          <div class="section-label">時段開放狀態</div>
+          <div class="avail-card">
+            <div class="avail-top">
+              <span class="avail-title">今日 · 0 個時段開放</span>
+              <span class="avail-badge-off">未開放</span>
+            </div>
+            <div class="avail-sub" style="margin-top:0;">點此前往開放時段 →</div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-label" style="margin-top:8px;">表現</div>
+          <div class="perf-card">
+            <div class="perf-row">
+              <div class="perf-item"><div class="perf-num">12</div><div class="perf-lbl">本週曝光</div></div>
+              <div class="perf-item"><div class="perf-num">4.9★</div><div class="perf-lbl">評分</div></div>
+              <div class="perf-item"><div class="perf-num">3</div><div class="perf-lbl">本週預約</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Smart nudge</h3>
+      <p>Alert banner if no slots open. Status card shows current state. Performance below. Context-aware.</p>
+    </div>
+  </div>
+
+</div>

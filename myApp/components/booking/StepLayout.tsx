@@ -4,7 +4,7 @@ import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useNavigation } from '@react-navigation/native'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { ProgressBar } from './ProgressBar'
 import { useBookingRequest } from '@/lib/booking-context'
@@ -63,7 +63,7 @@ export function StepLayout({
               accessibilityRole="button"
               accessibilityLabel="返回"
             >
-              <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
+              <AppIcon name="back" size={20} color="#1F2723" />
             </Pressable>
           )}
           <View flex={1} alignItems="center">
@@ -75,13 +75,13 @@ export function StepLayout({
             accessibilityRole="button"
             accessibilityLabel="關閉"
           >
-            <FA6ProIcon name="xmark" size={24} color="#1F2723" />
+            <AppIcon name="close" size={24} color="#1F2723" />
           </Pressable>
         </XStack>
       </YStack>
 
       {/* Question heading */}
-      <YStack paddingLeft={20} paddingRight={16} paddingTop={24} paddingBottom={8} gap={12}>
+      <YStack paddingLeft={20} paddingRight={16} paddingTop={24} paddingBottom={8} gap={8}>
         <Text fontSize={30} fontWeight="600" lineHeight={38} color="#1F2723">
           {title}
         </Text>

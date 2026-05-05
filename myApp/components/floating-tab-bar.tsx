@@ -1,9 +1,10 @@
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { BlurView } from 'expo-blur'
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
+import type { AppIconName } from '@/constants/iconMap'
 
 const ACTIVE_COLOR = '#1A1A1A'
 const INACTIVE_COLOR = 'rgba(0,0,0,0.4)'
@@ -13,8 +14,8 @@ const INNER_PADDING = 6
 const ACTIVE_RADIUS = CONTAINER_RADIUS - INNER_PADDING // 34
 
 // ── Default customer tab config ────────────────────────────────
-const DEFAULT_ICON_NAMES: Record<string, string> = {
-  index: 'house',
+const DEFAULT_ICON_NAMES: Record<string, AppIconName> = {
+  index: 'home',
   bookings: 'calendar',
   account: 'user',
 }
@@ -26,7 +27,7 @@ const DEFAULT_LABELS: Record<string, string> = {
 }
 
 type TabBarConfig = {
-  iconNames?: Record<string, string>
+  iconNames?: Record<string, AppIconName>
   labels?: Record<string, string>
 }
 
@@ -72,7 +73,7 @@ export function FloatingTabBar({ state, navigation, iconNames, labels }: BottomT
             if (!(route.name in resolvedIcons)) return null
             const isFocused = state.index === index
             const iconName = resolvedIcons[route.name]!
-            const label = resolvedLabels[route.name] ?? route.name
+            const accessLabel = resolvedLabels[route.name] ?? route.name
             const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR
 
             const onPress = () => {
@@ -100,24 +101,15 @@ export function FloatingTabBar({ state, navigation, iconNames, labels }: BottomT
                 onLongPress={onLongPress}
                 accessibilityRole="button"
                 accessibilityState={isFocused ? { selected: true } : {}}
-                accessibilityLabel={label}
+                accessibilityLabel={accessLabel}
                 style={[styles.tab, isFocused && styles.tabActive]}
               >
-                <FA6ProIcon
+                <AppIcon
                   name={iconName}
-                  size={22}
+                  size={24}
                   color={color}
                   weight={isFocused ? 'solid' : 'regular'}
                 />
-                <Text
-                  style={[
-                    styles.label,
-                    isFocused && styles.labelActive,
-                    { color },
-                  ]}
-                >
-                  {label}
-                </Text>
               </Pressable>
             )
           })}
@@ -179,19 +171,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: ACTIVE_RADIUS,
-    gap: 2,
   },
   tabActive: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: 'rgba(232,233,233,0.7)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.95)',
-  },
-  label: {
-    fontSize: 10,
-    lineHeight: 12,
-    fontWeight: '400',
-  },
-  labelActive: {
-    fontWeight: '600',
   },
 })

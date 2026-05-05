@@ -1,27 +1,68 @@
 // app/(onboarding)/pro/location.tsx
-import { useState } from 'react'
-import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native'
+import { useRef, useState } from 'react'
+import { FlatList, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import GooglePlacesAutocomplete from 'react-native-google-places-autocomplete'
 import { OnboardingStepLayout } from '@/components/onboarding/OnboardingStepLayout'
 import { AppIcon } from '@/components/AppIcon'
 import { TAIWAN_CITIES, type TaiwanCity } from '@/constants/taiwan-districts'
 
 const DRAFT_KEY = '@vava/proWizardDraft'
 const MAPS_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
+const PLACES_URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json'
 
 export default function ProLocationScreen() {
   const router = useRouter()
   const [city, setCity] = useState<string | null>(null)
   const [district, setDistrict] = useState<string | null>(null)
   const [address, setAddress] = useState('')
+  const [streetText, setStreetText] = useState('')
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const [showCityPicker, setShowCityPicker] = useState(false)
   const [showDistrictPicker, setShowDistrictPicker] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const cityData: TaiwanCity | undefined = TAIWAN_CITIES.find((c) => c.name === city)
   const canNext = !!city && !!district && address.trim().length > 0
+
+  async function fetchSuggestions(text: string, currentDistrict: string) {
+    if (text.length < 2) { setSuggestions([]); return }
+    try {
+      const input = encodeURIComponent(`${currentDistrict} ${text}`)
+      const res = await fetch(
+        `${PLACES_URL}?input=${input}&components=country:tw&language=zh-TW&key=${MAPS_KEY}`
+      )
+      const json = await res.json()
+      if (json.status === 'OK') {
+        // Only keep results that mention the selected district
+        const filtered: string[] = json.predictions
+          .filter((p: { description: string }) => p.description.includes(currentDistrict))
+          .map((p: { description: string }) => p.description)
+        setSuggestions(filtered)
+      } else {
+        setSuggestions([])
+      }
+    } catch {
+      setSuggestions([])
+    }
+  }
+
+  function handleStreetChange(text: string) {
+    setStreetText(text)
+    setAddress('')
+    if (!text) { setSuggestions([]); return }
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (district) {
+      debounceRef.current = setTimeout(() => fetchSuggestions(text, district), 350)
+    }
+  }
+
+  function selectSuggestion(description: string) {
+    setAddress(description)
+    setStreetText(description)
+    setSuggestions([])
+  }
 
   async function handleNext() {
     if (!canNext) return
@@ -38,11 +79,17 @@ export default function ProLocationScreen() {
   function selectCity(name: string) {
     setCity(name)
     setDistrict(null)
+    setAddress('')
+    setStreetText('')
+    setSuggestions([])
     setShowCityPicker(false)
   }
 
   function selectDistrict(name: string) {
     setDistrict(name)
+    setAddress('')
+    setStreetText('')
+    setSuggestions([])
     setShowDistrictPicker(false)
   }
 
@@ -82,31 +129,31 @@ export default function ProLocationScreen() {
         <AppIcon name="chevronDown" size={16} color={city ? '#626765' : '#C8C9C8'} />
       </Pressable>
 
-      {/* Google Places address input */}
+      {/* Address autocomplete — filtered to selected district */}
       <Text style={[styles.label, styles.labelSpaced]}>詳細地址</Text>
-      <GooglePlacesAutocomplete
-        placeholder="輸入地址"
-        onPress={(data) => setAddress(data.description)}
-        query={{
-          key: MAPS_KEY,
-          language: 'zh-TW',
-          components: 'country:tw',
-        }}
-        textInputProps={{
-          placeholderTextColor: '#AEADA6',
-          onChangeText: (text) => { if (!text) setAddress('') },
-        }}
-        styles={{
-          textInput: styles.addressInput,
-          row: styles.suggestionRow,
-          description: styles.suggestionText,
-          listView: styles.suggestionList,
-        }}
-        fetchDetails={false}
-        enablePoweredByContainer={false}
-        keepResultsAfterBlur={false}
-        minLength={2}
+      <TextInput
+        value={streetText}
+        onChangeText={handleStreetChange}
+        placeholder={district ? `在 ${district} 搜尋地址` : '先選擇行政區'}
+        placeholderTextColor="#AEADA6"
+        editable={!!district}
+        returnKeyType="done"
+        style={[styles.addressInput, !district && styles.selectorDisabled]}
       />
+      {suggestions.length > 0 && (
+        <FlatList
+          data={suggestions}
+          keyExtractor={(item) => item}
+          style={styles.suggestionList}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <Pressable onPress={() => selectSuggestion(item)} style={styles.suggestionRow}>
+              <Text style={styles.suggestionText}>{item}</Text>
+            </Pressable>
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      )}
 
       {/* City picker modal */}
       <Modal visible={showCityPicker} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowCityPicker(false)}>
@@ -200,6 +247,7 @@ const styles = StyleSheet.create({
     borderColor: '#E8E9E9',
     borderRadius: 10,
     marginTop: 4,
+    maxHeight: 220,
   },
   suggestionRow: { paddingHorizontal: 14, paddingVertical: 12 },
   suggestionText: { fontSize: 14, color: '#1F2723' },

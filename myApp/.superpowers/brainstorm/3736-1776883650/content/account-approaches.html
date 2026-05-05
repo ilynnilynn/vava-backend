@@ -1,0 +1,160 @@
+<h2>Account Page — Layout Approach</h2>
+<p class="subtitle">3 ways to structure the account page. Pick the one that feels right.</p>
+
+<div class="cards">
+
+  <!-- OPTION A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f5f4ed;padding:16px;border-radius:8px;font-family:system-ui,sans-serif;">
+      <!-- Phone mockup -->
+      <div style="width:160px;margin:0 auto;background:#fff;border-radius:20px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <!-- status bar -->
+        <div style="height:28px;background:#f5f4ed;display:flex;align-items:center;padding:0 12px;justify-content:space-between;">
+          <span style="font-size:9px;color:#87867f;font-weight:600;">9:41</span>
+          <span style="font-size:9px;color:#87867f;">●●●</span>
+        </div>
+        <!-- title -->
+        <div style="padding:10px 12px 6px;background:#f5f4ed;">
+          <span style="font-size:14px;font-weight:700;color:#141413;">帳號</span>
+        </div>
+        <!-- user info row -->
+        <div style="padding:8px 12px;background:#fff;border-top:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#87867f;margin-bottom:2px;">電子郵件</div>
+          <div style="font-size:10px;color:#141413;">user@example.com</div>
+        </div>
+        <div style="padding:6px 12px;background:#fff;border-top:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#4d4c48;opacity:0.4;">編輯個人資料 ›</div>
+        </div>
+        <!-- divider -->
+        <div style="height:6px;background:#f5f4ed;"></div>
+        <!-- liked pros section -->
+        <div style="padding:6px 12px 4px;background:#fff;border-top:1px solid #f0eee6;">
+          <div style="font-size:9px;font-weight:700;color:#141413;margin-bottom:6px;">喜愛的設計師</div>
+          <div style="display:flex;gap:6px;">
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#e8e6dc;margin:0 auto 2px;"></div>
+              <div style="font-size:7px;color:#4d4c48;">Joy</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#e8e6dc;margin:0 auto 2px;"></div>
+              <div style="font-size:7px;color:#4d4c48;">Momo</div>
+            </div>
+          </div>
+        </div>
+        <!-- divider -->
+        <div style="height:6px;background:#f5f4ed;"></div>
+        <!-- mode / become pro -->
+        <div style="padding:6px 12px;background:#fff;border-top:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#c96442;font-weight:600;">成為設計師 ›</div>
+        </div>
+        <!-- logout -->
+        <div style="padding:6px 12px;background:#fff;border-top:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#b53333;">登出</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Single scrollable page</h3>
+      <p>All sections stacked top-to-bottom: user info → liked pros grid → become a pro / mode toggle → logout. Simple, fast to build, no new routes.</p>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f5f4ed;padding:16px;border-radius:8px;font-family:system-ui,sans-serif;">
+      <div style="width:160px;margin:0 auto;background:#fff;border-radius:20px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <div style="height:28px;background:#f5f4ed;display:flex;align-items:center;padding:0 12px;justify-content:space-between;">
+          <span style="font-size:9px;color:#87867f;font-weight:600;">9:41</span>
+          <span style="font-size:9px;color:#87867f;">●●●</span>
+        </div>
+        <div style="padding:10px 12px 6px;background:#f5f4ed;">
+          <span style="font-size:14px;font-weight:700;color:#141413;">帳號</span>
+        </div>
+        <!-- profile card -->
+        <div style="margin:8px 10px;padding:8px;background:#f5f4ed;border-radius:8px;display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:#d4b8a0;flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#141413;">用戶名稱</div>
+            <div style="font-size:8px;color:#87867f;">user@example.com</div>
+          </div>
+        </div>
+        <!-- settings rows -->
+        <div style="margin:0 10px 4px;">
+          <div style="font-size:7px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">我的收藏</div>
+          <div style="background:#fff;border-radius:6px;border:1px solid #f0eee6;overflow:hidden;">
+            <div style="padding:7px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0eee6;">
+              <span style="font-size:9px;color:#141413;">喜愛的設計師</span>
+              <span style="font-size:9px;color:#87867f;">2 ›</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin:6px 10px 4px;">
+          <div style="font-size:7px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">帳號</div>
+          <div style="background:#fff;border-radius:6px;border:1px solid #f0eee6;overflow:hidden;">
+            <div style="padding:7px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0eee6;">
+              <span style="font-size:9px;color:#c96442;">成為設計師</span>
+              <span style="font-size:9px;color:#87867f;">›</span>
+            </div>
+            <div style="padding:7px 8px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:9px;color:#b53333;">登出</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Settings-style list (iOS)</h3>
+      <p>Profile card header + grouped rows like iOS Settings. Liked Pros row navigates to a separate screen. Clean hierarchy, familiar pattern.</p>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f5f4ed;padding:16px;border-radius:8px;font-family:system-ui,sans-serif;">
+      <div style="width:160px;margin:0 auto;background:#fff;border-radius:20px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <div style="height:28px;background:#f5f4ed;display:flex;align-items:center;padding:0 12px;justify-content:space-between;">
+          <span style="font-size:9px;color:#87867f;font-weight:600;">9:41</span>
+          <span style="font-size:9px;color:#87867f;">●●●</span>
+        </div>
+        <!-- no page title — profile IS the header -->
+        <div style="padding:12px 12px 8px;background:#f5f4ed;text-align:center;">
+          <div style="width:44px;height:44px;border-radius:50%;background:#d4b8a0;margin:0 auto 4px;"></div>
+          <div style="font-size:10px;font-weight:700;color:#141413;">用戶名稱</div>
+          <div style="font-size:8px;color:#87867f;">user@example.com</div>
+        </div>
+        <!-- liked pros horizontal scroll -->
+        <div style="padding:6px 12px;background:#fff;border-top:1px solid #f0eee6;">
+          <div style="font-size:8px;font-weight:700;color:#141413;margin-bottom:5px;">喜愛的設計師</div>
+          <div style="display:flex;gap:6px;overflow:hidden;">
+            <div style="flex-shrink:0;text-align:center;">
+              <div style="width:28px;height:28px;border-radius:8px;background:#e8e6dc;margin-bottom:2px;"></div>
+              <div style="font-size:7px;color:#4d4c48;">Joy</div>
+            </div>
+            <div style="flex-shrink:0;text-align:center;">
+              <div style="width:28px;height:28px;border-radius:8px;background:#e8e6dc;margin-bottom:2px;"></div>
+              <div style="font-size:7px;color:#4d4c48;">Momo</div>
+            </div>
+            <div style="flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1.5px dashed #d1cfc5;display:flex;align-items:center;justify-content:center;margin-top:0;">
+              <span style="font-size:12px;color:#b0aea5;">+</span>
+            </div>
+          </div>
+        </div>
+        <!-- mode card -->
+        <div style="margin:6px 10px 4px;padding:8px;background:#f5f4ed;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:9px;font-weight:600;color:#c96442;">✦ 成為設計師</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+        <div style="padding:6px 12px;border-top:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#b53333;">登出</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Profile-first with horizontal scroll</h3>
+      <p>Centered profile avatar at top, liked pros shown as a horizontal scroll row (like Instagram highlights). More visual but slightly complex.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">My recommendation: <strong>B (Settings-style)</strong> — familiar iOS pattern, cleanest separation between liked pros and settings rows, easy to extend later.</p>

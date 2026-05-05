@@ -3,7 +3,7 @@ import { Pressable, FlatList, Alert } from 'react-native'
 import { YStack, XStack, Text, View, Spinner } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { useBookingRequest } from '@/lib/booking-context'
 import { apiPost } from '@/lib/api'
@@ -110,7 +110,7 @@ export default function SlotsScreen() {
           accessibilityRole="button"
           accessibilityLabel="返回"
         >
-          <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
+          <AppIcon name="back" size={20} color="#1F2723" />
         </Pressable>
         <View flex={1} alignItems="center">
           <Text fontSize={16} fontWeight="600" color="#1F2723">可預約時段</Text>
@@ -236,7 +236,7 @@ export default function SlotsScreen() {
                       width: 64,
                       height: 44,
                       borderRadius: 9999,
-                      backgroundColor: isSelected ? '#1F2723' : '#E8E9E9',
+                      backgroundColor: isSelected ? '#1F2723' : '#E7E8E1',
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: pressed ? 0.7 : 1,

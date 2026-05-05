@@ -3,7 +3,7 @@ import { Pressable, ActivityIndicator, Alert } from 'react-native'
 import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { StatusBadge } from '@/components/booking/StatusBadge'
 import { fetchBookingDetail } from '@/lib/bookings-api'
@@ -123,7 +123,7 @@ export default function BookingDetailScreen() {
           accessibilityRole="button"
           accessibilityLabel="返回"
         >
-          <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
+          <AppIcon name="back" size={20} color="#1F2723" />
         </Pressable>
         <View flex={1} alignItems="center">
           <Text fontSize={16} fontWeight="600" color="#1F2723">預約詳情</Text>
@@ -147,28 +147,28 @@ export default function BookingDetailScreen() {
 
           <YStack gap={8}>
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="scissors" size={14} color="#626765" />
+              <AppIcon name="scissors" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 {domainLabel} — {detail.service_label}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="calendar" size={14} color="#626765" />
+              <AppIcon name="calendar" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 {formatBookingDate(detail.starts_at)} {formatSlotTime(detail.starts_at)}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="location-dot" size={14} color="#626765" />
+              <AppIcon name="location" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 {detail.studio_address}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="dollar-sign" size={14} color="#626765" />
+              <AppIcon name="dollarSign" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 NT${detail.price_min}–{detail.price_max}
               </Text>
@@ -176,7 +176,7 @@ export default function BookingDetailScreen() {
 
             {showPhone && detail.pro_phone && (
               <XStack gap={8} alignItems="center">
-                <FA6ProIcon name="phone" size={14} color="#626765" />
+                <AppIcon name="phone" size={14} color="#626765" />
                 <Text fontSize={15} fontWeight="600" color="#626765">
                   {detail.pro_phone}
                 </Text>

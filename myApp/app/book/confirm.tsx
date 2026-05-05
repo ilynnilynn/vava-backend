@@ -4,7 +4,8 @@ import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useBookingRequest } from '@/lib/booking-context'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
+import type { AppIconName } from '@/constants/iconMap'
 import { apiPost } from '@/lib/api'
 import { formatBookingDate, formatSlotTime } from '@/lib/booking-helpers'
 
@@ -113,7 +114,7 @@ export default function ConfirmScreen() {
             accessibilityRole="button"
             accessibilityLabel="返回"
           >
-            <FA6ProIcon name="chevron-left" size={20} color="#1F2723" />
+            <AppIcon name="back" size={20} color="#1F2723" />
           </Pressable>
           <View flex={1} alignItems="center">
             <Text fontSize={16} fontWeight="600" color="#1F2723">確認預約</Text>
@@ -130,7 +131,7 @@ export default function ConfirmScreen() {
       >
         <YStack backgroundColor="#F0EDE5" borderRadius={8} padding={20} gap={16}>
           {/* Pro name */}
-          <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723">
+          <Text fontSize={24} fontWeight="700" lineHeight={32} color="#1F2723">
             {params.proName}
           </Text>
 
@@ -138,21 +139,21 @@ export default function ConfirmScreen() {
           <ServiceRows lines={serviceLines} />
 
           {/* Notes & preferences */}
-          {noteLabel ? <InfoRow icon="pen" label="備註" value={noteLabel} /> : null}
+          {noteLabel ? <InfoRow icon="edit" label="備註" value={noteLabel} /> : null}
 
           {/* Reference photo indicator */}
           {state.refPhotoUrl ? <InfoRow icon="image" label="參考圖片" value="已上傳 1 張" /> : null}
 
           {/* Date & time */}
           <InfoRow icon="calendar" label="日期" value={dateLabel} />
-          <InfoRow icon="clock" label="時間" value={timeLabel} />
+          <InfoRow icon="time" label="時間" value={timeLabel} />
 
           {/* Price */}
-          <InfoRow icon="tag" label="估價" value={`NT$${priceMin} 起`} />
+          <InfoRow icon="price" label="估價" value={`NT$${priceMin} 起`} />
 
           {/* Address */}
           <InfoRow
-            icon="location-dot"
+            icon="location"
             label="地址"
             value={params.studioAddress || '確認後由設計師提供'}
           />
@@ -173,14 +174,14 @@ export default function ConfirmScreen() {
           paddingVertical={10}
           alignItems="center"
           justifyContent="center"
-          gap={10}
+          gap={12}
         >
-          <FA6ProIcon name="shield-halved" size={15} color="#626765" />
+          <AppIcon name="shieldCheck" size={20} color="#33CC87" />
           <YStack gap={1} alignItems="center">
-            <Text fontSize={13} fontWeight="600" lineHeight={18} color="#4d4c48" textAlign="center">
+            <Text fontSize={15} fontWeight="600" lineHeight={22} color="#1F2723" textAlign="center">
               確認後10分鐘內可免責取消
             </Text>
-            <Text fontSize={12} lineHeight={16} color="#626765" textAlign="center">
+            <Text fontSize={13} lineHeight={18} color="#626765" textAlign="center">
               安心預約，隨時保有彈性
             </Text>
           </YStack>
@@ -219,14 +220,14 @@ export default function ConfirmScreen() {
 
 // ── Helper component ──
 
-function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+function InfoRow({ icon, label, value }: { icon: AppIconName; label: string; value: string }) {
   return (
     <XStack justifyContent="space-between" alignItems="flex-start" gap={12}>
       <XStack alignItems="center" gap={8} style={{ minWidth: 80 }}>
-        <FA6ProIcon name={icon} size={13} color="#626765" />
-        <Text fontSize={14} lineHeight={20} color="#626765">{label}</Text>
+        <AppIcon name={icon} size={16} color="#626765" />
+        <Text fontSize={15} lineHeight={22} color="#626765">{label}</Text>
       </XStack>
-      <Text fontSize={15} lineHeight={22} fontWeight="600" color="#1F2723" flex={1} textAlign="right">
+      <Text fontSize={15} lineHeight={22} fontWeight="400" color="#1F2723" flex={1} textAlign="right">
         {value}
       </Text>
     </XStack>
@@ -237,12 +238,12 @@ function ServiceRows({ lines }: { lines: string[] }) {
   return (
     <XStack justifyContent="space-between" alignItems="flex-start" gap={12}>
       <XStack alignItems="center" gap={8} style={{ minWidth: 80 }}>
-        <FA6ProIcon name="flower" size={13} color="#626765" />
-        <Text fontSize={14} lineHeight={20} color="#626765">服務</Text>
+        <AppIcon name="serviceGeneric" size={16} color="#626765" />
+        <Text fontSize={15} lineHeight={22} color="#626765">服務</Text>
       </XStack>
       <YStack flex={1} alignItems="flex-end" gap={2}>
         {lines.map((line, i) => (
-          <Text key={i} fontSize={15} lineHeight={22} fontWeight="600" color="#1F2723" textAlign="right">
+          <Text key={i} fontSize={15} lineHeight={22} fontWeight="400" color="#1F2723" textAlign="right">
             {line}
           </Text>
         ))}

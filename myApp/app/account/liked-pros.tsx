@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect, useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { fetchLikedPros } from '@/lib/liked-pros-api'
 import { LikedProCard } from '@/components/account/LikedProCard'
@@ -40,19 +40,19 @@ export default function LikedProsScreen() {
   )
 
   return (
-    <YStack flex={1} backgroundColor="#f5f4ed">
+    <YStack flex={1} backgroundColor="#FBFBF8">
       {/* Nav bar */}
-      <YStack paddingTop={insets.top} backgroundColor="#f5f4ed">
-        <XStack height={48} alignItems="center" paddingHorizontal={4}>
+      <YStack paddingTop={insets.top} backgroundColor="#FBFBF8">
+        <XStack height={48} alignItems="center" paddingHorizontal={20}>
           <Pressable
             onPress={() => router.back()}
             style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
             accessibilityLabel="返回"
             accessibilityRole="button"
           >
-            <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
+            <AppIcon name="back" size={20} color="#1F2723" />
           </Pressable>
-          <Text flex={1} fontSize={16} fontWeight="600" color="#1F2723" textAlign="center">
+          <Text flex={1} fontSize={20} fontWeight="700" color="#1F2723" textAlign="center">
             喜愛的設計師
           </Text>
           <View width={44} />
@@ -61,14 +61,14 @@ export default function LikedProsScreen() {
 
       {/* Loading */}
       {loading && (
-        <YStack flex={1} justifyContent="center" alignItems="center">
+        <YStack flex={1} justifyContent="center" alignItems="center" paddingBottom={80}>
           <ActivityIndicator size="large" color="#1F2723" />
         </YStack>
       )}
 
       {/* Error */}
       {!loading && error && (
-        <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24}>
+        <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24} paddingBottom={80}>
           <Text fontSize={15} color="#626765" textAlign="center">{error}</Text>
           <Pressable
             onPress={() => { setLoading(true); load() }}
@@ -88,9 +88,9 @@ export default function LikedProsScreen() {
 
       {/* Empty state */}
       {!loading && !error && pros.length === 0 && (
-        <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24}>
-          <FA6ProIcon name="heart" size={40} color="#E8E9E9" />
-          <Text fontSize={16} fontWeight="600" color="#626765">還沒有喜愛的設計師</Text>
+        <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24} paddingBottom={80}>
+          <AppIcon name="favorite" size={40} color="#E8E9E9" />
+          <Text fontSize={16} fontWeight="600" color="#626765" textAlign="center">還沒有喜愛的設計師</Text>
           <Text fontSize={14} color="#626765" textAlign="center">
             在搜尋結果中點擊愛心，即可收藏設計師
           </Text>
@@ -104,7 +104,7 @@ export default function LikedProsScreen() {
             <YStack key={pro.pro_id}>
               <LikedProCard pro={pro} onBook={() => setSelectedPro(pro)} />
               {index < pros.length - 1 && (
-                <View height={1} backgroundColor="#F0EDE5" marginLeft={16} />
+                <View height={1} backgroundColor="#F0EDE5" marginLeft={20} />
               )}
             </YStack>
           ))}

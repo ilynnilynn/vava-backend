@@ -1,15 +1,17 @@
 // components/account/SettingsRow.tsx
 import { Pressable } from 'react-native'
 import { XStack, Text, View } from 'tamagui'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
+import type { AppIconName } from '@/constants/iconMap'
 
 type Props = {
   label: string
   onPress?: () => void
   disabled?: boolean
   labelColor?: string
-  iconName?: string
+  iconName?: AppIconName
   iconColor?: string
+  iconSize?: number
   showChevron?: boolean
 }
 
@@ -20,6 +22,7 @@ export function SettingsRow({
   labelColor = '#1F2723',
   iconName,
   iconColor = '#1F2723',
+  iconSize = 22,
   showChevron = true,
 }: Props) {
   return (
@@ -35,7 +38,7 @@ export function SettingsRow({
         <XStack alignItems="center" gap={14} flex={1}>
           {iconName && (
             <View width={22} height={22} alignItems="center" justifyContent="center">
-              <FA6ProIcon name={iconName} size={22} color={iconColor} weight="regular" />
+              <AppIcon name={iconName} size={iconSize} color={iconColor} weight="regular" />
             </View>
           )}
           <Text fontSize={15} lineHeight={22} color={labelColor}>
@@ -43,7 +46,7 @@ export function SettingsRow({
           </Text>
         </XStack>
         {showChevron && !disabled && (
-          <FA6ProIcon name="chevron-right" size={13} color="#787D7B" />
+          <AppIcon name="forward" size={13} color="#787D7B" />
         )}
       </XStack>
     </Pressable>

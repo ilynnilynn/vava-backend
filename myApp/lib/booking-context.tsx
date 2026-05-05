@@ -19,6 +19,7 @@ export type BookingRequestState = {
   preferences: string[]
   customerNote: string
   refPhotoUrl: string | null
+  budgetRange: { min: number; max: number } | null
   prefilledFields: string[]
   isEditing: boolean
 }
@@ -29,7 +30,7 @@ export type BookingAction =
   | { type: 'SET_WHEN'; payload: { date: string | null; timeBand: BookingRequestState['timeBand'] } }
   | { type: 'SET_SERVICES'; payload: BookingRequestState['services'] }
   | { type: 'SET_ADDONS'; payload: string[] }
-  | { type: 'SET_EXTRAS'; payload: { preferences: string[]; customerNote: string; refPhotoUrl: string | null } }
+  | { type: 'SET_EXTRAS'; payload: { preferences: string[]; customerNote: string; refPhotoUrl: string | null; budgetRange: { min: number; max: number } | null } }
   | { type: 'SET_PREFILLED'; payload: string[] }
   | { type: 'SET_EDITING'; payload: boolean }
   | { type: 'RESET' }
@@ -44,6 +45,7 @@ const initialState: BookingRequestState = {
   preferences: [],
   customerNote: '',
   refPhotoUrl: null,
+  budgetRange: null,
   prefilledFields: [],
   isEditing: false,
 }
@@ -61,7 +63,7 @@ function bookingReducer(state: BookingRequestState, action: BookingAction): Book
     case 'SET_ADDONS':
       return { ...state, addons: action.payload }
     case 'SET_EXTRAS':
-      return { ...state, preferences: action.payload.preferences, customerNote: action.payload.customerNote, refPhotoUrl: action.payload.refPhotoUrl }
+      return { ...state, preferences: action.payload.preferences, customerNote: action.payload.customerNote, refPhotoUrl: action.payload.refPhotoUrl, budgetRange: action.payload.budgetRange }
     case 'SET_PREFILLED':
       return { ...state, prefilledFields: action.payload }
     case 'SET_EDITING':

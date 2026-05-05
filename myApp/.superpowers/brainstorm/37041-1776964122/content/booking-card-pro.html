@@ -1,0 +1,98 @@
+<h2>Pro 預約卡 — Action Button Layout</h2>
+<p class="subtitle">During an active session, the card shows time-sensitive actions. Which layout feels right?</p>
+
+<div style="display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+
+  <!-- Phone A -->
+  <div style="text-align:center">
+    <p style="font-weight:700;margin-bottom:12px;font-size:15px">A — Buttons below card info</p>
+    <div onclick="selectPhone('a')" id="phone-a" style="cursor:pointer;display:inline-block;border:3px solid #e0e0e0;border-radius:40px;padding:12px 8px;width:210px;background:#fafafa;box-shadow:0 8px 32px rgba(0,0,0,0.12);transition:border-color 0.2s">
+      <div style="width:60px;height:6px;background:#ddd;border-radius:3px;margin:0 auto 10px"></div>
+      <div style="background:#FBFBF8;border-radius:16px;overflow:hidden;min-height:400px">
+        <!-- Header -->
+        <div style="padding:12px 14px 8px;border-bottom:1px solid #f0f0f0">
+          <div style="font-size:13px;font-weight:700;color:#141413">今日預約</div>
+        </div>
+        <!-- Card -->
+        <div style="margin:10px;background:#fff;border-radius:12px;border:1px solid #eee;overflow:hidden">
+          <!-- Card top -->
+          <div style="padding:12px 12px 8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-size:13px;font-weight:700;color:#141413">陳小姐</div>
+              <div style="font-size:9px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:99px;font-weight:600">進行中</div>
+            </div>
+            <div style="font-size:11px;color:#808868;margin-bottom:3px">💅 凝膠光療 · 手部</div>
+            <div style="font-size:11px;color:#808868">🕐 14:00 — 15:30</div>
+          </div>
+          <!-- Divider -->
+          <div style="height:1px;background:#f0f0f0;margin:0 12px"></div>
+          <!-- Actions -->
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:7px">
+            <button style="width:100%;padding:8px;background:#141413;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">✓ 結束服務</button>
+            <button style="width:100%;padding:8px;background:#fff;color:#b53333;border:1px solid #f0d0d0;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer">客戶未到場</button>
+          </div>
+        </div>
+        <!-- Second card (no actions yet) -->
+        <div style="margin:0 10px 10px;background:#fff;border-radius:12px;border:1px solid #eee;padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-size:13px;font-weight:700;color:#141413">王先生</div>
+            <div style="font-size:9px;background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:99px;font-weight:600">待到場</div>
+          </div>
+          <div style="font-size:11px;color:#808868;margin-bottom:3px">👁 捲翹嫁接 · 自然款</div>
+          <div style="font-size:11px;color:#808868">🕐 16:00 — 17:00</div>
+        </div>
+      </div>
+      <div style="width:50px;height:4px;background:#ddd;border-radius:2px;margin:10px auto 0"></div>
+    </div>
+  </div>
+
+  <!-- Phone B -->
+  <div style="text-align:center">
+    <p style="font-weight:700;margin-bottom:12px;font-size:15px">B — Swipe card to reveal actions</p>
+    <div onclick="selectPhone('b')" id="phone-b" style="cursor:pointer;display:inline-block;border:3px solid #e0e0e0;border-radius:40px;padding:12px 8px;width:210px;background:#fafafa;box-shadow:0 8px 32px rgba(0,0,0,0.12);transition:border-color 0.2s">
+      <div style="width:60px;height:6px;background:#ddd;border-radius:3px;margin:0 auto 10px"></div>
+      <div style="background:#FBFBF8;border-radius:16px;overflow:hidden;min-height:400px">
+        <div style="padding:12px 14px 8px;border-bottom:1px solid #f0f0f0">
+          <div style="font-size:13px;font-weight:700;color:#141413">今日預約</div>
+        </div>
+        <!-- Card with swipe hint -->
+        <div style="margin:10px;position:relative">
+          <!-- Action revealed behind -->
+          <div style="position:absolute;right:0;top:0;bottom:0;display:flex;border-radius:12px;overflow:hidden">
+            <div style="background:#15803d;width:60px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600;text-align:center">結束<br>服務</div>
+            <div style="background:#b53333;width:60px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600;text-align:center">未<br>到場</div>
+          </div>
+          <!-- Card shifted left to show swipe -->
+          <div style="background:#fff;border-radius:12px;border:1px solid #eee;padding:12px;margin-right:40px;position:relative">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-size:13px;font-weight:700;color:#141413">陳小姐</div>
+              <div style="font-size:9px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:99px;font-weight:600">進行中</div>
+            </div>
+            <div style="font-size:11px;color:#808868;margin-bottom:3px">💅 凝膠光療 · 手部</div>
+            <div style="font-size:11px;color:#808868">🕐 14:00 — 15:30</div>
+            <div style="font-size:9px;color:#bbb;margin-top:6px;text-align:right">← 左滑查看操作</div>
+          </div>
+        </div>
+        <!-- Second card -->
+        <div style="margin:0 10px 10px;background:#fff;border-radius:12px;border:1px solid #eee;padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-size:13px;font-weight:700;color:#141413">王先生</div>
+            <div style="font-size:9px;background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:99px;font-weight:600">待到場</div>
+          </div>
+          <div style="font-size:11px;color:#808868;margin-bottom:3px">👁 捲翹嫁接 · 自然款</div>
+          <div style="font-size:11px;color:#808868">🕐 16:00 — 17:00</div>
+        </div>
+      </div>
+      <div style="width:50px;height:4px;background:#ddd;border-radius:2px;margin:10px auto 0"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectPhone(choice) {
+  document.querySelectorAll('[id^="phone-"]').forEach(el => el.style.borderColor = '#e0e0e0');
+  document.getElementById('phone-' + choice).style.borderColor = '#F9583B';
+  if (window.recordChoice) recordChoice(choice, choice === 'a' ? 'A — Buttons below info' : 'B — Swipe to reveal');
+}
+</script>

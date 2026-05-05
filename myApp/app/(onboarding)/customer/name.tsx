@@ -1,6 +1,6 @@
 // app/(onboarding)/customer/name.tsx
-import { useState } from 'react'
-import { Alert, TextInput, StyleSheet } from 'react-native'
+import { useRef, useState } from 'react'
+import { Pressable, TextInput, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSession } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
@@ -9,52 +9,49 @@ import { OnboardingStepLayout } from '@/components/onboarding/OnboardingStepLayo
 export default function CustomerNameScreen() {
   const router = useRouter()
   const { session } = useSession()
+  const inputRef = useRef<TextInput>(null)
   const [name, setName] = useState('')
-  const [saving, setSaving] = useState(false)
 
-  async function handleNext() {
+  function handleNext() {
     const trimmed = name.trim()
     if (!trimmed || !session) return
-    setSaving(true)
-    const { error } = await supabase
-      .from('users')
-      .upsert({ id: session.user.id, display_name: trimmed }, { onConflict: 'id' })
-    setSaving(false)
-    if (error) {
-      Alert.alert('儲存失敗', error.message)
-      return
-    }
     router.push('/(onboarding)/customer/phone')
+    supabase.from('users').upsert({ id: session.user.id, display_name: trimmed }, { onConflict: 'id' })
+      .then(({ error }) => { if (error) console.error('name save failed:', error) })
   }
 
   return (
     <OnboardingStepLayout
-      title="你希望我們怎麼稱呼你？"
+      title="怎麼稱呼你？"
+      subtitle="預約時顯示的名稱"
       step={1}
       totalSteps={4}
       onNext={handleNext}
-      nextDisabled={!name.trim() || saving}
+      nextDisabled={!name.trim()}
+      onBack={() => router.replace('/(auth)/login' as never)}
     >
-      <TextInput
-        value={name}
-        onChangeText={setName}
-        placeholder="輸入名字"
-        placeholderTextColor="#AEADA6"
-        autoFocus
-        returnKeyType="done"
-        onSubmitEditing={handleNext}
-        style={styles.input}
-      />
+      <Pressable style={{ flex: 1 }} onPress={() => inputRef.current?.focus()}>
+        <TextInput
+          ref={inputRef}
+          value={name}
+          onChangeText={setName}
+          placeholder="輸入名字"
+          placeholderTextColor="#AEADA6"
+          autoFocus
+          returnKeyType="done"
+          onSubmitEditing={handleNext}
+          style={styles.input}
+        />
+      </Pressable>
     </OnboardingStepLayout>
   )
 }
 
 const styles = StyleSheet.create({
   input: {
-    fontSize: 20,
+    fontSize: 30,
+    fontWeight: '400',
     color: '#1F2723',
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#E8E9E9',
     paddingVertical: 12,
     paddingHorizontal: 0,
   },

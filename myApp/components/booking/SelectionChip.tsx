@@ -7,9 +7,10 @@ type Props = {
   onPress: () => void
   disabled?: boolean
   subtitle?: string
+  borderRadius?: number
 }
 
-export function SelectionChip({ label, selected, onPress, disabled, subtitle }: Props) {
+export function SelectionChip({ label, selected, onPress, disabled, subtitle, borderRadius = 9999 }: Props) {
   return (
     <Pressable
       onPress={onPress}
@@ -18,7 +19,7 @@ export function SelectionChip({ label, selected, onPress, disabled, subtitle }: 
       accessibilityState={{ selected, disabled: !!disabled }}
       accessibilityLabel={subtitle ? `${label} ${subtitle}` : label}
       style={({ pressed }) => ({
-        borderRadius: 9999,
+        borderRadius,
         minHeight: 44,
         paddingHorizontal: 16,
         paddingVertical: subtitle ? 8 : 0,

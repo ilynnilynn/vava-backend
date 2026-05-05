@@ -1,7 +1,7 @@
 // components/pro/BookingCardPro.tsx
 import { Alert, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 import { useState } from 'react'
 
 import { getProDisplayStatus } from '@/lib/pro-helpers'
@@ -11,15 +11,15 @@ import type { ProBookingListItem, ProDisplayStatus } from '@/types/pro'
 // ── Client avatar ─────────────────────────────────────────────
 
 const AVATAR_PALETTE = [
-  { bg: '#C0E8BA', fg: '#1F2723' },  // mint
-  { bg: '#8FD3D1', fg: '#1F2723' },  // teal
-  { bg: '#8DC2E6', fg: '#1F2723' },  // sky
-  { bg: '#A8AFFF', fg: '#1F2723' },  // periwinkle
-  { bg: '#CDB5FF', fg: '#1F2723' },  // lavender
-  { bg: '#F98486', fg: '#1F2723' },  // pink
-  { bg: '#FD6B59', fg: '#1F2723' },  // coral
-  { bg: '#FFA46E', fg: '#1F2723' },  // peach
-  { bg: '#DFF5AD', fg: '#1F2723' },  // lime
+  { bg: '#C0E8BA', fg: '#353C38' },  // mint
+  { bg: '#8FD3D1', fg: '#353C38' },  // teal
+  { bg: '#8DC2E6', fg: '#353C38' },  // sky
+  { bg: '#A8AFFF', fg: '#353C38' },  // periwinkle
+  { bg: '#CDB5FF', fg: '#353C38' },  // lavender
+  { bg: '#F98486', fg: '#353C38' },  // pink
+  { bg: '#FD6B59', fg: '#353C38' },  // coral
+  { bg: '#FFA46E', fg: '#353C38' },  // peach
+  { bg: '#DFF5AD', fg: '#353C38' },  // lime
 ]
 
 function getAvatarColor(seed: string) {
@@ -44,7 +44,7 @@ function ClientAvatar({ name }: { name: string }) {
 // ── Status badge ─────────────────────────────────────────────
 
 const BADGE_CONFIG: Record<ProDisplayStatus, { label: string; bg: string; text: string }> = {
-  awaiting:    { label: '待到場', bg: '#e0f2fe', text: '#0369a1' },
+  awaiting:    { label: '待到場', bg: 'rgba(168,175,255,0.2)', text: '#7D85E7' },
   in_progress: { label: '進行中', bg: '#dcfce7', text: '#15803d' },
   completed:   { label: '已完成', bg: '#f0f0f0', text: '#787D7B' },
   no_show:     { label: '未到場', bg: '#fee2e2', text: '#b91c1c' },
@@ -143,7 +143,8 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
   )
 
   const isNails = booking.service_domain === 'nails'
-  const domainIcon = isNails ? 'hand-sparkles' : 'eye'
+  const domainIcon = isNails ? 'serviceNails' : 'serviceLashes' as const
+  const domainLabel = isNails ? '美甲' : '美睫'
 
   const startTime = new Date(booking.starts_at).toLocaleTimeString('zh-TW', {
     hour: '2-digit',
@@ -157,26 +158,24 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
   })
 
   return (
-    <XStack paddingVertical={14} paddingHorizontal={20} gap={14} alignItems="flex-start">
+    <XStack paddingVertical={14} paddingHorizontal={20} gap={14} alignItems="center">
       <ClientAvatar name={booking.client_display_name} />
 
-      <YStack flex={1}>
+      <YStack flex={1} gap={6}>
         {/* Client name + badge */}
-        <XStack justifyContent="space-between" alignItems="center" marginBottom={6}>
-          <Text fontSize={16} fontWeight="700" color="#1F2723" flex={1} marginRight={8} numberOfLines={1}>
+        <XStack justifyContent="space-between" alignItems="center">
+          <Text fontSize={16} fontWeight="500" color="#1F2723" flex={1} marginRight={8} numberOfLines={1}>
             {booking.client_display_name}
           </Text>
           <ProStatusBadge displayStatus={displayStatus} />
         </XStack>
 
         {/* Service + time */}
-        <XStack gap={6} alignItems="center" marginBottom={2}>
-          <FA6ProIcon name={domainIcon} size={12} color="#626765" />
-          <Text fontSize={14} color="#626765">{booking.service_label}</Text>
-        </XStack>
         <XStack gap={6} alignItems="center">
-          <FA6ProIcon name="clock" size={12} color="#626765" />
-          <Text fontSize={14} color="#626765">{startTime} — {endTime}</Text>
+          <AppIcon name={domainIcon} size={12} color="#8F9391" />
+          <Text fontSize={13} fontWeight="500" color="#8F9391">{domainLabel}</Text>
+          <View style={{ width: 3, height: 3, borderRadius: 9999, backgroundColor: 'rgba(31,39,35,0.2)' }} />
+          <Text fontSize={13} fontWeight="500" color="#8F9391">{startTime} — {endTime}</Text>
         </XStack>
 
         {/* Action buttons — only for in_progress */}
@@ -193,9 +192,9 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
 
 const styles = StyleSheet.create({
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,

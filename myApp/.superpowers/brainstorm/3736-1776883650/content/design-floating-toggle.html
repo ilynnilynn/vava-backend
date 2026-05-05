@@ -1,0 +1,169 @@
+<h2>Floating Role Toggle — Structure Confirmation</h2>
+<p class="subtitle">Showing the 3-layer structure: header → floating toggle → scrollable content</p>
+
+<div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;">
+
+  <!-- Main mockup: annotated -->
+  <div style="flex:1;min-width:200px;max-width:230px;">
+    <p class="label" style="text-align:center;margin-bottom:8px;">Structure (annotated)</p>
+
+    <div style="width:100%;border-radius:24px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.10);font-family:system-ui,sans-serif;position:relative;background:#f5f4ed;">
+
+      <!-- LAYER 1: HEADER -->
+      <div style="background:#F0EDE5;padding-bottom:28px;position:relative;z-index:1;">
+        <!-- status bar -->
+        <div style="height:32px;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+          <span style="font-size:10px;color:#87867f;font-weight:600;">9:41</span>
+          <span style="font-size:10px;color:#87867f;">●●●</span>
+        </div>
+        <!-- profile row -->
+        <div style="padding:10px 16px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <!-- avatar -->
+            <div style="width:40px;height:40px;border-radius:50%;background:#d4b8a0;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1F2723;">用戶名稱</div>
+              <div style="font-size:10px;color:#808868;">顧客</div>
+            </div>
+          </div>
+          <!-- notification icon -->
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:14px;">🔔</span>
+          </div>
+        </div>
+        <!-- annotation -->
+        <div style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#3898ec;color:#fff;font-size:8px;padding:2px 5px;border-radius:4px;pointer-events:none;">Layer 1: Header</div>
+      </div>
+
+      <!-- LAYER 3: FLOATING TOGGLE (absolutely positioned) -->
+      <div style="position:absolute;left:16px;right:16px;z-index:10;" id="floatingToggle"
+           style="top: calc(header_bottom - toggle_height/2);">
+        <!-- We simulate the overlap by using negative margin on content instead -->
+      </div>
+
+      <!-- CONTENT AREA with top padding to clear toggle overlap -->
+      <div style="background:#f5f4ed;padding-top:28px;position:relative;z-index:1;">
+
+        <!-- Floating toggle rendered here but visually it "floats" -->
+        <div style="position:absolute;top:-22px;left:16px;right:16px;z-index:10;
+                    background:#fff;border-radius:10px;padding:11px 14px;
+                    display:flex;align-items:center;justify-content:space-between;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.10);border:1px solid #e8e6dc;">
+          <div>
+            <div style="font-size:8px;color:#87867f;margin-bottom:1px;">Using Vava as</div>
+            <div style="font-size:12px;font-weight:700;color:#1F2723;">顧客</div>
+          </div>
+          <!-- toggle OFF -->
+          <div style="width:36px;height:21px;background:#b0aea5;border-radius:11px;position:relative;flex-shrink:0;">
+            <div style="width:17px;height:17px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:0 1px 3px rgba(0,0,0,0.25);"></div>
+          </div>
+          <!-- annotation -->
+          <div style="position:absolute;left:-2px;top:-18px;background:#c96442;color:#fff;font-size:7px;padding:2px 5px;border-radius:4px;white-space:nowrap;">Layer 3: Floating toggle (z-index:10)</div>
+        </div>
+
+        <!-- annotation for content -->
+        <div style="position:absolute;right:8px;top:6px;background:#87867f;color:#fff;font-size:8px;padding:2px 5px;border-radius:4px;pointer-events:none;white-space:nowrap;">Layer 2: Content</div>
+
+        <!-- Section: My Vava -->
+        <div style="padding:6px 16px 4px;">
+          <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">我的 Vava</span>
+        </div>
+        <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+          <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+            <span style="font-size:11px;color:#1F2723;">預約紀錄</span><span style="font-size:9px;color:#87867f;">›</span>
+          </div>
+          <div style="padding:9px 16px;display:flex;justify-content:space-between;">
+            <span style="font-size:11px;color:#1F2723;">喜愛的設計師</span><span style="font-size:9px;color:#87867f;">›</span>
+          </div>
+        </div>
+        <div style="height:10px;"></div>
+
+        <!-- Section: Settings -->
+        <div style="padding:4px 16px 4px;">
+          <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">設定</span>
+        </div>
+        <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+          <div style="padding:9px 16px;display:flex;justify-content:space-between;">
+            <span style="font-size:11px;color:#1F2723;">帳號</span><span style="font-size:9px;color:#87867f;">›</span>
+          </div>
+        </div>
+        <div style="height:10px;"></div>
+
+        <!-- Section: Support -->
+        <div style="padding:4px 16px 4px;">
+          <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">支援</span>
+        </div>
+        <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+          <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+            <span style="font-size:11px;color:#1F2723;">幫助中心</span><span style="font-size:9px;color:#87867f;">›</span>
+          </div>
+          <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+            <span style="font-size:11px;color:#1F2723;">聯絡我們</span><span style="font-size:9px;color:#87867f;">›</span>
+          </div>
+          <div style="padding:9px 16px;display:flex;justify-content:space-between;">
+            <span style="font-size:11px;color:#c96442;font-weight:600;">成為設計師</span><span style="font-size:9px;color:#87867f;">›</span>
+          </div>
+        </div>
+        <div style="height:10px;"></div>
+        <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+          <div style="padding:9px 16px;">
+            <span style="font-size:11px;color:#b53333;font-weight:600;">登出</span>
+          </div>
+        </div>
+        <div style="height:24px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implementation diagram -->
+  <div style="flex:1;min-width:220px;">
+    <div class="section">
+      <h3>How the 3-layer structure works in code</h3>
+      <div style="background:#f5f4ed;border-radius:8px;padding:16px;font-family:monospace;font-size:12px;color:#4d4c48;line-height:1.8;">
+<pre style="margin:0;white-space:pre-wrap;font-size:11px;"><span style="color:#87867f;">// View container (flex, relative)</span>
+&lt;YStack flex={1} position="relative"&gt;
+
+  <span style="color:#3898ec;">// Layer 1: Header (fixed height ~110px)</span>
+  &lt;YStack&gt;
+    avatar + name + notification
+    paddingBottom={TOGGLE_HEIGHT / 2}
+  &lt;/YStack&gt;
+
+  <span style="color:#c96442;">// Layer 3: Floating toggle</span>
+  &lt;View
+    position="absolute"
+    top={HEADER_HEIGHT - TOGGLE_HEIGHT/2}
+    left={16} right={16}
+    zIndex={10}
+  &gt;
+    "Using Vava as" + Switch
+  &lt;/View&gt;
+
+  <span style="color:#87867f;">// Layer 2: Scrollable content</span>
+  &lt;ScrollView
+    paddingTop={TOGGLE_HEIGHT / 2 + 8}
+  &gt;
+    sections...
+  &lt;/ScrollView&gt;
+
+&lt;/YStack&gt;</pre>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top:16px;">
+      <h3>Single-role user (no toggle)</h3>
+      <div style="background:#f5f4ed;border-radius:8px;padding:12px;font-size:12px;color:#4d4c48;line-height:1.7;">
+        <p style="margin:0;">When <code>enabledRoles.length === 1</code>:</p>
+        <ul style="margin:6px 0 0;padding-left:16px;">
+          <li>Toggle is hidden</li>
+          <li>Header has no bottom padding offset</li>
+          <li>ScrollView has no extra top padding</li>
+          <li>Support section shows "成為設計師"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px;">Does the floating boundary structure look right? Ready to write the spec and move to implementation planning.</p>

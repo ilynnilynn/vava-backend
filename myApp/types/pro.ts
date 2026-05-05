@@ -20,9 +20,14 @@ export type SlotItem = {
   state: SlotState
 }
 
+export type BodyPart = 'hand' | 'foot'
+
 export type ServiceItem = {
   id: string
-  name: string
+  domain: 'nails' | 'lashes' | 'makeup'
+  category_key: string
+  style_key: string | null
+  body_part: BodyPart | null  // hand/foot for nails, null for lashes
   duration_minutes: number
   price: number
 }

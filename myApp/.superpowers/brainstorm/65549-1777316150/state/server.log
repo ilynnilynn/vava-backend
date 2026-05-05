@@ -1,0 +1,9 @@
+{"type":"server-started","port":51379,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:51379","screen_dir":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content","state_dir":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/state"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/splash.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/splash-v2.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/splash-v3.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/login-layout.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/waiting.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/login-screen.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/65549-1777316150/content/waiting-2.html"}
+{"type":"server-stopped","reason":"idle timeout"}

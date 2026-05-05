@@ -101,6 +101,7 @@ export default function WhenScreen() {
                 label={opt.label}
                 subtitle={opt.subtitle}
                 selected={selectedDate === opt.key}
+                borderRadius={15}
                 onPress={() => {
                   setSelectedDate(opt.key)
                   if (opt.key === 'now') {

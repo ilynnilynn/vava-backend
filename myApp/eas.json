@@ -1,0 +1,29 @@
+{
+  "cli": {
+    "version": ">= 18.9.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://hlgtoocrifxmebyulzwp.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsZ3Rvb2NyaWZ4bWVieXVsendwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDkzNjYsImV4cCI6MjA4ODEyNTM2Nn0.YIXokCdNcKhe0JQDt0_LRDLAInB1ZLNiOwM0E_V03yk",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "469445215641-u0885r0eri69999e4fbemi5iqtq6471l.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "469445215641-g5k6vfghfs39d873i7loiaklsted95fg.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY": "AIzaSyCmBVHouxfFd2jDSBFOe2ndLo4SPQ9xQB0",
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCmBVHouxfFd2jDSBFOe2ndLo4SPQ9xQB0"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

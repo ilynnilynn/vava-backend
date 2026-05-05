@@ -11,14 +11,13 @@ const OPTIONS = [
   { value: 'female', label: '女性' },
   { value: 'male',   label: '男性' },
   { value: 'other',  label: '其他' },
-  { value: 'prefer_not', label: '不想透露' },
 ] as const
 
 type GenderValue = typeof OPTIONS[number]['value']
 
 export default function CustomerGenderScreen() {
   const router = useRouter()
-  const { session } = useSession()
+  const { session, refreshUser } = useSession()
   const [selected, setSelected] = useState<GenderValue | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -28,11 +27,15 @@ export default function CustomerGenderScreen() {
     const { error } = await supabase
       .from('users')
       .upsert({ id: session.user.id, gender: selected }, { onConflict: 'id' })
-    setSaving(false)
     if (error) {
+      setSaving(false)
       Alert.alert('儲存失敗', error.message)
       return
     }
+    // Sync auth-context with the users row we just wrote so the rest of the
+    // session has correct user/onboardingComplete values.
+    await refreshUser()
+    setSaving(false)
     router.replace('/(tabs)/' as never)
   }
 
@@ -45,7 +48,7 @@ export default function CustomerGenderScreen() {
       nextLabel="完成"
       nextDisabled={!selected || saving}
     >
-      <View style={styles.options}>
+      <View style={[styles.options, { marginTop: 16 }]}>
         {OPTIONS.map((opt) => (
           <Pressable
             key={opt.value}
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
   options: { gap: 12 },
   option: {
     height: 52,
-    borderRadius: 12,
+    borderRadius: 50,
     borderWidth: 1.5,
     borderColor: '#E8E9E9',
     alignItems: 'center',
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FBFBF8',
   },
   optionSelected: {
-    backgroundColor: '#FF5A3C',
-    borderColor: '#FF5A3C',
+    backgroundColor: '#1F2723',
+    borderColor: '#1F2723',
   },
 })

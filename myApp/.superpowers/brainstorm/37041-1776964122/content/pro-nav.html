@@ -1,0 +1,36 @@
+<h2>Pro Mode — Navigation Structure</h2>
+<p class="subtitle">6 sections to fit into a mobile nav. Which pattern feels right?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>4-Tab Bar (recommended)</h3>
+      <p>Home · Slots · Services · Account<br>
+      History lives inside Home (past bookings section). Subscription lives inside Account. Mirrors customer tab count — feels familiar.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>3-Tab Bar + "More" drawer</h3>
+      <p>Home · Slots · More ···<br>
+      More → History, Services, Settings, Subscription. Keeps tab bar minimal but buries important sections behind a tap.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>5-Tab Bar</h3>
+      <p>Home · Slots · History · Services · Account<br>
+      Everything visible. Settings + Subscription live inside Account. More taps in the bar — can feel crowded on small screens.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <p class="label">Context</p>
+  <p>Customer tab bar has 3 tabs: Home · Bookings · Account. The Pro tab bar will replace these entirely when role = pro.</p>
+</div>

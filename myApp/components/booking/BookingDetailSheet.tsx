@@ -3,7 +3,7 @@ import { Pressable, ActivityIndicator, Alert } from 'react-native'
 import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBadge } from './StatusBadge'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 import { fetchBookingDetail } from '@/lib/bookings-api'
 import { formatBookingDate, formatSlotTime } from '@/lib/booking-helpers'
 import type { BookingDetail } from '@/types/booking-list'
@@ -144,7 +144,7 @@ export function BookingDetailSheet({ bookingId, onClose }: Props) {
             style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
             accessibilityLabel="關閉"
           >
-            <FA6ProIcon name="xmark" size={20} color="#1F2723" />
+            <AppIcon name="close" size={20} color="#1F2723" />
           </Pressable>
         </View>
       </XStack>
@@ -172,28 +172,28 @@ export function BookingDetailSheet({ bookingId, onClose }: Props) {
 
           <YStack gap={8}>
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="flower" size={14} color="#626765" weight="solid" />
+              <AppIcon name="serviceGeneric" size={14} color="#626765" weight="solid" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 {domainLabel} — {detail.service_label}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="calendar" size={14} color="#626765" />
+              <AppIcon name="calendar" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 {formatBookingDate(detail.starts_at)} {formatSlotTime(detail.starts_at)}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="location-dot" size={14} color="#626765" />
+              <AppIcon name="location" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 {detail.studio_address}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <FA6ProIcon name="dollar-sign" size={14} color="#626765" />
+              <AppIcon name="dollarSign" size={14} color="#626765" />
               <Text fontSize={15} lineHeight={22} color="#626765">
                 NT${detail.price_min}–{detail.price_max}
               </Text>
@@ -201,7 +201,7 @@ export function BookingDetailSheet({ bookingId, onClose }: Props) {
 
             {showPhone && detail.pro_phone && (
               <XStack gap={8} alignItems="center">
-                <FA6ProIcon name="phone" size={14} color="#626765" />
+                <AppIcon name="phone" size={14} color="#626765" />
                 <Text fontSize={15} fontWeight="600" color="#626765">
                   {detail.pro_phone}
                 </Text>

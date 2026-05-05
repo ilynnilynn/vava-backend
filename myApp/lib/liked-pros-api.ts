@@ -2,31 +2,66 @@
 import { supabase } from './supabase'
 import type { LikedPro } from '@/types/liked-pros'
 
-const USE_MOCK = true
-
-const MOCK_LIKED_PROS: LikedPro[] = [
-  { pro_id: 'mock-pro-1', pro_display_name: 'Joy',  service_domain: 'nails',  profile_photo_url: null },
-  { pro_id: 'mock-pro-2', pro_display_name: 'Momo', service_domain: 'lashes', profile_photo_url: null },
-]
-
-// Mutable set so likePro / unlikePro work in mock mode
-const mockLikedIds = new Set<string>(MOCK_LIKED_PROS.map((p) => p.pro_id))
-
 export async function fetchLikedPros(): Promise<LikedPro[]> {
-  if (USE_MOCK) return MOCK_LIKED_PROS.filter((p) => mockLikedIds.has(p.pro_id))
-  throw new Error('fetchLikedPros: real backend not yet implemented')
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return []
+
+  // Step 1: liked pro IDs + basic pro info
+  const { data: liked, error } = await supabase
+    .from('liked_pros')
+    .select('pro_id, pros!inner(display_name, profile_photo_url)')
+    .eq('user_id', session.user.id)
+
+  if (error) throw error
+  if (!liked?.length) return []
+
+  const proIds = liked.map((r: any) => r.pro_id as string)
+
+  // Step 2: derive primary domain from the pro's first enabled service
+  const { data: services } = await supabase
+    .from('pro_services')
+    .select('pro_id, service_categories!inner(domain)')
+    .in('pro_id', proIds)
+    .eq('is_enabled', true)
+
+  const domainMap = new Map<string, 'nails' | 'lashes'>()
+  for (const s of services ?? []) {
+    if (!domainMap.has((s as any).pro_id)) {
+      domainMap.set((s as any).pro_id, (s as any).service_categories.domain)
+    }
+  }
+
+  return liked.map((r: any) => ({
+    pro_id: r.pro_id as string,
+    pro_display_name: r.pros.display_name as string,
+    service_domain: domainMap.get(r.pro_id) ?? 'nails',
+    profile_photo_url: r.pros.profile_photo_url as string | null,
+  }))
 }
 
 export async function likePro(proId: string): Promise<void> {
-  if (USE_MOCK) { mockLikedIds.add(proId); return }
-  const { error } = await supabase.from('liked_pros').insert({ pro_id: proId })
-  if (error) throw new Error(error.message)
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return
+
+  const { error } = await supabase
+    .from('liked_pros')
+    .insert({ user_id: session.user.id, pro_id: proId })
+
+  // Ignore unique-constraint violation (already liked)
+  if (error && error.code !== '23505') throw error
 }
 
 export async function unlikePro(proId: string): Promise<void> {
-  if (USE_MOCK) { mockLikedIds.delete(proId); return }
-  const { error } = await supabase.from('liked_pros').delete().eq('pro_id', proId)
-  if (error) throw new Error(error.message)
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return
+
+  const { error } = await supabase
+    .from('liked_pros')
+    .delete()
+    .eq('user_id', session.user.id)
+    .eq('pro_id', proId)
+
+  if (error) throw error
 }
 
 export function isProLiked(proId: string, likedPros: LikedPro[]): boolean {

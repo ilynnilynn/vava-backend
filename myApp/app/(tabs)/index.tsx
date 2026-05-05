@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Animated, Alert, Pressable, Platform, StyleSheet } from 'react-native'
-import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
+import { Animated, Alert, Pressable, Platform, ScrollView, StyleSheet } from 'react-native'
+import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { VavaLogo } from '@/components/vava-logo'
 import { useBookingRequest } from '@/lib/booking-context'
@@ -59,13 +59,17 @@ export default function HomeScreen() {
     Alert.alert('即將推出', '模特機會功能即將上線，敬請期待！')
   }
 
+  // Tab bar: 61px height + positioned at (insets.bottom - 8) from screen bottom
+  // = insets.bottom + 53px clearance needed, plus breathing room
+  const tabBarClearance = insets.bottom + 72
+
   return (
     <ScrollView
-      flex={1}
-      backgroundColor="$background"
+      style={{ flex: 1, backgroundColor: '#FBFBF8' }}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: tabBarClearance }}
     >
-      <YStack paddingBottom={16} marginTop={-4}>
+      <YStack marginTop={-4}>
         {/* A) Header Bar */}
         <XStack
           paddingTop={insets.top}
@@ -82,7 +86,7 @@ export default function HomeScreen() {
             accessibilityRole="button"
             accessibilityLabel="搜尋"
           >
-            <FA6ProIcon name="magnifying-glass" size={20} color="#1F2723" />
+            <AppIcon name="search" size={20} color="#1F2723" />
           </Pressable>
         </XStack>
 
@@ -218,7 +222,7 @@ export default function HomeScreen() {
                 >
                   填寫需求
                 </Text>
-                <FA6ProIcon name="chevron-right" size={14} color="rgba(251,251,248,0.4)" />
+                <AppIcon name="forward" size={14} color="rgba(251,251,248,0.4)" />
               </Pressable>
             </YStack>
           </YStack>
@@ -336,7 +340,7 @@ export default function HomeScreen() {
                   <Text fontSize={16} fontWeight="700" color="#FBFBF8">
                     尋找模特機會
                   </Text>
-                  <FA6ProIcon name="chevron-right" size={14} color="rgba(251,251,248,0.4)" />
+                  <AppIcon name="forward" size={14} color="rgba(251,251,248,0.4)" />
                 </Pressable>
               </YStack>
             </YStack>

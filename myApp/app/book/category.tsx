@@ -1,7 +1,8 @@
 import { Pressable, Alert } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
+import type { AppIconName } from '@/constants/iconMap'
 
 import { StepLayout } from '@/components/booking/StepLayout'
 import { useBookingRequest } from '@/lib/booking-context'
@@ -12,13 +13,13 @@ const CATEGORIES: {
   key: CategoryKey
   label: string
   subtitle: string
-  icon: string
+  icon: AppIconName
   disabled?: boolean
   badge?: string
 }[] = [
-  { key: 'nails', label: '美甲', subtitle: '凝膠、卸甲、修補、保養', icon: 'hand-sparkles' },
-  { key: 'lashes', label: '美睫', subtitle: '嫁接、卸睫、睫毛管理', icon: 'eye' },
-  { key: 'makeup', label: '美妝', subtitle: '即將推出', icon: 'wand-magic-sparkles', disabled: true, badge: '即將推出' },
+  { key: 'nails', label: '美甲', subtitle: '凝膠、卸甲、修補、保養', icon: 'serviceNails' },
+  { key: 'lashes', label: '美睫', subtitle: '嫁接、卸睫、睫毛管理', icon: 'serviceLashes' },
+  { key: 'makeup', label: '美妝', subtitle: '即將推出', icon: 'serviceMakeup', disabled: true, badge: '即將推出' },
 ]
 
 export default function CategoryScreen() {
@@ -72,7 +73,7 @@ export default function CategoryScreen() {
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <FA6ProIcon
+                  <AppIcon
                     name={cat.icon}
                     size={22}
                     color={isSelected ? '#FBFBF8' : '#1F2723'}
@@ -107,8 +108,8 @@ export default function CategoryScreen() {
                     {cat.subtitle}
                   </Text>
                 </YStack>
-                <FA6ProIcon
-                  name="chevron-right"
+                <AppIcon
+                  name="forward"
                   size={16}
                   color={isSelected ? 'rgba(251,251,248,0.4)' : 'rgba(31,39,35,0.4)'}
                 />

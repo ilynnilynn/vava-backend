@@ -2,7 +2,7 @@ import { Pressable } from 'react-native'
 import { YStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 import { useBookingRequest } from '@/lib/booking-context'
 import { formatBookingDate, formatSlotTime } from '@/lib/booking-helpers'
@@ -43,7 +43,7 @@ export default function SuccessScreen() {
           alignItems="center"
           justifyContent="center"
         >
-          <FA6ProIcon name="circle-check" size={48} color="#2E7D52" />
+          <AppIcon name="success" size={48} color="#2E7D52" />
         </View>
 
         {/* Title */}

@@ -1,0 +1,267 @@
+<h2>Pro Account — Sub-page Designs</h2>
+<p class="subtitle">4 screens to build. Tap any phone to select it.</p>
+
+<style>
+  .screens { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screen-label { font-size: 13px; font-weight: 700; color: #141413; }
+  .phone { width: 220px; border-radius: 36px; background: #FBFBF8; border: 2px solid #d8d6ce; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.13); }
+  .phone-bar { height: 26px; background: #FBFBF8; display: flex; align-items: center; justify-content: center; }
+  .phone-notch { width: 56px; height: 13px; background: #d8d6ce; border-radius: 7px; }
+
+  /* Header */
+  .ph { padding: 0 14px; }
+  .screen-hdr { display: flex; align-items: center; padding: 14px 14px 10px; gap: 10px; border-bottom: 1px solid #eaeae4; }
+  .back-btn { font-size: 13px; color: #141413; }
+  .screen-title { font-size: 16px; font-weight: 700; color: #141413; flex: 1; }
+  .hdr-action { font-size: 12px; color: #c96442; font-weight: 600; }
+
+  /* Form rows */
+  .form-section { padding: 10px 14px 4px; }
+  .form-label { font-size: 9px; font-weight: 600; color: #858279; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .form-group { background: #F5F5F0; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  .form-row { display: flex; align-items: center; padding: 10px 12px; gap: 8px; }
+  .form-row + .form-row { border-top: 1px solid #e8e6dc; }
+  .row-label { font-size: 11px; color: #141413; flex: 1; }
+  .row-value { font-size: 11px; color: #858279; }
+  .row-chevron { font-size: 9px; color: #c8c6be; }
+  .row-toggle { width: 28px; height: 16px; background: #c96442; border-radius: 8px; position: relative; }
+  .row-toggle-off { background: #d8d6ce; }
+  .toggle-knob { width: 12px; height: 12px; background: #fff; border-radius: 6px; position: absolute; top: 2px; right: 2px; }
+  .toggle-knob-off { left: 2px; right: auto; }
+
+  /* Text field */
+  .text-field { background: #F5F5F0; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .text-field-val { font-size: 11px; color: #141413; }
+  .text-field-hint { font-size: 10px; color: #aaa; }
+  .text-area { height: 44px; }
+
+  /* Notification empty state */
+  .notif-empty { margin: 20px 14px 10px; background: #F5F5F0; border-radius: 10px; padding: 16px 12px; text-align: center; }
+  .notif-empty-icon { font-size: 20px; margin-bottom: 6px; }
+  .notif-empty-title { font-size: 12px; font-weight: 700; color: #141413; margin-bottom: 4px; }
+  .notif-empty-sub { font-size: 10px; color: #858279; line-height: 1.4; margin-bottom: 10px; }
+  .notif-cta { background: #141413; border-radius: 8px; padding: 8px 12px; display: inline-block; font-size: 11px; font-weight: 600; color: #fff; }
+
+  /* Photo row */
+  .photo-row { display: flex; align-items: center; padding: 12px 14px; gap: 12px; }
+  .avatar-circle { width: 44px; height: 44px; border-radius: 22px; background: #DFF5AD; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #3d3d3a; flex-shrink: 0; }
+  .photo-label { font-size: 11px; color: #c96442; font-weight: 600; }
+
+  .divider-line { height: 1px; background: #e8e6dc; margin: 0 14px; }
+</style>
+
+<div class="screens">
+
+  <!-- 1. 預約設定 -->
+  <div class="screen-wrap">
+    <div class="screen-label">預約設定</div>
+    <div class="phone">
+      <div class="phone-bar"><div class="phone-notch"></div></div>
+      <div class="screen-hdr">
+        <span class="back-btn">‹</span>
+        <span class="screen-title">預約設定</span>
+        <span class="hdr-action">儲存</span>
+      </div>
+
+      <div class="form-section">
+        <div class="form-label">預約規則</div>
+        <div class="form-group">
+          <div class="form-row">
+            <span class="row-label">最早提前預約</span>
+            <span class="row-value">1 小時</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">最多提前預約</span>
+            <span class="row-value">30 天</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">服務間隔時間</span>
+            <span class="row-value">15 分鐘</span>
+            <span class="row-chevron">›</span>
+          </div>
+        </div>
+
+        <div class="form-label">確認方式</div>
+        <div class="form-group">
+          <div class="form-row">
+            <span class="row-label">自動確認預約</span>
+            <div class="row-toggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="form-row">
+            <span class="row-label">取消截止時間</span>
+            <span class="row-value">24 小時前</span>
+            <span class="row-chevron">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 營業基本資料 -->
+  <div class="screen-wrap">
+    <div class="screen-label">營業基本資料</div>
+    <div class="phone">
+      <div class="phone-bar"><div class="phone-notch"></div></div>
+      <div class="screen-hdr">
+        <span class="back-btn">‹</span>
+        <span class="screen-title">營業基本資料</span>
+        <span class="hdr-action">儲存</span>
+      </div>
+
+      <div class="form-section">
+        <div class="form-label">營業地址</div>
+        <div class="text-field">
+          <div class="text-field-val">台北市大安區忠孝東路四段</div>
+        </div>
+
+        <div class="form-label">營業時間</div>
+        <div class="form-group">
+          <div class="form-row">
+            <span class="row-label">週一</span>
+            <span class="row-value">11:00 – 20:00</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">週二</span>
+            <span class="row-value">11:00 – 20:00</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">週三</span>
+            <span class="row-value">11:00 – 20:00</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">週四</span>
+            <span class="row-value">11:00 – 20:00</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">週五</span>
+            <span class="row-value">11:00 – 20:00</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">週六</span>
+            <span class="row-value">11:00 – 20:00</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">週日</span>
+            <span class="row-value" style="color:#c96442;">休息</span>
+            <span class="row-chevron">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 個人資料 -->
+  <div class="screen-wrap">
+    <div class="screen-label">個人資料</div>
+    <div class="phone">
+      <div class="phone-bar"><div class="phone-notch"></div></div>
+      <div class="screen-hdr">
+        <span class="back-btn">‹</span>
+        <span class="screen-title">個人資料</span>
+        <span class="hdr-action">儲存</span>
+      </div>
+
+      <div class="photo-row">
+        <div class="avatar-circle">林</div>
+        <div>
+          <div class="photo-label">更換大頭照</div>
+        </div>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="form-section">
+        <div class="form-label">基本資訊</div>
+        <div class="form-group">
+          <div class="form-row">
+            <span class="row-label">顯示名稱</span>
+            <span class="row-value">林小姐美甲</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label" style="color:#858279;">簡介</span>
+            <span class="row-value" style="font-size:9px; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">專業美甲師，10年經驗</span>
+            <span class="row-chevron">›</span>
+          </div>
+        </div>
+
+        <div class="form-label">聯絡方式</div>
+        <div class="form-group">
+          <div class="form-row">
+            <span class="row-label">電話</span>
+            <span class="row-value">0912-345-678</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">Instagram</span>
+            <span class="row-value">@linmei_nails</span>
+            <span class="row-chevron">›</span>
+          </div>
+          <div class="form-row">
+            <span class="row-label">Line ID</span>
+            <span class="row-value">linmei2024</span>
+            <span class="row-chevron">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 通知設定 (push off state) -->
+  <div class="screen-wrap">
+    <div class="screen-label">通知設定 — 推播關閉</div>
+    <div class="phone">
+      <div class="phone-bar"><div class="phone-notch"></div></div>
+      <div class="screen-hdr">
+        <span class="back-btn">‹</span>
+        <span class="screen-title">通知設定</span>
+      </div>
+      <div class="notif-empty">
+        <div class="notif-empty-icon">🔔</div>
+        <div class="notif-empty-title">推播通知已關閉</div>
+        <div class="notif-empty-sub">開啟後，即可收到新預約、<br>取消及提醒通知</div>
+        <div class="notif-cta">前往開啟通知 →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 通知設定 (push on state) -->
+  <div class="screen-wrap">
+    <div class="screen-label">通知設定 — 推播開啟</div>
+    <div class="phone">
+      <div class="phone-bar"><div class="phone-notch"></div></div>
+      <div class="screen-hdr">
+        <span class="back-btn">‹</span>
+        <span class="screen-title">通知設定</span>
+      </div>
+      <div class="form-section">
+        <div class="form-label">推播通知</div>
+        <div class="form-group">
+          <div class="form-row">
+            <span class="row-label">新預約</span>
+            <div class="row-toggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="form-row">
+            <span class="row-label">取消通知</span>
+            <div class="row-toggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="form-row">
+            <span class="row-label">服務提醒</span>
+            <div class="row-toggle row-toggle-off"><div class="toggle-knob toggle-knob-off"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="text-align:center;margin-top:24px;">All screens follow the same pattern: back button + title + 儲存 (where editable). Does this layout feel right?</p>

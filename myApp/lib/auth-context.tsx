@@ -14,6 +14,7 @@ type AuthContextType = {
   onboardingComplete: boolean  // users.display_name IS NOT NULL
   proStatus: ProStatus         // derived from pro row
   signOut: () => Promise<void>
+  refreshUser: () => Promise<void>  // re-fetch users+pros after onboarding writes
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   onboardingComplete: false,
   proStatus: 'none',
   signOut: async () => {},
+  refreshUser: async () => {},
 })
 
 export function SessionProvider({ children }: { children: ReactNode }) {
@@ -71,12 +73,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  async function refreshUser() {
+    const { data: { session: current } } = await supabase.auth.getSession()
+    if (current?.user) await fetchUserData(current.user.id)
+  }
+
   const onboardingComplete = !!user?.display_name
   const proStatus: ProStatus =
     pro === null ? 'none' : pro.is_approved ? 'approved' : 'pending'
 
   return (
-    <AuthContext.Provider value={{ session, isLoading, user, pro, onboardingComplete, proStatus, signOut }}>
+    <AuthContext.Provider value={{ session, isLoading, user, pro, onboardingComplete, proStatus, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

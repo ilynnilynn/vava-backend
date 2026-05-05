@@ -1,0 +1,203 @@
+<h2>Mode Toggle — Position Update</h2>
+<p class="subtitle">Full-width edge-to-edge row, right below the header, before any sections. Design colours.</p>
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+
+  <!-- Customer-only: no toggle -->
+  <div style="flex:1;min-width:180px;max-width:210px;">
+    <p class="label" style="text-align:center;margin-bottom:8px;">Customer only (no toggle)</p>
+    <div style="width:100%;background:#f5f4ed;border-radius:24px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.10);font-family:system-ui,sans-serif;">
+      <div style="height:32px;background:#f5f4ed;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+        <span style="font-size:10px;color:#87867f;font-weight:600;">9:41</span>
+        <span style="font-size:10px;color:#87867f;">●●●</span>
+      </div>
+      <div style="padding:14px 16px 12px;background:#f5f4ed;">
+        <span style="font-size:17px;font-weight:700;color:#141413;">帳號</span>
+      </div>
+      <!-- No toggle row -->
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">帳號</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;border-bottom:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#87867f;margin-bottom:1px;">電子郵件</div>
+          <div style="font-size:11px;color:#141413;">user@example.com</div>
+        </div>
+        <div style="padding:9px 16px;opacity:0.38;display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:#4d4c48;">編輯個人資料</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">我的 Vava</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:#141413;">喜愛的設計師</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">支援</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+          <span style="font-size:11px;color:#141413;">幫助中心</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+          <span style="font-size:11px;color:#141413;">關於 Vava</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:#c96442;font-weight:600;">成為設計師</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;">
+          <span style="font-size:11px;color:#b53333;font-weight:600;">登出</span>
+        </div>
+      </div>
+      <div style="height:20px;background:#f5f4ed;"></div>
+    </div>
+  </div>
+
+  <!-- Dual-mode: toggle OFF -->
+  <div style="flex:1;min-width:180px;max-width:210px;">
+    <p class="label" style="text-align:center;margin-bottom:8px;">Dual-mode — toggle OFF</p>
+    <div style="width:100%;background:#f5f4ed;border-radius:24px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.10);font-family:system-ui,sans-serif;">
+      <div style="height:32px;background:#f5f4ed;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+        <span style="font-size:10px;color:#87867f;font-weight:600;">9:41</span>
+        <span style="font-size:10px;color:#87867f;">●●●</span>
+      </div>
+      <div style="padding:14px 16px 12px;background:#f5f4ed;">
+        <span style="font-size:17px;font-weight:700;color:#141413;">帳號</span>
+      </div>
+
+      <!-- ★ Full-width toggle row — warm sand, flush edge-to-edge -->
+      <div style="background:#e8e6dc;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:13px;font-weight:600;color:#4d4c48;">設計師模式</span>
+        <!-- toggle OFF -->
+        <div style="width:40px;height:24px;background:#b0aea5;border-radius:12px;position:relative;flex-shrink:0;">
+          <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:0 1px 3px rgba(0,0,0,0.25);"></div>
+        </div>
+      </div>
+
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">帳號</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;border-bottom:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#87867f;margin-bottom:1px;">電子郵件</div>
+          <div style="font-size:11px;color:#141413;">user@example.com</div>
+        </div>
+        <div style="padding:9px 16px;opacity:0.38;display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:#4d4c48;">編輯個人資料</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">我的 Vava</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:#141413;">喜愛的設計師</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">支援</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+          <span style="font-size:11px;color:#141413;">幫助中心</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:#141413;">關於 Vava</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;">
+          <span style="font-size:11px;color:#b53333;font-weight:600;">登出</span>
+        </div>
+      </div>
+      <div style="height:20px;background:#f5f4ed;"></div>
+    </div>
+  </div>
+
+  <!-- Dual-mode: toggle ON -->
+  <div style="flex:1;min-width:180px;max-width:210px;">
+    <p class="label" style="text-align:center;margin-bottom:8px;">Dual-mode — toggle ON</p>
+    <div style="width:100%;background:#f5f4ed;border-radius:24px;border:1.5px solid #e8e6dc;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.10);font-family:system-ui,sans-serif;">
+      <div style="height:32px;background:#f5f4ed;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+        <span style="font-size:10px;color:#87867f;font-weight:600;">9:41</span>
+        <span style="font-size:10px;color:#87867f;">●●●</span>
+      </div>
+      <div style="padding:14px 16px 12px;background:#f5f4ed;">
+        <span style="font-size:17px;font-weight:700;color:#141413;">帳號</span>
+      </div>
+
+      <!-- ★ Full-width toggle row — ON state, terracotta -->
+      <div style="background:#e8e6dc;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:13px;font-weight:600;color:#4d4c48;">設計師模式</span>
+        <!-- toggle ON — terracotta -->
+        <div style="width:40px;height:24px;background:#c96442;border-radius:12px;position:relative;flex-shrink:0;">
+          <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,0.25);"></div>
+        </div>
+      </div>
+
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">帳號</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;border-bottom:1px solid #f0eee6;">
+          <div style="font-size:9px;color:#87867f;margin-bottom:1px;">電子郵件</div>
+          <div style="font-size:11px;color:#141413;">user@example.com</div>
+        </div>
+        <div style="padding:9px 16px;opacity:0.38;display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:#4d4c48;">編輯個人資料</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">我的 Vava</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:#141413;">喜愛的設計師</span>
+          <span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="padding:4px 16px 4px;background:#f5f4ed;">
+        <span style="font-size:9px;font-weight:700;color:#87867f;text-transform:uppercase;letter-spacing:0.6px;">支援</span>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;border-bottom:1px solid #f0eee6;">
+          <span style="font-size:11px;color:#141413;">幫助中心</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+        <div style="padding:9px 16px;display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:#141413;">關於 Vava</span><span style="font-size:9px;color:#87867f;">›</span>
+        </div>
+      </div>
+      <div style="height:10px;background:#f5f4ed;"></div>
+      <div style="background:#fff;border-top:1px solid #f0eee6;border-bottom:1px solid #f0eee6;">
+        <div style="padding:9px 16px;">
+          <span style="font-size:11px;color:#b53333;font-weight:600;">登出</span>
+        </div>
+      </div>
+      <div style="height:20px;background:#f5f4ed;"></div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px;">Toggle row: full-width warm sand band, flush between header and sections. OFF = muted gray thumb, ON = Terracotta Brand (#c96442) track. Does this match what you had in mind?</p>

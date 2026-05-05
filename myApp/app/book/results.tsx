@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Pressable, FlatList, Dimensions, View as RNView, ActivityIndicator,
-  Animated, PanResponder, Modal, ScrollView, StyleSheet, Linking, Alert,
+  Animated, PanResponder, Modal, ScrollView, StyleSheet, Linking, Alert, Platform,
 } from 'react-native'
 import { YStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
+import type { AppIconName } from '@/constants/iconMap'
 import { StatusBar } from 'expo-status-bar'
 import MapView, { Marker } from 'react-native-maps'
 
@@ -42,11 +43,12 @@ type SelectedSlot = {
 
 // ── Fake data ──
 
-// Returns ISO string for a time on today's date at hh:mm
+// Returns local ISO string for a time on today's date at hh:mm
+function pad(n: number) { return String(n).padStart(2, '0') }
+
 function todayAt(h: number, m: number): string {
   const d = new Date()
-  d.setHours(h, m, 0, 0)
-  return d.toISOString().slice(0, 19)
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(h)}:${pad(m)}:00`
 }
 
 // Returns the next :00 or :30 boundary at least `minAheadMins` from now
@@ -64,7 +66,9 @@ function nowSlots(): string[] {
   const cursor = nextHalfHour(15)
   const cutoff = Date.now() + 120 * 60000
   while (cursor.getTime() <= cutoff) {
-    slots.push(cursor.toISOString().slice(0, 19))
+    slots.push(
+      `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(cursor.getDate())}T${pad(cursor.getHours())}:${pad(cursor.getMinutes())}:00`
+    )
     cursor.setMinutes(cursor.getMinutes() + 30)
   }
   return slots
@@ -387,7 +391,7 @@ export default function ResultsScreen() {
           opacity: pressed ? 0.75 : 1,
         })}
       >
-        <FA6ProIcon name="chevron-left" size={16} color="#1F2723" />
+        <AppIcon name="back" size={16} color="#1F2723" />
       </Pressable>
 
       {/* ── Floating cancel (X) button ── */}
@@ -398,7 +402,7 @@ export default function ResultsScreen() {
             '目前的預約內容會被清除。',
             [
               { text: '繼續預約', style: 'cancel' },
-              { text: '離開', style: 'destructive', onPress: () => { dispatch({ type: 'RESET' }); router.back() } },
+              { text: '離開', style: 'destructive', onPress: () => { dispatch({ type: 'RESET' }); router.replace('/(tabs)') } },
             ]
           )
         }
@@ -422,7 +426,7 @@ export default function ResultsScreen() {
           opacity: pressed ? 0.75 : 1,
         })}
       >
-        <FA6ProIcon name="xmark" size={16} color="#1F2723" />
+        <AppIcon name="close" size={16} color="#1F2723" />
       </Pressable>
 
       {/* ── Draggable bottom sheet ── */}
@@ -459,7 +463,7 @@ export default function ResultsScreen() {
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                 >
-                  <FA6ProIcon name="chevron-left" size={18} color="#1F2723" />
+                  <AppIcon name="back" size={18} color="#1F2723" />
                 </Pressable>
                 <Text fontSize={16} fontWeight="600" lineHeight={24} color="#1F2723" style={{ flex: 1, textAlign: 'center' }}>
                   {detailPro.pro.displayName}
@@ -485,7 +489,7 @@ export default function ResultsScreen() {
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >
-                    <FA6ProIcon name="sliders" size={14} color="#1F2723" />
+                    <AppIcon name="filter" size={14} color="#1F2723" />
                   </Pressable>
                 </RNView>
               </>
@@ -557,12 +561,12 @@ export default function ResultsScreen() {
                       <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723">
                         {detailPro?.pro.displayName ?? ''}
                       </Text>
-                      <FA6ProIcon name="star" size={11} color="#626765" weight="solid" />
+                      <AppIcon name="rating" size={11} color="#626765" weight="solid" />
                       <Text fontSize={13} lineHeight={20} color="#626765">4.9 (176)</Text>
                     </RNView>
                     {detailPro?.pro.district ? (
                       <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <FA6ProIcon name="location-dot" size={12} color="#626765" weight="solid" />
+                        <AppIcon name="location" size={12} color="#626765" weight="solid" />
                         <Text fontSize={13} lineHeight={20} color="#626765">
                           {detailPro.pro.district}
                           {detailPro.distanceKm != null ? `　${detailPro.distanceKm.toFixed(1)}km` : ''}
@@ -578,15 +582,21 @@ export default function ResultsScreen() {
                       const label = items.join('＋')
                       const price = detailPro?.priceRange.min ?? 0
                       return label ? (
-                        <Text fontSize={13} lineHeight={20} color="#4A5A52">
-                          {label}
-                          {'　'}
-                          <Text fontWeight="600" color="#1F2723">${price} TWD 起</Text>
-                        </Text>
+                        <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                          <AppIcon name="serviceGeneric" size={12} color="#4A5A52" weight="solid" />
+                          <Text fontSize={13} lineHeight={20} color="#4A5A52">
+                            {label}
+                            {'　'}
+                            <Text fontWeight="600" color="#1F2723">${price} TWD 起</Text>
+                          </Text>
+                        </RNView>
                       ) : (
-                        <Text fontSize={13} lineHeight={20} color="#4A5A52">
-                          ${price} – {detailPro?.priceRange.max} TWD
-                        </Text>
+                        <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                          <AppIcon name="price" size={12} color="#4A5A52" />
+                          <Text fontSize={13} lineHeight={20} color="#4A5A52">
+                            ${price} – {detailPro?.priceRange.max} TWD
+                          </Text>
+                        </RNView>
                       )
                     })()}
 
@@ -599,7 +609,7 @@ export default function ResultsScreen() {
                         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignSelf: 'flex-start' })}
                       >
                         <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <FA6ProIcon name="at" size={13} color="#626765" />
+                          <AppIcon name="instagram" size={13} color="#626765" />
                           <Text fontSize={13} lineHeight={20} color="#626765">@{detailPro.pro.igHandle}</Text>
                         </RNView>
                       </Pressable>
@@ -607,7 +617,7 @@ export default function ResultsScreen() {
                   </RNView>
 
                   {/* Divider */}
-                  <RNView style={{ height: 1, backgroundColor: '#E8E9E9', marginHorizontal: 16, marginTop: 16 }} />
+                  <RNView style={{ height: 1, backgroundColor: '#E7E8E1', marginHorizontal: 16, marginTop: 16 }} />
 
                   {/* Slots */}
                   <RNView style={{ paddingHorizontal: 16, paddingTop: 16, gap: 10 }}>
@@ -651,7 +661,7 @@ export default function ResultsScreen() {
             </Animated.View>
 
             {/* ── Bottom CTA ── */}
-            <RNView style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: insets.bottom + 12, borderTopWidth: 1, borderTopColor: '#E8E9E9', backgroundColor: '#FBFBF8' }}>
+            <RNView style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: insets.bottom + 12, borderTopWidth: 1, borderTopColor: '#E7E8E1', backgroundColor: '#FBFBF8' }}>
               <Pressable
                 onPress={handleConfirm}
                 disabled={!selected}
@@ -696,7 +706,7 @@ export default function ResultsScreen() {
                   style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                   accessibilityLabel="關閉"
                 >
-                  <FA6ProIcon name="xmark" size={18} color="#1F2723" />
+                  <AppIcon name="close" size={18} color="#1F2723" />
                 </Pressable>
               </RNView>
             </RNView>
@@ -706,23 +716,23 @@ export default function ResultsScreen() {
               <RNView style={{ backgroundColor: '#F5F4EF', borderRadius: 12, overflow: 'hidden' }}>
                 {[
                   state.category ? {
-                    icon: 'flower',
+                    icon: 'serviceGeneric',
                     value: CATEGORY_SHORT[state.category] ?? state.category,
                   } : null,
-                  state.location?.label ? { icon: 'location-dot', value: state.location.label } : null,
+                  state.location?.label ? { icon: 'location', value: state.location.label } : null,
                   state.date ? { icon: 'calendar', value: state.date === 'now' ? '現在（2小時內）' : formatDateWithDay(state.date) } : null,
-                  state.timeBand ? { icon: 'clock', value: TIME_BAND_LABELS[state.timeBand] ?? state.timeBand } : null,
+                  state.timeBand ? { icon: 'time', value: TIME_BAND_LABELS[state.timeBand] ?? state.timeBand } : null,
                   state.services?.categoryIds?.length ? { icon: 'list', value: state.services.categoryIds.join('、') } : null,
                   state.services?.styleId ? { icon: 'palette', value: state.services.styleId } : null,
                   state.services?.nailScope ? { icon: 'hand', value: state.services.nailScope } : null,
-                  state.services?.treatmentTier ? { icon: 'star', value: state.services.treatmentTier } : null,
-                  state.services?.lashDensity ? { icon: 'layer-group', value: state.services.lashDensity } : null,
-                  state.services?.fiberTagId ? { icon: 'feather', value: state.services.fiberTagId } : null,
-                  state.services?.fillInDays != null ? { icon: 'rotate', value: `${state.services.fillInDays} 天` } : null,
+                  state.services?.treatmentTier ? { icon: 'rating', value: state.services.treatmentTier } : null,
+                  state.services?.lashDensity ? { icon: 'layers', value: state.services.lashDensity } : null,
+                  state.services?.fiberTagId ? { icon: 'fiber', value: state.services.fiberTagId } : null,
+                  state.services?.fillInDays != null ? { icon: 'refresh', value: `${state.services.fillInDays} 天` } : null,
                   state.services?.styleTags?.length ? { icon: 'tags', value: state.services.styleTags.join('、') } : null,
-                  state.addons?.length ? { icon: 'circle-plus', value: state.addons.join('、') } : null,
-                  state.preferences?.length ? { icon: 'comment-slash', value: state.preferences.join('、') } : null,
-                  state.customerNote ? { icon: 'pen', value: state.customerNote } : null,
+                  state.addons?.length ? { icon: 'addCircle', value: state.addons.join('、') } : null,
+                  state.preferences?.length ? { icon: 'noComment', value: state.preferences.join('、') } : null,
+                  state.customerNote ? { icon: 'edit', value: state.customerNote } : null,
                   state.refPhotoUrl ? { icon: 'image', value: '__photo__' } : null,
                 ].filter(Boolean).map((row, i, arr) => (
                   <RNView
@@ -735,11 +745,11 @@ export default function ResultsScreen() {
                       paddingRight: 16,
                       paddingVertical: 13,
                       borderBottomWidth: i < arr.length - 1 ? 1 : 0,
-                      borderBottomColor: '#E8E9E9',
+                      borderBottomColor: '#E7E8E1',
                     }}
                   >
                     <RNView style={{ width: 32, alignItems: 'center' }}>
-                      <FA6ProIcon name={row!.icon} size={15} color="#626765" weight={row!.icon === 'flower' || row!.icon === 'location-dot' ? 'solid' : 'regular'} />
+                      <AppIcon name={row!.icon as AppIconName} size={15} color="#626765" weight={row!.icon === 'serviceGeneric' || row!.icon === 'location' ? 'solid' : 'regular'} />
                     </RNView>
                     {row!.value === '__photo__' ? (
                       <Image
@@ -799,11 +809,24 @@ function ProCard({
   ].filter(Boolean).join('｜')
 
   return (
-    <Pressable onPress={() => onPress(proResult)} accessibilityRole="button">
+    <Pressable
+      onPress={() => onPress(proResult)}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.85 : 1,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#f0eee6',
+        ...Platform.select({
+          ios: { shadowColor: '#141413', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3 },
+          android: { elevation: 2 },
+        }),
+      })}
+    >
     <RNView style={{
       backgroundColor: '#FFFFFF',
       borderRadius: 8,
-      height: 128,
+      height: 140,
       flexDirection: 'row',
       overflow: 'hidden',
     }}>
@@ -811,39 +834,46 @@ function ProCard({
       <RNView style={{ width: 120, backgroundColor: '#7E334B' }} />
 
       {/* Content */}
-      <RNView style={{ flex: 1, paddingTop: 10, paddingBottom: 8, paddingLeft: 12, paddingRight: 12, gap: 8 }}>
+      <RNView style={{ flex: 1, paddingTop: 12, paddingBottom: 12, paddingLeft: 12, paddingRight: 0, gap: 8 }}>
 
         {/* Row 1: name + star rating + heart */}
-        <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 24 }}>
           <Text fontSize={18} fontWeight="700" lineHeight={24} color="#1F2723" numberOfLines={1}
-            style={{ letterSpacing: -0.36, flexShrink: 1 }}>
+            style={{ flexShrink: 1 }}>
             {proResult.pro.displayName}
           </Text>
           <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 }}>
-            <FA6ProIcon name="star" size={10} color="#626765" weight="solid" />
-            <Text fontSize={12} lineHeight={16} color="#626765">4.9 (176)</Text>
+            <AppIcon name="rating" size={12} color="#87867f" weight="solid" />
+            <Text fontSize={12} lineHeight={16} color="#87867f">4.9 (176)</Text>
           </RNView>
-          <HeartButton isLiked={isLiked} onToggle={onHeartToggle} size={18} />
+          <HeartButton isLiked={isLiked} onToggle={onHeartToggle} size={22} />
         </RNView>
 
         {/* Row 2: distance + district */}
         {locationText ? (
-          <Text fontSize={12} lineHeight={16} color="#1F2723" style={{ opacity: 0.6 }}>
+          <Text fontSize={12} lineHeight={16} color="#87867f">
             {locationText}
           </Text>
         ) : null}
 
         {/* Row 3: service + price */}
-        <Text fontSize={12} lineHeight={16} color="#4A5A52">
-          {serviceLabel ? `${serviceLabel} ` : ''}
-          <Text fontSize={13} fontWeight="500" color="#4A5A52">${proResult.priceRange.min} TWD</Text>
-          {' 起'}
-        </Text>
+        <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          {serviceLabel ? (
+            <>
+              <AppIcon name="serviceGeneric" size={12} color="#5e5d59" />
+              <Text fontSize={12} lineHeight={16} color="#5e5d59">{serviceLabel}</Text>
+            </>
+          ) : null}
+          <Text fontSize={13} fontWeight="500" lineHeight={16} color="#5e5d59">
+            {proResult.priceRange.min} TWD 起
+          </Text>
+        </RNView>
 
         {/* Row 4: time slots */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={{ height: 32 }}
           contentContainerStyle={{ gap: 6 }}
         >
           {proResult.slots.map((slot) => {
@@ -861,7 +891,7 @@ function ProCard({
                   borderColor: isSelected ? '#1F2723' : '#D8D9D2',
                   borderRadius: 6,
                   paddingHorizontal: 12,
-                  paddingVertical: 4,
+                  height: 32,
                   alignItems: 'center',
                   justifyContent: 'center',
                   opacity: pressed ? 0.7 : 1,

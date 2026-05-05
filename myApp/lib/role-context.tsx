@@ -13,7 +13,7 @@ type RoleState = {
 }
 
 const STORAGE_KEY = '@vava/activeRole'
-const USE_MOCK = true
+const USE_MOCK = false
 
 const RoleContext = createContext<RoleState>({
   enabledRoles: ['customer'],

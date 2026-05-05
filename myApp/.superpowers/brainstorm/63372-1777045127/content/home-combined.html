@@ -1,0 +1,174 @@
+<h2>Combined B + C — Refined Design</h2>
+<p class="subtitle">Two states: no slots open (left) vs. slots active (right). Does this feel right?</p>
+
+<style>
+  .phone-row { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .phone { width: 230px; border-radius: 36px; background: #FBFBF8; border: 2px solid #d8d6ce; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.14); }
+  .phone-bar { height: 28px; background: #FBFBF8; display: flex; align-items: center; justify-content: center; }
+  .phone-notch { width: 60px; height: 14px; background: #d8d6ce; border-radius: 8px; }
+
+  .screen-header { padding: 18px 14px 10px; }
+  .screen-title { font-size: 18px; font-weight: 700; color: #141413; margin: 0; }
+  .screen-sub { font-size: 10px; color: #858279; margin: 2px 0 0; }
+
+  /* Nudge banner */
+  .nudge { margin: 0 12px 10px; border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; }
+  .nudge-warn { background: #fef3cd; }
+  .nudge-good { background: #f0fdf4; }
+  .nudge-dot-warn { width: 7px; height: 7px; background: #c96442; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .nudge-dot-good { width: 7px; height: 7px; background: #15803d; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .nudge-text { font-size: 10px; color: #141413; line-height: 1.4; }
+  .nudge-action { font-weight: 600; color: #c96442; }
+  .nudge-action-good { font-weight: 600; color: #15803d; }
+
+  /* Slot card */
+  .slot-card { margin: 0 12px 10px; background: #F5F5F0; border-radius: 12px; padding: 12px; cursor: pointer; }
+  .slot-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .slot-card-title { font-size: 12px; font-weight: 600; color: #141413; }
+  .badge-on { font-size: 9px; background: #dcfce7; color: #15803d; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+  .badge-off { font-size: 9px; background: #F0EDE5; color: #858279; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+
+  .slot-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-bottom: 7px; }
+  .dot { width: 14px; height: 14px; border-radius: 3px; }
+  .dot-booked { background: #c96442; opacity: 0.75; }
+  .dot-open   { background: #141413; }
+  .dot-avail  { background: #E0E0D8; border: 1px solid #c8c6be; }
+
+  .slot-legend { display: flex; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 3px; font-size: 9px; color: #858279; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  .slot-cta-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e8e6dc; font-size: 10px; font-weight: 600; color: #141413; text-align: center; }
+
+  /* Stats */
+  .section-label { font-size: 10px; font-weight: 600; color: #858279; padding: 0 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .stat-row { display: flex; gap: 6px; padding: 0 12px; margin-bottom: 12px; }
+  .stat-card { flex: 1; background: #F5F5F0; border-radius: 10px; padding: 10px 4px; text-align: center; }
+  .stat-num { font-size: 16px; font-weight: 700; color: #141413; line-height: 1.2; }
+  .stat-label { font-size: 9px; color: #858279; margin-top: 2px; line-height: 1.3; }
+
+  .state-label { text-align: center; font-size: 12px; font-weight: 700; color: #141413; margin: 12px 0 4px; }
+  .state-sub { text-align: center; font-size: 10px; color: #858279; margin-bottom: 12px; }
+</style>
+
+<div class="split">
+
+  <!-- State 1: No slots open -->
+  <div class="mockup">
+    <div class="mockup-header">State 1 — No slots open yet</div>
+    <div class="mockup-body" style="display:flex;justify-content:center;padding:20px 0;">
+      <div class="phone">
+        <div class="phone-bar"><div class="phone-notch"></div></div>
+
+        <div class="screen-header">
+          <p class="screen-title">總覽</p>
+          <p class="screen-sub">4/24 週四</p>
+        </div>
+
+        <!-- Smart nudge -->
+        <div class="nudge nudge-warn">
+          <div class="nudge-dot-warn"></div>
+          <div class="nudge-text">今日尚未開放時段。<span class="nudge-action">開放時段</span>讓新客戶找到你 →</div>
+        </div>
+
+        <!-- Slot card (tappable) -->
+        <div class="slot-card">
+          <div class="slot-card-top">
+            <span class="slot-card-title">今日時段</span>
+            <span class="badge-off">未開放</span>
+          </div>
+          <div class="slot-grid">
+            <div class="dot dot-avail"></div><div class="dot dot-avail"></div>
+            <div class="dot dot-avail"></div><div class="dot dot-avail"></div>
+            <div class="dot dot-avail"></div><div class="dot dot-avail"></div>
+            <div class="dot dot-avail"></div><div class="dot dot-avail"></div>
+            <div class="dot dot-avail"></div><div class="dot dot-avail"></div>
+          </div>
+          <div class="slot-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#E0E0D8;border:1px solid #c8c6be;"></div> 可開放</div>
+          </div>
+          <div class="slot-cta-row">前往開放時段 →</div>
+        </div>
+
+        <!-- Performance -->
+        <div class="section-label">本週表現</div>
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-num">12</div>
+            <div class="stat-label">搜尋曝光</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">4.9★</div>
+            <div class="stat-label">客戶評分</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">3</div>
+            <div class="stat-label">新預約</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 2: Slots open -->
+  <div class="mockup">
+    <div class="mockup-header">State 2 — Slots open, some booked</div>
+    <div class="mockup-body" style="display:flex;justify-content:center;padding:20px 0;">
+      <div class="phone">
+        <div class="phone-bar"><div class="phone-notch"></div></div>
+
+        <div class="screen-header">
+          <p class="screen-title">總覽</p>
+          <p class="screen-sub">4/24 週四</p>
+        </div>
+
+        <!-- Smart nudge — positive state -->
+        <div class="nudge nudge-good">
+          <div class="nudge-dot-good"></div>
+          <div class="nudge-text"><span class="nudge-action-good">2 個預約</span>已確認。還有 3 個空檔可接新客戶。</div>
+        </div>
+
+        <!-- Slot card -->
+        <div class="slot-card">
+          <div class="slot-card-top">
+            <span class="slot-card-title">今日時段 · 3 個開放</span>
+            <span class="badge-on">接客中</span>
+          </div>
+          <div class="slot-grid">
+            <div class="dot dot-booked"></div><div class="dot dot-booked"></div>
+            <div class="dot dot-open"></div><div class="dot dot-avail"></div>
+            <div class="dot dot-open"></div><div class="dot dot-avail"></div>
+            <div class="dot dot-avail"></div><div class="dot dot-open"></div>
+            <div class="dot dot-avail"></div><div class="dot dot-avail"></div>
+          </div>
+          <div class="slot-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#c96442;"></div> 已預約</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#141413;"></div> 開放中</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#E0E0D8;border:1px solid #c8c6be;"></div> 可開放</div>
+          </div>
+          <div class="slot-cta-row">管理時段 →</div>
+        </div>
+
+        <!-- Performance -->
+        <div class="section-label">本週表現</div>
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-num">28</div>
+            <div class="stat-label">搜尋曝光</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">4.9★</div>
+            <div class="stat-label">客戶評分</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">5</div>
+            <div class="stat-label">新預約</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="text-align:center;margin-top:20px;">Tapping the slot card navigates to the 時段 tab. The nudge banner adapts to the pro's current state.</p>

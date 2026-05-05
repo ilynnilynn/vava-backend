@@ -10,12 +10,35 @@ import { hasUnreadNotifications } from '@/lib/notifications-api'
 import { RoleToggle } from '@/components/account/RoleToggle'
 import { SettingsRow } from '@/components/account/SettingsRow'
 
+function isPrivateRelay(email: string | undefined): boolean {
+  return !!email?.endsWith('privaterelay.appleid.com')
+}
+
+type AuthUser = NonNullable<ReturnType<typeof useSession>['session']>['user']
+
+function resolveDisplayName(user: AuthUser | null | undefined): string {
+  if (!user) return 'Vava User'
+  // 1. Profile full_name or name from metadata
+  const meta = user.user_metadata ?? {}
+  if (meta.full_name && typeof meta.full_name === 'string') return meta.full_name
+  if (meta.name && typeof meta.name === 'string') return meta.name
+  // 2. Email local part — only if not a private relay and short enough
+  const email = user.email
+  if (email && !isPrivateRelay(email)) {
+    const local = email.split('@')[0]
+    if (local.length <= 20) return local
+  }
+  // 3. Fallback
+  return 'Vava User'
+}
+
 export default function AccountScreen() {
   const router = useRouter()
   const { session, signOut, proStatus } = useSession()
   const user = session?.user
-  const displayName =
-    user?.user_metadata?.full_name ?? user?.email ?? user?.phone ?? '使用者'
+  const displayName = resolveDisplayName(user)
+  // Only show email as secondary if it's not a private relay
+  const displayEmail = user?.email && !isPrivateRelay(user.email) ? user.email : undefined
 
   const [hasUnread, setHasUnread] = useState(false)
   useFocusEffect(
@@ -33,7 +56,7 @@ export default function AccountScreen() {
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">
-      <ProfileHeader displayName={displayName} hasUnread={hasUnread} />
+      <ProfileHeader displayName={displayName} email={displayEmail} hasUnread={hasUnread} />
       <RoleToggle />
 
       <ScrollView

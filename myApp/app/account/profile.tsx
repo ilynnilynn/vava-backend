@@ -5,42 +5,56 @@ import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { AppIcon } from '@/components/AppIcon'
-
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/lib/auth-context'
+
+const GENDER_LABELS: Record<string, string> = {
+  female: '女性',
+  male: '男性',
+  other: '其他',
+  prefer_not: '不想透露',
+}
+
+function formatPhone(raw: string | null | undefined): string {
+  if (!raw) return ''
+  const d = raw.replace(/\D/g, '')
+  if (d.length <= 4) return d
+  if (d.length <= 7) return `${d.slice(0, 4)}-${d.slice(4)}`
+  return `${d.slice(0, 4)}-${d.slice(4, 7)}-${d.slice(7, 10)}`
+}
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { session } = useSession()
-
-  const user = session?.user
-  const initialName = user?.user_metadata?.full_name ?? ''
+  const { session, user, refreshUser } = useSession()
 
   const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(initialName)
+  const [name, setName] = useState(user?.display_name ?? '')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     const trimmed = name.trim()
-    if (!trimmed) {
-      Alert.alert('請輸入姓名')
-      return
-    }
+    if (!trimmed) { Alert.alert('請輸入姓名'); return }
+    if (!session) return
     setSaving(true)
-    const { error } = await supabase.auth.updateUser({ data: { full_name: trimmed } })
+    const { error } = await supabase
+      .from('users')
+      .upsert({ id: session.user.id, display_name: trimmed }, { onConflict: 'id' })
     setSaving(false)
     if (error) {
       Alert.alert('儲存失敗', error.message)
     } else {
+      await refreshUser()
       setEditing(false)
     }
   }
 
   function handleCancel() {
-    setName(initialName)
+    setName(user?.display_name ?? '')
     setEditing(false)
   }
+
+  const divider = <View height={1} backgroundColor="#F0EDE5" marginLeft={52} />
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">
@@ -98,12 +112,7 @@ export default function ProfileScreen() {
         borderColor="#F0EDE5"
       >
         {/* Display name */}
-        <XStack
-          height={52}
-          paddingHorizontal={20}
-          alignItems="center"
-          gap={12}
-        >
+        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
           <View width={20} alignItems="center">
             <AppIcon name="user" size={14} color="#626765" />
           </View>
@@ -116,55 +125,75 @@ export default function ProfileScreen() {
                 autoFocus
                 returnKeyType="done"
                 onSubmitEditing={handleSave}
-                style={{
-                  fontSize: 15,
-                  color: '#1F2723',
-                  padding: 0,
-                  margin: 0,
-                }}
+                style={{ fontSize: 15, color: '#1F2723', padding: 0, margin: 0 }}
               />
             ) : (
-              <Text fontSize={15} color={name ? '#1F2723' : '#b0aea5'}>
-                {name || '未設定'}
+              <Text fontSize={15} color={user?.display_name ? '#1F2723' : '#b0aea5'}>
+                {user?.display_name ?? '未設定'}
               </Text>
             )}
           </YStack>
         </XStack>
 
-        {/* Divider */}
-        {(user?.email || user?.phone) && (
-          <View height={1} backgroundColor="#F0EDE5" marginLeft={52} />
-        )}
+        {divider}
 
-        {/* Email */}
-        {user?.email && (
+        {/* Phone */}
+        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
+          <View width={20} alignItems="center">
+            <AppIcon name="phone" size={14} color="#626765" />
+          </View>
+          <YStack flex={1}>
+            <Text fontSize={12} color="#626765" marginBottom={2}>手機號碼</Text>
+            <Text fontSize={15} color={user?.phone ? '#1F2723' : '#b0aea5'}>
+              {user?.phone ? formatPhone(user.phone) : '未設定'}
+            </Text>
+          </YStack>
+        </XStack>
+
+        {divider}
+
+        {/* Birthday */}
+        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
+          <View width={20} alignItems="center">
+            <AppIcon name="calendar" size={14} color="#626765" />
+          </View>
+          <YStack flex={1}>
+            <Text fontSize={12} color="#626765" marginBottom={2}>生日</Text>
+            <Text fontSize={15} color={user?.birthday ? '#1F2723' : '#b0aea5'}>
+              {user?.birthday ?? '未設定'}
+            </Text>
+          </YStack>
+        </XStack>
+
+        {divider}
+
+        {/* Gender */}
+        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
+          <View width={20} alignItems="center">
+            <AppIcon name="user" size={14} color="#626765" />
+          </View>
+          <YStack flex={1}>
+            <Text fontSize={12} color="#626765" marginBottom={2}>性別</Text>
+            <Text fontSize={15} color={user?.gender ? '#1F2723' : '#b0aea5'}>
+              {user?.gender ? (GENDER_LABELS[user.gender] ?? user.gender) : '未設定'}
+            </Text>
+          </YStack>
+        </XStack>
+
+        {/* Email (from auth, read-only) */}
+        {session?.user?.email && (
           <>
+            {divider}
             <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
               <View width={20} alignItems="center">
                 <AppIcon name="email" size={14} color="#626765" />
               </View>
               <YStack flex={1}>
                 <Text fontSize={12} color="#626765" marginBottom={2}>電子郵件</Text>
-                <Text fontSize={15} color="#1F2723">{user.email}</Text>
+                <Text fontSize={15} color="#1F2723">{session.user.email}</Text>
               </YStack>
             </XStack>
-            {user?.phone && (
-              <View height={1} backgroundColor="#F0EDE5" marginLeft={52} />
-            )}
           </>
-        )}
-
-        {/* Phone */}
-        {user?.phone && (
-          <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
-            <View width={20} alignItems="center">
-              <AppIcon name="phone" size={14} color="#626765" />
-            </View>
-            <YStack flex={1}>
-              <Text fontSize={12} color="#626765" marginBottom={2}>手機號碼</Text>
-              <Text fontSize={15} color="#1F2723">{user.phone}</Text>
-            </YStack>
-          </XStack>
         )}
       </YStack>
     </YStack>

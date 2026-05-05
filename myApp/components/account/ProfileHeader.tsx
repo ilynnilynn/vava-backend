@@ -1,22 +1,23 @@
 // components/account/ProfileHeader.tsx
-import { Alert, Pressable, View as RNView } from 'react-native'
+import { Pressable, View as RNView } from 'react-native'
 import { XStack, YStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { useRouter } from 'expo-router'
+import { AppIcon } from '@/components/AppIcon'
 
-const AVATAR_ICONS = ['flower-daffodil', 'flower-tulip', 'olive', 'wheat', 'pretzel'] as const
+const AVATAR_ICONS = ['avatarDaffodil', 'avatarTulip', 'avatarOlive', 'avatarWheat', 'avatarPretzel'] as const
 
 // Each entry: background + icon colour pairing
 const AVATAR_PALETTE = [
-  { bg: '#C0E8BA', fg: '#1F2723' },  // mint
-  { bg: '#8FD3D1', fg: '#1F2723' },  // teal
-  { bg: '#8DC2E6', fg: '#1F2723' },  // sky
-  { bg: '#A8AFFF', fg: '#1F2723' },  // periwinkle
-  { bg: '#CDB5FF', fg: '#1F2723' },  // lavender
-  { bg: '#F98486', fg: '#1F2723' },  // pink
-  { bg: '#FD6B59', fg: '#1F2723' },  // coral
-  { bg: '#FFA46E', fg: '#1F2723' },  // peach
-  { bg: '#DFF5AD', fg: '#1F2723' },  // lime
+  { bg: '#C0E8BA', fg: '#353C38' },  // mint
+  { bg: '#8FD3D1', fg: '#353C38' },  // teal
+  { bg: '#8DC2E6', fg: '#353C38' },  // sky
+  { bg: '#A8AFFF', fg: '#353C38' },  // periwinkle
+  { bg: '#CDB5FF', fg: '#353C38' },  // lavender
+  { bg: '#F98486', fg: '#353C38' },  // pink
+  { bg: '#FD6B59', fg: '#353C38' },  // coral
+  { bg: '#FFA46E', fg: '#353C38' },  // peach
+  { bg: '#DFF5AD', fg: '#353C38' },  // lime
 ]
 
 // Deterministic pick from `seed` so the avatar stays stable across renders
@@ -34,11 +35,13 @@ function getAvatarStyle(seed: string) {
 
 type Props = {
   displayName: string
+  email?: string
   hasUnread?: boolean
 }
 
-export function ProfileHeader({ displayName, hasUnread = false }: Props) {
+export function ProfileHeader({ displayName, email, hasUnread = false }: Props) {
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   const avatar = getAvatarStyle(displayName)
 
   return (
@@ -50,7 +53,7 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
     >
       <XStack alignItems="center" justifyContent="space-between">
         {/* Left: Avatar + Name */}
-        <XStack alignItems="center" gap={14} flex={1}>
+        <XStack alignItems="center" gap={14} flex={1} minWidth={0}>
           <View
             width={64}
             height={64}
@@ -58,32 +61,52 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
             backgroundColor={avatar.bg}
             alignItems="center"
             justifyContent="center"
+            flexShrink={0}
           >
-            <FA6ProIcon name={avatar.icon} size={26} color={avatar.fg} />
+            <AppIcon name={avatar.icon} size={26} color={avatar.fg} />
           </View>
 
-          <YStack gap={4}>
-            <Text fontSize={22} fontWeight="700" color="#1F2723" lineHeight={28}>
-              林小美
+          <YStack gap={4} flex={1} minWidth={0}>
+            <Text
+              fontSize={22}
+              fontWeight="700"
+              color="#1F2723"
+              lineHeight={28}
+              numberOfLines={2}
+            >
+              {displayName}
             </Text>
-            <XStack alignItems="center" gap={4}>
-              <FA6ProIcon name="star" size={11} color="#1F2723" />
-              <Text fontSize={12} color="#1F2723" lineHeight={16}>
-                4.8
+            {email ? (
+              <Text
+                fontSize={12}
+                color="#626765"
+                lineHeight={16}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {email}
               </Text>
-            </XStack>
+            ) : (
+              <XStack alignItems="center" gap={4}>
+                <AppIcon name="rating" size={11} color="#1F2723" />
+                <Text fontSize={12} color="#1F2723" lineHeight={16}>
+                  4.8
+                </Text>
+              </XStack>
+            )}
           </YStack>
         </XStack>
 
         {/* Right: Notification bell */}
         <Pressable
-          onPress={() => Alert.alert('通知', '通知中心即將推出')}
+          onPress={() => router.push('/notifications')}
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel="通知"
+          style={{ paddingHorizontal: 8 }}
         >
           <RNView style={{ width: 24, height: 24 }}>
-            <FA6ProIcon name="bell" size={22} color="#787D7B" weight="regular" />
+            <AppIcon name="notification" size={22} color="#787D7B" weight="regular" />
             {hasUnread && (
               <RNView
                 style={{
@@ -94,8 +117,6 @@ export function ProfileHeader({ displayName, hasUnread = false }: Props) {
                   height: 8,
                   borderRadius: 4,
                   backgroundColor: '#FF5A3C',
-                  borderWidth: 1.5,
-                  borderColor: '#FBFBF8',
                 }}
               />
             )}

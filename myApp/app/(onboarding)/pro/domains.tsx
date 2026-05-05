@@ -41,7 +41,7 @@ export default function ProDomainsScreen() {
     <OnboardingStepLayout
       title="你提供哪些服務？"
       subtitle="可複選"
-      step={2}
+      step={1}
       totalSteps={6}
       onNext={handleNext}
       nextDisabled={selected.length === 0}

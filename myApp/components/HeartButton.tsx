@@ -1,6 +1,6 @@
 // components/HeartButton.tsx
 import { Pressable } from 'react-native'
-import { FA6ProIcon } from '@/components/FA6ProIcon'
+import { AppIcon } from '@/components/AppIcon'
 
 type Props = {
   isLiked: boolean
@@ -16,8 +16,8 @@ export function HeartButton({ isLiked, onToggle, size = 20 }: Props) {
       accessibilityLabel={isLiked ? '取消收藏' : '收藏設計師'}
       accessibilityRole="button"
     >
-      <FA6ProIcon
-        name="heart"
+      <AppIcon
+        name="favorite"
         size={size}
         color={isLiked ? '#CC3352' : '#E8E9E9'}
         weight={isLiked ? 'solid' : 'regular'}

@@ -1,0 +1,8 @@
+{"type":"server-started","port":50289,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:50289","screen_dir":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content","state_dir":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/state"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content/pro-nav.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content/waiting-1.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content/slots-layout.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content/slots-phone.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content/booking-card-pro.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/37041-1776964122/content/waiting-2.html"}
+{"type":"server-stopped","reason":"idle timeout"}

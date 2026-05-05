@@ -14,8 +14,8 @@ describe('deriveRoute', () => {
     expect(deriveRoute(true, 'Alice', null)).toBe('/(tabs)/')
   })
 
-  it('returns onboarding/pro/submitted when pro row not approved', () => {
-    expect(deriveRoute(true, 'Alice', false)).toBe('/(onboarding)/pro/submitted')
+  it('returns tabs when pro row is pending (not yet approved)', () => {
+    expect(deriveRoute(true, 'Alice', false)).toBe('/(tabs)/')
   })
 
   it('returns pro-tabs when pro row approved', () => {

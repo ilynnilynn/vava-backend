@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { View, Linking } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { TamaguiProvider } from 'tamagui'
 import { Stack, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
@@ -75,13 +76,14 @@ export default function RootLayout() {
     return () => sub.remove()
   }, [router])
 
-  // Save Expo push token whenever the user signs in
+  // Save push token on sign-in; redirect to login on sign-out
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') savePushToken()
+      if (event === 'SIGNED_OUT') router.replace('/(auth)/login' as never)
     })
     return () => subscription.unsubscribe()
-  }, [])
+  }, [router])
 
   // Handle notification taps — route to booking detail via data payload
   useEffect(() => {
@@ -110,9 +112,10 @@ export default function RootLayout() {
   if (!fontsLoaded) return null
 
   return (
-    <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* Solid bar behind the iOS status bar */}
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top - 2, backgroundColor: BG, zIndex: 10 }} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: BG }}>
+      {/* Solid bar behind the iOS status bar — must not intercept touches */}
+      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top - 2, backgroundColor: BG, zIndex: 10 }} />
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <SessionProvider>
           <RoleProvider>
@@ -137,5 +140,6 @@ export default function RootLayout() {
         </SessionProvider>
       </TamaguiProvider>
     </View>
+    </GestureHandlerRootView>
   )
 }

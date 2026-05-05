@@ -1,0 +1,58 @@
+<h2>Splash Screen Approach</h2>
+<p class="subtitle">How should the app open before routing to login or home?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1F2723; display:flex; align-items:center; justify-content:center; height:220px; border-radius:8px 8px 0 0;">
+      <div style="text-align:center;">
+        <div style="font-family:Georgia,serif; font-size:32px; color:#FBFBF8; letter-spacing:4px; font-weight:700;">VAVA</div>
+        <div style="width:32px; height:2px; background:#FBFBF8; margin:14px auto 0; opacity:0.4;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Logo hold</h3>
+      <p>Static logo on brand dark green background for ~1.5s, then cross-fades to login. Simple, instant feel. No animation.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#FBFBF8; display:flex; align-items:center; justify-content:center; height:220px; border-radius:8px 8px 0 0; border:1px solid #E8E9E9; border-bottom:none;">
+      <div style="text-align:center;">
+        <div style="font-family:Georgia,serif; font-size:28px; color:#1F2723; letter-spacing:3px; font-weight:700; opacity:0.15;">VAVA</div>
+        <div style="font-size:11px; color:#A5A8A7; margin-top:10px; letter-spacing:1px;">↑ fades in</div>
+        <div style="margin-top:8px;">
+          <div style="width:40px;height:3px;background:#1F2723;border-radius:2px;margin:0 auto;opacity:0.15;"></div>
+          <div style="width:24px;height:3px;background:#1F2723;border-radius:2px;margin:6px auto 0;opacity:0.08;"></div>
+        </div>
+        <div style="font-size:11px; color:#A5A8A7; margin-top:10px; letter-spacing:1px;">→ slides up</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Fade + tagline</h3>
+      <p>Logo fades in on light background, tagline slides up beneath it ("美甲 · 美睫 · 即刻預約"). ~2s, then transitions to login.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(160deg,#1F2723 0%,#353C38 100%); display:flex; align-items:center; justify-content:center; height:220px; border-radius:8px 8px 0 0;">
+      <div style="text-align:center; padding:0 16px;">
+        <div style="font-family:Georgia,serif; font-size:30px; color:#FBFBF8; letter-spacing:4px; font-weight:700;">VAVA</div>
+        <div style="font-size:12px; color:rgba(251,251,248,0.5); margin-top:8px; letter-spacing:2px;">美甲 · 美睫</div>
+        <div style="margin-top:18px; display:flex; gap:6px; justify-content:center;">
+          <div style="width:6px;height:6px;border-radius:50%;background:rgba(251,251,248,0.8);"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:rgba(251,251,248,0.3);"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:rgba(251,251,248,0.3);"></div>
+        </div>
+        <div style="font-size:10px;color:rgba(251,251,248,0.3);margin-top:6px;">loading dots</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Dark + loading indicator</h3>
+      <p>Dark gradient, logo + subtitle, animated loading dots while session is checked. Hides the auth check latency gracefully.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">All three auto-dismiss once the session check completes. Click to select.</p>

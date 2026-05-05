@@ -1,0 +1,4 @@
+{"type":"server-started","port":59357,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:59357","screen_dir":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/63372-1777045127/content","state_dir":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/63372-1777045127/state"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/63372-1777045127/content/home-layouts.html"}
+{"type":"screen-added","file":"/Users/ilynn/Projects/engineering/vava-backend/myApp/.superpowers/brainstorm/63372-1777045127/content/home-combined.html"}
+{"type":"server-stopped","reason":"idle timeout"}
