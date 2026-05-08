@@ -141,27 +141,55 @@ export default function TermsPage() {
 
       <h3>15. Cancellation Policy</h3>
       <p>
-        Customers may cancel a confirmed booking free of charge up to <strong>2 hours</strong> before the scheduled appointment time.
-        Cancellations made within 2 hours of the appointment may incur a cancellation fee.
-        Professionals who cancel a confirmed booking without reasonable cause may be subject to account penalties.
-        VAVA reserves the right to update cancellation windows and fees, and will notify users of any such changes.
+        Customers may cancel a confirmed booking up to <strong>48 hours</strong> before the scheduled appointment time.
+        As VAVA does not currently process payments from customers, no cancellation fee applies at this time.
+      </p>
+      <p>
+        However, excessive last-minute cancellations, abusive booking behavior, or repeated unreliable conduct
+        may result in account restrictions, reduced visibility on the Platform, warnings, or account flags.
+      </p>
+      <p>
+        Professionals who repeatedly cancel confirmed bookings without reasonable cause may also receive
+        account flags or restrictions.
+      </p>
+      <p>
+        VAVA reserves the right to update cancellation windows and policies in the future,
+        and will notify users of any such changes.
       </p>
 
       <h3>16. No-Show and Late Arrival</h3>
       <p>
-        If a Customer fails to appear for a confirmed booking without prior cancellation (&ldquo;no-show&rdquo;),
-        the booking may be charged in full and no refund will be issued.
-        If a Customer arrives more than 15 minutes late, the Professional may, at their discretion, modify the scope
-        of service or treat the booking as a no-show. Repeated no-shows may result in account suspension.
+        As VAVA does not currently process payments from customers, no no-show fee or charge applies at this time.
+      </p>
+      <p>
+        If a Customer arrives more than 10&ndash;20 minutes late, the Professional may, at their discretion:
+      </p>
+      <ul>
+        <li>Shorten or adjust the scope of the service;</li>
+        <li>Refuse the booking; or</li>
+        <li>Treat the booking as a no-show.</li>
+      </ul>
+      <p>
+        Repeated no-shows, repeated excessive lateness, or disruptive behavior may result in warnings,
+        account flags, reduced platform access, temporary restrictions, or account suspension.
+      </p>
+      <p>
+        Professionals who repeatedly fail to appear for confirmed bookings may also receive
+        account restrictions or flags.
       </p>
 
       <h3>17. Refunds</h3>
       <p>
-        Refunds are evaluated on a case-by-case basis. A refund may be issued if: (a) a Professional cancels
-        a confirmed booking; (b) a service was not performed due to a fault attributable to the Professional;
-        or (c) a technical billing error occurred. Refunds are not issued for dissatisfaction with service quality alone,
-        given that Professionals are independent contractors. Requests must be submitted within 72 hours of the appointment
-        via <a href="mailto:hello@vava.now">hello@vava.now</a>.
+        VAVA currently does not process payments between customers and professionals.
+        As such, VAVA does not currently provide or process refunds.
+      </p>
+      <p>
+        Any direct financial arrangement between a customer and a professional is outside
+        VAVA&rsquo;s responsibility, unless otherwise stated in future platform features.
+      </p>
+      <p>
+        VAVA may introduce platform payments, deposits, cancellation fees, or refund systems in the future.
+        Users will be notified if and when such systems are implemented.
       </p>
 
       <h3>18. Consumer Protection and 7-Day Cooling-Off Period</h3>
@@ -458,26 +486,51 @@ export default function TermsPage() {
 
       <h3>十五、取消政策</h3>
       <p>
-        顧客可在預約服務時間前至少 <strong>2 小時</strong>免費取消已確認的預約。
-        在預約時間前 2 小時內取消可能產生取消費用。
-        無正當理由取消已確認預約的設計師可能受到帳戶懲處。
-        VAVA 保留更新取消時限及費用的權利，並將通知使用者相關變更。
+        顧客可在預約服務時間前至少 <strong>48 小時</strong>取消已確認的預約。
+        由於 VAVA 目前不處理顧客付款，目前不收取任何取消費用。
+      </p>
+      <p>
+        然而，過度的臨時取消、濫用預約行為或重複的不可靠行為，可能導致帳戶限制、
+        平台上的能見度降低、警告或帳戶標記。
+      </p>
+      <p>
+        多次無正當理由取消已確認預約的設計師，亦可能收到帳戶標記或受到限制。
+      </p>
+      <p>
+        VAVA 保留未來更新取消時限及相關政策的權利，並將通知使用者相關變更。
       </p>
 
       <h3>十六、未出席與遲到</h3>
       <p>
-        若顧客未事先取消且未出現於已確認預約（「未出席」），
-        該預約可能被全額收費，且不予退款。
-        若顧客遲到超過 15 分鐘，設計師可自行決定調整服務範圍，或將該預約視為未出席。
-        多次未出席可能導致帳戶停權。
+        由於 VAVA 目前不處理顧客付款，目前不收取任何未出席費用。
+      </p>
+      <p>
+        若顧客遲到超過 10 至 20 分鐘，設計師可自行決定：
+      </p>
+      <ul>
+        <li>縮短或調整服務範圍；</li>
+        <li>拒絕該預約；或</li>
+        <li>將該預約視為未出席。</li>
+      </ul>
+      <p>
+        多次未出席、多次嚴重遲到或破壞性行為，可能導致警告、帳戶標記、
+        平台使用權限降低、暫時限制或帳戶停權。
+      </p>
+      <p>
+        多次未出現於已確認預約的設計師，亦可能受到帳戶限制或標記。
       </p>
 
       <h3>十七、退款</h3>
       <p>
-        退款將依個案評估。以下情形可能獲得退款：(a) 設計師取消已確認的預約；
-        (b) 因設計師可歸責之原因導致服務未能執行；或 (c) 發生技術性帳單錯誤。
-        僅因對服務品質不滿意而不予退款，因設計師為獨立承攬人。
-        退款申請須於服務時間後 72 小時內透過 <a href="mailto:hello@vava.now">hello@vava.now</a> 提出。
+        VAVA 目前不處理顧客與設計師之間的付款，因此目前不提供或處理任何退款。
+      </p>
+      <p>
+        顧客與設計師之間的任何直接財務安排，均屬 VAVA 責任範圍之外，
+        除非未來平台功能另有規定。
+      </p>
+      <p>
+        VAVA 未來可能推出平台付款、訂金、取消費用或退款系統。
+        若實施此類系統，將通知使用者。
       </p>
 
       <h3>十八、消費者保護與七日鑑賞期</h3>
