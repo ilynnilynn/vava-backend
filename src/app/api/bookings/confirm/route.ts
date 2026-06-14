@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { confirmBooking, getCustomerBookings, type ConfirmBookingParams } from '@/lib/bookings'
-import { notifyProBookingConfirmed, createInAppNotification } from '@/lib/notifications'
+import { notifyProBookingConfirmed, notifyCustomerBookingConfirmed, createInAppNotification, sendPushNotification, logNotificationSend } from '@/lib/notifications'
 import { hasTimeOverlap } from '@/lib/overlap'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -213,6 +213,54 @@ export async function POST(req: NextRequest) {
           bookingId: result.data?.id,
         })
       }
+
+      // ── Notify customer (LINE + push + in-app) ───────────────
+      const { data: customerFull } = await supabase
+        .from('users')
+        .select('line_user_id, push_token_expo')
+        .eq('id', user.id)
+        .single()
+
+      if (customerFull?.line_user_id) {
+        try {
+          await notifyCustomerBookingConfirmed({
+            customerLineUserId: customerFull.line_user_id,
+            proDisplayName: pro.display_name,
+            dateTime,
+            serviceSummary,
+          })
+          await logNotificationSend({
+            userId: user.id, channel: 'line', type: 'booking_confirmed',
+            bookingId: result.data?.id, success: true,
+          })
+        } catch (custLineErr) {
+          console.error('[bookings/confirm] customer LINE notification failed:', custLineErr)
+          await logNotificationSend({
+            userId: user.id, channel: 'line', type: 'booking_confirmed',
+            bookingId: result.data?.id, success: false,
+            errorMessage: String(custLineErr),
+          })
+        }
+      }
+
+      // Push notification to customer
+      if (customerFull?.push_token_expo) {
+        await sendPushNotification({
+          pushToken: customerFull.push_token_expo,
+          title: '預約確認 ✅',
+          body: `${dateTime} — ${serviceSummary}（${pro.display_name}）`,
+          data: { type: 'booking_confirmed', bookingId: result.data?.id },
+        })
+      }
+
+      // In-app notification for customer
+      await createInAppNotification({
+        userId: user.id,
+        type: 'booking_confirmed',
+        title: '預約已確認',
+        body: `${dateTime} — ${serviceSummary}\n設計師：${pro.display_name}`,
+        bookingId: result.data?.id,
+      })
     }
   } catch (err) {
     // Log but don't fail the booking — notification is best-effort

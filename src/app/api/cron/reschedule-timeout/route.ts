@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getExpiredReschedulePending } from '@/lib/bookings'
-import { notifyCustomerRescheduleOutcome } from '@/lib/notifications'
+import { notifyCustomerRescheduleOutcome, sendPushNotification, createInAppNotification } from '@/lib/notifications'
 import type { BookingStatus } from '@/types/database'
 
 export async function GET(req: NextRequest) {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       // Notify customer that reschedule was auto-declined
       const { data: customer } = await supabase
         .from('users')
-        .select('line_user_id')
+        .select('line_user_id, push_token_expo')
         .eq('id', booking.user_id)
         .single()
 
@@ -42,6 +42,25 @@ export async function GET(req: NextRequest) {
           approved: false,
         })
       }
+
+      // Push
+      if (customer?.push_token_expo) {
+        await sendPushNotification({
+          pushToken: customer.push_token_expo,
+          title: '更改時間申請結果',
+          body: '設計師無法接受此次更改時間申請，您的原預約維持不變。',
+          data: { type: 'booking_changed', bookingId: booking.id },
+        }).catch(err => console.error(`[cron/reschedule-timeout] push failed for ${booking.id}:`, err))
+      }
+
+      // In-app
+      await createInAppNotification({
+        userId: booking.user_id,
+        type: 'booking_changed',
+        title: '更改時間結果',
+        body: '設計師無法接受此次更改時間申請，您的原預約維持不變。',
+        bookingId: booking.id,
+      })
     }
 
     return NextResponse.json({ ok: true, processed: bookings.length })

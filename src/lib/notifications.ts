@@ -212,6 +212,33 @@ export async function notifyProDeclined(params: {
   await push(params.proLineUserId, [text(lines.join('\n'))])
 }
 
+// ── Booking confirmed → customer ─────────────────────────────
+
+// Sent immediately after confirmBooking(). Confirmation receipt for the customer.
+export async function notifyCustomerBookingConfirmed(params: {
+  customerLineUserId: string
+  proDisplayName: string
+  dateTime: string             // formatted: "3月17日 14:30"
+  serviceSummary: string       // e.g. "凝膠 · 貓眼"
+}): Promise<void> {
+  await push(params.customerLineUserId, [text(
+    `【VAVA 預約確認 ✅】\n您的預約已成功！\n📅 ${params.dateTime}\n💅 ${params.serviceSummary}\n設計師：${params.proDisplayName}\n\n預約前 10 分鐘將收到地址提醒。`
+  )])
+}
+
+// ── 1-hour reminder → customer ───────────────────────────────
+
+export async function notifyCustomer1HourReminder(params: {
+  customerLineUserId: string
+  proDisplayName: string
+  dateTime: string        // "14:30"
+  serviceSummary: string
+}): Promise<void> {
+  await push(params.customerLineUserId, [text(
+    `【VAVA 提醒】\n⏰ 您的預約將在 1 小時後開始\n設計師：${params.proDisplayName}\n📅 ${params.dateTime}\n💅 ${params.serviceSummary}\n\n請提前做好準備！`
+  )])
+}
+
 // ── Rating prompt → customer (1hr after completed_at) ────────
 
 export async function notifyCustomerRatingPrompt(params: {
@@ -222,4 +249,98 @@ export async function notifyCustomerRatingPrompt(params: {
   await push(params.customerLineUserId, [text(
     `【VAVA 預約完成】\n感謝您使用 VAVA 💅\n請為 ${params.proDisplayName} 留下評價，幫助其他客戶做選擇 👇\n${params.ratingUrl}`
   )])
+}
+
+// ── Expo Push Notifications ──────────────────────────────────
+
+const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
+
+type ExpoPushMessage = {
+  to: string
+  title: string
+  body: string
+  data?: Record<string, unknown>
+  sound?: 'default' | null
+  badge?: number
+}
+
+// Send a push notification via Expo Push API.
+// pushToken = Expo push token (ExponentPushToken[xxx]) stored in users.push_token_expo
+export async function sendPushNotification(params: {
+  pushToken: string
+  title: string
+  body: string
+  data?: Record<string, unknown>
+}): Promise<void> {
+  if (!params.pushToken) return
+
+  const message: ExpoPushMessage = {
+    to: params.pushToken,
+    title: params.title,
+    body: params.body,
+    data: params.data,
+    sound: 'default',
+  }
+
+  const res = await fetch(EXPO_PUSH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Encoding': 'gzip, deflate',
+    },
+    body: JSON.stringify(message),
+  })
+
+  if (!res.ok) {
+    const body = await res.text()
+    console.error('[notifications] Expo push error:', res.status, body)
+  }
+}
+
+// Batch send push notifications (Expo supports up to 100 per request)
+export async function sendPushNotificationBatch(
+  messages: ExpoPushMessage[]
+): Promise<void> {
+  if (!messages.length) return
+
+  const res = await fetch(EXPO_PUSH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Encoding': 'gzip, deflate',
+    },
+    body: JSON.stringify(messages),
+  })
+
+  if (!res.ok) {
+    const body = await res.text()
+    console.error('[notifications] Expo push batch error:', res.status, body)
+  }
+}
+
+// ── Notification logging ─────────────────────────────────────
+
+// Log a notification send attempt for audit/history.
+export async function logNotificationSend(params: {
+  userId: string
+  channel: 'line' | 'push' | 'in_app'
+  type: string
+  bookingId?: string | null
+  success: boolean
+  errorMessage?: string | null
+}): Promise<void> {
+  const admin = createAdminClient()
+  const { error } = await admin.from('notification_logs').insert({
+    user_id: params.userId,
+    channel: params.channel,
+    type: params.type,
+    booking_id: params.bookingId ?? null,
+    success: params.success,
+    error_message: params.errorMessage ?? null,
+  })
+  if (error) {
+    console.error('[notifications] Failed to log notification:', error)
+  }
 }

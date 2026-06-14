@@ -15,6 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 const GRACE_PERIOD_MS    = 10 * 60 * 1000   // 10 minutes
 const HARD_FLAG_MINS     = 30               // < 30 min before = hard flag
 const REMINDER_MINS      = 10              // reminder fires at -10 min
+const REMINDER_1HR_MINS  = 60              // 1-hour reminder
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -394,6 +395,42 @@ export async function getBookingsNeedingReminder(sb?: SupabaseClient): Promise<B
     .in('slot_id', slots.map(s => s.id))
 
   return enrichWithStartsAt(supabase, data ?? [])
+}
+
+// Bookings that need a 1-hour reminder (starts in 58–62 min, 1hr reminder not yet sent)
+export async function getBookingsNeeding1HourReminder(sb?: SupabaseClient): Promise<Booking[]> {
+  const supabase = sb ?? await createClient()
+  const now      = new Date()
+  const from     = new Date(now.getTime() + (REMINDER_1HR_MINS - 2) * 60 * 1000).toISOString()
+  const to       = new Date(now.getTime() + (REMINDER_1HR_MINS + 2) * 60 * 1000).toISOString()
+
+  const { data: slots } = await supabase
+    .from('slots')
+    .select('id')
+    .eq('is_booked', true)
+    .gte('starts_at', from)
+    .lte('starts_at', to)
+
+  if (!slots?.length) return []
+
+  const { data } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('status', 'confirmed')
+    .is('reminder_1hr_sent_at', null)
+    .in('slot_id', slots.map(s => s.id))
+
+  return enrichWithStartsAt(supabase, data ?? [])
+}
+
+// Mark 1-hour reminder as sent
+export async function markReminder1HrSent(bookingId: string): Promise<Result<null>> {
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('bookings')
+    .update({ reminder_1hr_sent_at: new Date().toISOString() })
+    .eq('id', bookingId)
+  return { data: null, error: error?.message ?? null }
 }
 
 // Bookings where session_ends_at has passed but status is still confirmed

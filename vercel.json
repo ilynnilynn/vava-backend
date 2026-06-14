@@ -13,6 +13,10 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron/reminders-1hr",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/rating-prompts",
       "schedule": "*/15 * * * *"
     },
