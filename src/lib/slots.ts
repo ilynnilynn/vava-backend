@@ -351,8 +351,12 @@ export type MatchingSlotResult = {
     studioAddress: string
     studioLat: number | null
     studioLng: number | null
+    igHandle: string | null
+    studioName: string | null
+    district: string | null
+    portfolioUrls: string[]
   }
-  slots: { id: string; startsAt: string; endsAt: string | null }[]
+  slots: { id: string; startsAt: string; endsAt: string | null; durationMinutes: number }[]
   priceRange: { min: number; max: number }
   distanceKm: number | null
 }
@@ -534,12 +538,22 @@ export async function getMatchingSlots(
         studioAddress: pro.studio_address,
         studioLat: pro.studio_lat,
         studioLng: pro.studio_lng,
+        igHandle: pro.ig_handle ?? null,
+        studioName: pro.studio_name ?? null,
+        district: pro.studio_district ?? null,
+        portfolioUrls: pro.portfolio_urls ?? [],
       },
-      slots: filtered.map(s => ({
-        id: s.id,
-        startsAt: s.starts_at,
-        endsAt: s.ends_at,
-      })),
+      slots: filtered.map(s => {
+        const durationMinutes = s.ends_at
+          ? Math.round((new Date(s.ends_at).getTime() - new Date(s.starts_at).getTime()) / 60000)
+          : 60
+        return {
+          id: s.id,
+          startsAt: s.starts_at,
+          endsAt: s.ends_at,
+          durationMinutes,
+        }
+      }),
       priceRange,
       distanceKm: pro.distanceKm,
     })

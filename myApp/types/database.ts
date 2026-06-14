@@ -36,7 +36,7 @@ export type FlagType =
   | 'hard'     // Same-day cancel / <30min cancel — hurts standing
   | 'no_show'  // No-show — immediate suspension risk
 
-export type FlaggedEntity = 'user' | 'pro'
+export type FlaggedEntity = 'customer' | 'pro'
 
 export type ProStanding =
   | 'good'       // 0–1 soft, 0 hard
@@ -63,7 +63,7 @@ export type User = {
   display_name: string | null      // set during customer onboarding
   phone: string | null             // set during customer onboarding
   birthday: string | null          // date ISO 'YYYY-MM-DD'
-  gender: string | null            // 'female' | 'male' | 'other' | 'prefer_not'
+  gender: string | null            // 'male' | 'female' | 'other' | 'prefer_not'
   profile_photo_url: string | null
   auth_provider: string            // 'google' | 'apple'
   line_notifications: boolean
@@ -80,12 +80,16 @@ export type Pro = {
   display_name: string             // public-facing. Triggers re-review if changed.
   phone: string                    // internal/ops only. NEVER exposed to customers.
   ig_handle: string                // required
+  ig_verification_status: 'verified' | 'pending_review'
+  line_id: string | null           // LINE contact ID shared with customers
   domains: string[]                // e.g. ['nails', 'lashes', 'makeup']
+  studio_name: string | null       // optional studio/brand name
   studio_address: string           // triggers re-review if changed
+  studio_district: string          // city+district combined string
   studio_lat: number | null        // geocoded from address
   studio_lng: number | null        // geocoded from address
   nail_scope: NailScope | null     // only set if domain includes nails
-  gender: 'male' | 'female' | 'non-binary' // not editable self-serve
+  gender: 'male' | 'female' | 'other' | 'prefer_not' // not editable self-serve
   profile_photo_url: string | null // from LINE profile
   portfolio_photos: string[]       // min 3. Array of URLs.
   id_photo_path: string | null     // Supabase Storage path for ID photo (private bucket)
@@ -93,6 +97,10 @@ export type Pro = {
   is_suspended: boolean            // default false. Set by flag system.
   is_accepting: boolean            // 'Accepting Requests Now' toggle. Default false.
   submitted_at: string | null      // set when pro submits onboarding
+  verification_status: 'draft' | 'pending' | 'approved' | 'declined'
+  rejection_reasons: string[] | null   // admin decline reasons
+  rejection_note: string | null        // admin notes on decline
+  reviewed_at: string | null           // timestamp of admin review
   subscription_status: SubscriptionStatus
   confirmed_booking_count: number  // counter. Triggers paywall at 10.
   standing: ProStanding            // computed from flags — stored for fast querying

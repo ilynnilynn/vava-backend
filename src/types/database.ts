@@ -36,7 +36,7 @@ export type FlagType =
   | 'hard'     // Same-day cancel / <30min cancel — hurts standing
   | 'no_show'  // No-show — immediate suspension risk
 
-export type FlaggedEntity = 'user' | 'pro'
+export type FlaggedEntity = 'customer' | 'pro'
 
 export type ProStanding =
   | 'good'       // 0–1 soft, 0 hard
@@ -82,8 +82,10 @@ export type Pro = {
   studio_address: string           // triggers re-review if changed
   studio_lat: number | null        // geocoded from address
   studio_lng: number | null        // geocoded from address
+  studio_name: string | null       // optional studio brand name
+  studio_district: string | null   // e.g. '台北市大安區'
   nail_scope: NailScope | null     // only set if domain includes nails
-  gender: 'male' | 'female' | 'non-binary' // not editable self-serve
+  gender: 'male' | 'female' | 'other' | 'prefer_not' // not editable self-serve
   profile_photo_url: string | null // from LINE profile
   portfolio_photos: string[]       // min 3. Array of URLs.
   id_photo_path: string | null     // Supabase Storage path for ID photo (private bucket)
@@ -97,7 +99,7 @@ export type Pro = {
   no_show_window_minutes: 10 | 15 | 20  // minutes before pro can mark no-show. Default 15.
   work_start_hour: number               // 0–23, default 10
   work_end_hour: number                 // 1–24, default 20
-  verification_status: 'pending' | 'approved' | 'rejected'
+  verification_status: 'draft' | 'pending' | 'approved' | 'declined'
   rejection_reasons: string[] | null
   rejection_note: string | null
   reviewed_at: string | null

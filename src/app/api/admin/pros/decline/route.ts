@@ -2,12 +2,13 @@
 // POST /api/admin/pros/decline
 //
 // Admin-only: declines a pending pro with reasons.
-// Sets verification_status = 'rejected' and stores reasons.
+// Sets verification_status = 'declined' and stores reasons.
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { validateDeclineReasons } from '@/lib/verification'
 
 export async function POST(req: NextRequest) {
   // ── Auth + admin check ───────────────────────────────────
@@ -18,15 +19,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let isAdmin = user.app_metadata?.is_admin === true
+  // Check admin status from public.users — the single source of truth
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
 
-  if (!isAdmin) {
-    const admin = createAdminClient()
-    const { data: { user: freshUser } } = await admin.auth.admin.getUserById(user.id)
-    isAdmin = freshUser?.app_metadata?.is_admin === true
-  }
-
-  if (!isAdmin) {
+  if (!userRow?.is_admin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -40,32 +40,48 @@ export async function POST(req: NextRequest) {
 
   const { proId, reasons, note } = body
 
-  if (!proId) {
+  if (!proId || typeof proId !== 'string') {
     return NextResponse.json({ error: 'proId is required' }, { status: 400 })
   }
 
-  if (!reasons || !Array.isArray(reasons) || reasons.length === 0) {
-    return NextResponse.json({ error: 'reasons must be a non-empty array' }, { status: 400 })
+  if (!validateDeclineReasons(reasons)) {
+    return NextResponse.json(
+      { error: 'reasons must be a non-empty array of valid decline reasons' },
+      { status: 400 },
+    )
   }
+
+  const trimmedNote = typeof note === 'string' ? note.trim() : null
 
   // ── Decline ────────────────────────────────────────────────
   const admin = createAdminClient()
 
-  const { error: updateError } = await admin
+  // TODO: Add reviewed_by column to pros table, then store user.id or user.email here
+  const { data: updated, error: updateError } = await admin
     .from('pros')
     .update({
       is_approved: false,
-      verification_status: 'rejected',
+      verification_status: 'declined',
       rejection_reasons: reasons,
-      rejection_note: note ?? null,
+      rejection_note: trimmedNote || null,
       reviewed_at: new Date().toISOString(),
     })
     .eq('id', proId)
+    .eq('verification_status', 'pending')
+    .select('id')
 
   if (updateError) {
     console.error('[admin/pros/decline] update error:', updateError)
     return NextResponse.json({ error: 'Failed to decline' }, { status: 500 })
   }
+
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ error: 'This pro has already been reviewed.' }, { status: 409 })
+  }
+
+  // Notification is handled by the database trigger (migration 0042:
+  // trg_pro_application_declined) which fires when verification_status
+  // changes to 'declined'. No manual insert needed here.
 
   return NextResponse.json({ ok: true })
 }

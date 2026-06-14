@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   if (flagInfo) {
     await createFlag({
       bookingId,
-      flaggedEntity: 'user',
+      flaggedEntity: 'customer',
       flaggedId: user.id,
       flagType: flagInfo.flagType,
       isSameDay: flagInfo.isSameDay,
