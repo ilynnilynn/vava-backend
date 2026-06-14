@@ -59,6 +59,13 @@ export type ConfirmBookingParams = {
   preference?: string[] | null
   customerNote?: string | null
   briefingRefPhotoUrl?: string | null
+  // Per-scope fields for 手+腳 split bookings
+  handCategoryIds?: string[] | null
+  handStyleId?: string | null
+  handTreatmentTier?: Booking['treatment_tier']
+  footCategoryIds?: string[] | null
+  footStyleId?: string | null
+  footTreatmentTier?: Booking['treatment_tier']
 }
 
 // Locks a booking instantly (true instant confirm — no pro response window).
@@ -97,6 +104,12 @@ export async function confirmBooking(params: ConfirmBookingParams): Promise<Resu
       preference:                params.preference ?? null,
       customer_note:             params.customerNote ?? null,
       briefing_ref_photo_url:    params.briefingRefPhotoUrl ?? null,
+      hand_category_ids:         params.handCategoryIds ?? null,
+      hand_style_id:             params.handStyleId ?? null,
+      hand_treatment_tier:       params.handTreatmentTier ?? null,
+      foot_category_ids:         params.footCategoryIds ?? null,
+      foot_style_id:             params.footStyleId ?? null,
+      foot_treatment_tier:       params.footTreatmentTier ?? null,
       early_completion:          false,
     })
     .select()

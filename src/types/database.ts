@@ -217,6 +217,13 @@ export type Booking = {
   early_completion: boolean             // true if pro tapped 完成 before session_ends_at
   no_show_window_minutes: number        // snapshot from pro.no_show_window at confirm time. Frozen.
   proposed_slot_id: string | null       // reschedule flow: proposed new slot_id, set when customer requests
+  // Per-scope fields for 手+腳 split bookings
+  hand_category_ids: string[] | null
+  hand_style_id: string | null
+  hand_treatment_tier: TreatmentTier | null
+  foot_category_ids: string[] | null
+  foot_style_id: string | null
+  foot_treatment_tier: TreatmentTier | null
   created_at: string                    // booking confirm timestamp
 }
 

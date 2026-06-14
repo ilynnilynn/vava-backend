@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateDeclineReasons } from '@/lib/verification'
+import { notifyProDeclined } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   // ── Auth + admin check ───────────────────────────────────
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
     })
     .eq('id', proId)
     .eq('verification_status', 'pending')
-    .select('id')
+    .select('id, line_user_id')
 
   if (updateError) {
     console.error('[admin/pros/decline] update error:', updateError)
@@ -79,9 +80,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This pro has already been reviewed.' }, { status: 409 })
   }
 
-  // Notification is handled by the database trigger (migration 0042:
-  // trg_pro_application_declined) which fires when verification_status
-  // changes to 'declined'. No manual insert needed here.
+  // In-app notification is handled by the database trigger (migration 0042:
+  // trg_pro_application_declined). Send LINE notification here too.
+  const proLineUserId = updated[0].line_user_id
+  if (proLineUserId) {
+    try {
+      await notifyProDeclined({
+        proLineUserId,
+        reasons: reasons!,
+        note: trimmedNote,
+      })
+    } catch (err) {
+      console.error('[admin/pros/decline] LINE notification failed:', err)
+    }
+  }
 
   return NextResponse.json({ ok: true })
 }

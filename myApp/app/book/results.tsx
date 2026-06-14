@@ -402,6 +402,19 @@ export default function ResultsScreen() {
       if (state.services?.styleId) {
         body.styleId = state.services.styleId
       }
+      if (state.services?.nailScope) {
+        body.nailScope = state.services.nailScope
+      }
+      if (state.services?.handCategoryIds?.length) {
+        body.handCategoryIds = state.services.handCategoryIds
+        body.handStyleId = state.services.handStyleId
+        body.handTreatmentTier = state.services.handTreatmentTier
+      }
+      if (state.services?.footCategoryIds?.length) {
+        body.footCategoryIds = state.services.footCategoryIds
+        body.footStyleId = state.services.footStyleId
+        body.footTreatmentTier = state.services.footTreatmentTier
+      }
 
       const res = await apiPost<{ results: ApiMatchResult[]; total: number }>('/api/bookings/match', body)
 

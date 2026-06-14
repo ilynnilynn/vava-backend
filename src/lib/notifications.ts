@@ -8,19 +8,50 @@
 // LINE Messaging API docs: https://developers.line.biz/en/docs/messaging-api/
 // ============================================================
 
+import { createAdminClient } from '@/lib/supabase/admin'
+
 const LINE_PUSH_URL    = 'https://api.line.me/v2/bot/message/push'
 const ACCESS_TOKEN     = process.env.LINE_CHANNEL_ACCESS_TOKEN
+
+// ── In-app fallback ──────────────────────────────────────────
+
+// Create an in-app notification as fallback when LINE delivery fails
+// or when the user has no LINE ID.
+export async function createInAppNotification(params: {
+  userId: string
+  type: string
+  title: string
+  body: string
+  bookingId?: string | null
+}): Promise<void> {
+  const admin = createAdminClient()
+  const { error } = await admin.from('notifications').insert({
+    user_id: params.userId,
+    type: params.type,
+    title: params.title,
+    body: params.body,
+    booking_id: params.bookingId ?? null,
+  })
+  if (error) {
+    console.error('[notifications] Failed to create in-app notification:', error)
+  }
+}
 
 // ── Core send ────────────────────────────────────────────────
 
 // Low-level push to a single LINE user ID.
 // lineUserId = the user's LINE UID (stored in users.line_user_id or pros.line_user_id)
+// Throws on failure so callers can handle fallback behavior.
 async function push(lineUserId: string, messages: object[]): Promise<void> {
   if (!ACCESS_TOKEN) {
-    // In dev without a LINE account set up — log and skip
-    console.warn('[notifications] LINE_CHANNEL_ACCESS_TOKEN not set — skipping send to', lineUserId)
+    console.error('[notifications] LINE_CHANNEL_ACCESS_TOKEN not set — cannot send LINE messages')
     console.debug('[notifications] Would have sent:', JSON.stringify(messages, null, 2))
-    return
+    throw new Error('LINE_CHANNEL_ACCESS_TOKEN not configured')
+  }
+
+  if (!lineUserId) {
+    console.error('[notifications] lineUserId is null/empty — cannot send LINE message')
+    throw new Error('lineUserId is required for LINE push')
   }
 
   const res = await fetch(LINE_PUSH_URL, {
@@ -35,6 +66,7 @@ async function push(lineUserId: string, messages: object[]): Promise<void> {
   if (!res.ok) {
     const body = await res.text()
     console.error('[notifications] LINE API error:', res.status, body)
+    throw new Error(`LINE API error: ${res.status} ${body}`)
   }
 }
 
@@ -158,6 +190,26 @@ export async function notifyProApproved(params: {
   await push(params.proLineUserId, [text(
     `【VAVA 審核通過 🎉】\n恭喜您！您的 VAVA 設計師帳號已通過審核。\n立即前往後台開放時段，開始接受預約 👇\n${params.dashboardUrl}`
   )])
+}
+
+// ── Pro application declined → pro (LINE) ────────────────────
+
+export async function notifyProDeclined(params: {
+  proLineUserId: string
+  reasons: string[]
+  note?: string | null
+}): Promise<void> {
+  const reasonList = params.reasons.join('、')
+  const lines = [
+    '【VAVA 審核通知】',
+    '很遺憾，您的設計師申請未通過。',
+    `原因：${reasonList}`,
+  ]
+  if (params.note) lines.push(`備註：${params.note}`)
+  lines.push('')
+  lines.push('請修正後重新申請。如有疑問請聯繫客服。')
+
+  await push(params.proLineUserId, [text(lines.join('\n'))])
 }
 
 // ── Rating prompt → customer (1hr after completed_at) ────────

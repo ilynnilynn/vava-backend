@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { confirmBooking, getCustomerBookings, type ConfirmBookingParams } from '@/lib/bookings'
-import { notifyProBookingConfirmed } from '@/lib/notifications'
+import { notifyProBookingConfirmed, createInAppNotification } from '@/lib/notifications'
 import { hasTimeOverlap } from '@/lib/overlap'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -139,6 +139,12 @@ export async function POST(req: NextRequest) {
     addonIds,
     nailScope: body.nailScope as ConfirmBookingParams['nailScope'],
     treatmentTier: body.treatmentTier as ConfirmBookingParams['treatmentTier'],
+    handCategoryIds: Array.isArray(body.handCategoryIds) ? body.handCategoryIds : null,
+    handStyleId: typeof body.handStyleId === 'string' ? body.handStyleId : null,
+    handTreatmentTier: body.handTreatmentTier as ConfirmBookingParams['handTreatmentTier'],
+    footCategoryIds: Array.isArray(body.footCategoryIds) ? body.footCategoryIds : null,
+    footStyleId: typeof body.footStyleId === 'string' ? body.footStyleId : null,
+    footTreatmentTier: body.footTreatmentTier as ConfirmBookingParams['footTreatmentTier'],
     fillInDays: typeof body.fillInDays === 'number' ? body.fillInDays : null,
     isReturningCustomer: typeof body.isReturningCustomer === 'boolean' ? body.isReturningCustomer : null,
     nailPackageId: typeof body.nailPackageId === 'string' ? body.nailPackageId : null,
@@ -153,15 +159,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: 500 })
   }
 
-  // ── Notify pro via LINE ───────────────────────────────────
+  // ── Notify pro via LINE + in-app fallback ─────────────────
   // Fetch pro + customer data for the notification (best-effort, don't fail the booking)
   try {
     const [{ data: pro }, { data: customer }] = await Promise.all([
-      supabase.from('pros').select('line_user_id, display_name, studio_address').eq('id', proId).single(),
+      supabase.from('pros').select('user_id, line_user_id, display_name, studio_address').eq('id', proId).single(),
       supabase.from('users').select('name, phone').eq('id', user.id).single(),
     ])
 
-    if (pro?.line_user_id && customer) {
+    if (!pro || !customer) {
+      console.error('[bookings/confirm] could not fetch pro/customer for notification')
+    } else {
       const dt = new Date(startsAt)
       const dateTime = `${dt.getMonth() + 1}月${dt.getDate()}日 ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
 
@@ -173,17 +181,38 @@ export async function POST(req: NextRequest) {
 
       const serviceSummary = categories?.map(c => c.name_zh).join(' · ') ?? '服務'
 
-      await notifyProBookingConfirmed({
-        proLineUserId: pro.line_user_id,
-        customerName: customer.name,
-        customerPhone: customer.phone,
-        dateTime,
-        serviceSummary,
-        studioAddress: pro.studio_address,
-        refPhotoUrl: params.briefingRefPhotoUrl,
-        preferences: params.preference ?? undefined,
-        customerNote: params.customerNote,
-      })
+      let lineSent = false
+      if (pro.line_user_id) {
+        try {
+          await notifyProBookingConfirmed({
+            proLineUserId: pro.line_user_id,
+            customerName: customer.name,
+            customerPhone: customer.phone,
+            dateTime,
+            serviceSummary,
+            studioAddress: pro.studio_address,
+            refPhotoUrl: params.briefingRefPhotoUrl,
+            preferences: params.preference ?? undefined,
+            customerNote: params.customerNote,
+          })
+          lineSent = true
+        } catch (lineErr) {
+          console.error('[bookings/confirm] LINE notification failed, falling back to in-app:', lineErr)
+        }
+      } else {
+        console.warn('[bookings/confirm] pro has no line_user_id, using in-app notification only')
+      }
+
+      // Always create in-app notification; serves as fallback when LINE fails
+      if (!lineSent) {
+        await createInAppNotification({
+          userId: pro.user_id,
+          type: 'booking_confirmed',
+          title: '新預約通知',
+          body: `${dateTime} — ${serviceSummary}\n客戶：${customer.name}`,
+          bookingId: result.data?.id,
+        })
+      }
     }
   } catch (err) {
     // Log but don't fail the booking — notification is best-effort
