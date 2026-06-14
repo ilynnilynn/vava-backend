@@ -25,19 +25,29 @@ export async function POST(req: NextRequest) {
   }
 
   const supabaseUserId = user.id
-
   const meta = user.user_metadata ?? {}
 
-  const type       = meta.auth_type    || body.type       || 'customer'
-  const lineUserId = meta.line_user_id || body.lineUserId || ''
-  const name       = meta.name         || body.name       || ''
-  const picture    = meta.picture      || body.picture    || null
+  // Google OAuth provides: full_name, avatar_url, email
+  const name    = meta.full_name || meta.name || ''
+  const picture = meta.avatar_url || meta.picture || null
+  const email   = user.email || ''
+
+  // Determine user type from metadata or request body.
+  // Default: customer. Pro mode is set inside the app after login.
+  const type = meta.auth_type || body.type || 'customer'
 
   try {
     if (type === 'pro') {
+      // Pro users also need a users row for notifications FK
+      await upsertUser({
+        supabaseUserId,
+        email,
+        name,
+        pictureUrl: picture || null,
+      })
+
       await upsertPro({
         supabaseUserId,
-        lineUserId,
         name,
         pictureUrl: picture || null,
       })
@@ -56,14 +66,15 @@ export async function POST(req: NextRequest) {
     } else {
       await upsertUser({
         supabaseUserId,
-        lineUserId,
+        email,
         name,
         pictureUrl: picture || null,
       })
 
+      // Check if user is admin — admins can access /admin/verification
       const { data: userRow } = await supabase
         .from('users')
-        .select('phone, birth_year')
+        .select('phone, birth_year, is_admin')
         .eq('id', supabaseUserId)
         .single()
 

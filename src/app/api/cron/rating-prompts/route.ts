@@ -30,40 +30,63 @@ export async function GET(req: NextRequest) {
         ])
 
         if (!pro) continue
+        if (!customer) continue  // skip if customer row missing — don't mark as sent
 
         const token = createRatingToken(booking.id, booking.user_id)
         const ratingUrl = `${process.env.NEXT_PUBLIC_APP_URL}/bookings/${booking.id}/rate?token=${token}`
 
+        let delivered = false
+
         // LINE
-        if (customer?.line_user_id) {
-          await notifyCustomerRatingPrompt({
-            customerLineUserId: customer.line_user_id,
-            proDisplayName: pro.display_name,
-            ratingUrl,
-          })
+        if (customer.line_user_id) {
+          try {
+            await notifyCustomerRatingPrompt({
+              customerLineUserId: customer.line_user_id,
+              proDisplayName: pro.display_name,
+              ratingUrl,
+            })
+            delivered = true
+          } catch (lineErr) {
+            console.error(`[cron/rating-prompts] LINE failed for ${booking.id}:`, lineErr)
+          }
         }
 
         // Push
-        if (customer?.push_token_expo) {
-          await sendPushNotification({
-            pushToken: customer.push_token_expo,
-            title: '服務已完成 💅',
-            body: `請為 ${pro.display_name} 留下評價`,
-            data: { type: 'review_prompt', bookingId: booking.id, ratingUrl },
-          }).catch(err => console.error(`[cron/rating-prompts] push failed for ${booking.id}:`, err))
+        if (customer.push_token_expo) {
+          try {
+            await sendPushNotification({
+              pushToken: customer.push_token_expo,
+              title: '服務已完成 💅',
+              body: `請為 ${pro.display_name} 留下評價`,
+              data: { type: 'review_prompt', bookingId: booking.id, ratingUrl },
+            })
+            delivered = true
+          } catch (pushErr) {
+            console.error(`[cron/rating-prompts] push failed for ${booking.id}:`, pushErr)
+          }
         }
 
-        // In-app
-        await createInAppNotification({
-          userId: booking.user_id,
-          type: 'review_prompt',
-          title: '請留下評價',
-          body: `感謝您使用 VAVA！請為 ${pro.display_name} 留下評價。`,
-          bookingId: booking.id,
-        })
+        // In-app (always try)
+        try {
+          await createInAppNotification({
+            userId: booking.user_id,
+            type: 'review_prompt',
+            title: '請留下評價',
+            body: `感謝您使用 VAVA！請為 ${pro.display_name} 留下評價。`,
+            bookingId: booking.id,
+          })
+          delivered = true
+        } catch (inAppErr) {
+          console.error(`[cron/rating-prompts] in-app failed for ${booking.id}:`, inAppErr)
+        }
 
-        await markRatingPromptSent(booking.id, supabase)
-        sent++
+        // Only mark as sent if at least one channel delivered
+        if (delivered) {
+          await markRatingPromptSent(booking.id, supabase)
+          sent++
+        } else {
+          console.warn(`[cron/rating-prompts] no channel delivered for booking ${booking.id}, will retry`)
+        }
       } catch (err) {
         console.error(`[cron/rating-prompts] failed for booking ${booking.id}:`, err)
       }

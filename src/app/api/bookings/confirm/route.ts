@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
   try {
     const [{ data: pro }, { data: customer }] = await Promise.all([
       supabase.from('pros').select('user_id, line_user_id, display_name, studio_address').eq('id', proId).single(),
-      supabase.from('users').select('name, phone').eq('id', user.id).single(),
+      supabase.from('users').select('display_name, phone').eq('id', user.id).single(),
     ])
 
     if (!pro || !customer) {
@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
         try {
           await notifyProBookingConfirmed({
             proLineUserId: pro.line_user_id,
-            customerName: customer.name,
+            customerName: customer.display_name,
             customerPhone: customer.phone,
             dateTime,
             serviceSummary,
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
           userId: pro.user_id,
           type: 'booking_confirmed',
           title: '新預約通知',
-          body: `${dateTime} — ${serviceSummary}\n客戶：${customer.name}`,
+          body: `${dateTime} — ${serviceSummary}\n客戶：${customer.display_name}`,
           bookingId: result.data?.id,
         })
       }

@@ -437,20 +437,31 @@ export async function getMatchingSlots(
   if (pros.length === 0) return []
 
   // 2. For each pro, check if they offer services in the requested domain
-  //    by querying pro_services filtered by category_id
+  //    by querying pro_services joined to service_categories to filter by domain
   const proIds = pros.map(p => p.id)
 
-  let serviceQuery = supabase
+  // First, get category IDs that match the requested domain
+  const { data: domainCategories } = await supabase
+    .from('service_categories')
+    .select('id')
+    .eq('domain', criteria.domain)
+
+  const domainCategoryIds = (domainCategories ?? []).map(c => c.id)
+  if (domainCategoryIds.length === 0) return []
+
+  // Filter pro_services by domain categories (and optionally by specific categoryIds)
+  const targetCategoryIds = (criteria.categoryIds && criteria.categoryIds.length > 0)
+    ? criteria.categoryIds.filter(id => domainCategoryIds.includes(id))
+    : domainCategoryIds
+
+  if (targetCategoryIds.length === 0) return []
+
+  const { data: proServices } = await supabase
     .from('pro_services')
     .select('pro_id, category_id')
     .in('pro_id', proIds)
     .eq('is_enabled', true)
-
-  if (criteria.categoryIds && criteria.categoryIds.length > 0) {
-    serviceQuery = serviceQuery.in('category_id', criteria.categoryIds)
-  }
-
-  const { data: proServices } = await serviceQuery
+    .in('category_id', targetCategoryIds)
 
   // Build set of pro IDs that have matching services
   const matchingProIds = new Set((proServices ?? []).map(ps => ps.pro_id))
@@ -541,7 +552,7 @@ export async function getMatchingSlots(
         igHandle: pro.ig_handle ?? null,
         studioName: pro.studio_name ?? null,
         district: pro.studio_district ?? null,
-        portfolioUrls: pro.portfolio_urls ?? [],
+        portfolioUrls: pro.portfolio_photos ?? [],
       },
       slots: filtered.map(s => {
         const durationMinutes = s.ends_at

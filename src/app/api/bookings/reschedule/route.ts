@@ -72,27 +72,31 @@ export async function POST(req: NextRequest) {
     .update({ proposed_slot_id: newSlotId })
     .eq('id', bookingId)
 
-  // Load data for notification
-  const [proRes, slotRes, userRes] = await Promise.all([
-    supabase.from('pros').select('line_user_id').eq('id', booking.pro_id).single(),
-    supabase.from('slots').select('starts_at').eq('id', booking.slot_id).single(),
-    supabase.from('users').select('name').eq('id', user.id).single(),
-  ])
+  // Load data for notification (best-effort — don't fail the reschedule)
+  try {
+    const [proRes, slotRes, userRes] = await Promise.all([
+      supabase.from('pros').select('line_user_id').eq('id', booking.pro_id).single(),
+      supabase.from('slots').select('starts_at').eq('id', booking.slot_id).single(),
+      supabase.from('users').select('display_name').eq('id', user.id).single(),
+    ])
 
-  if (proRes.data?.line_user_id && slotRes.data && userRes.data) {
-    const originalDateTime = new Date(slotRes.data.starts_at).toLocaleString('zh-TW', {
-      month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-    })
-    const newDateTime = new Date(newSlot.starts_at).toLocaleString('zh-TW', {
-      month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-    })
+    if (proRes.data?.line_user_id && slotRes.data && userRes.data) {
+      const originalDateTime = new Date(slotRes.data.starts_at).toLocaleString('zh-TW', {
+        month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      })
+      const newDateTime = new Date(newSlot.starts_at).toLocaleString('zh-TW', {
+        month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      })
 
-    await notifyProRescheduleRequested({
-      proLineUserId: proRes.data.line_user_id,
-      customerName: userRes.data.name,
-      originalDateTime,
-      newDateTime,
-    })
+      await notifyProRescheduleRequested({
+        proLineUserId: proRes.data.line_user_id,
+        customerName: userRes.data.display_name,
+        originalDateTime,
+        newDateTime,
+      })
+    }
+  } catch (err) {
+    console.error('[bookings/reschedule] notification error:', err)
   }
 
   return NextResponse.json({ ok: true })

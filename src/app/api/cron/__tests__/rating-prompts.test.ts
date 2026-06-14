@@ -6,6 +6,8 @@ import { NextRequest } from 'next/server'
 const mockGetBookingsNeedingRatingPrompt = vi.fn(async () => [])
 const mockMarkRatingPromptSent = vi.fn(async () => ({ data: null, error: null }))
 const mockNotifyCustomerRatingPrompt = vi.fn(async () => {})
+const mockSendPushNotification = vi.fn(async () => {})
+const mockCreateInAppNotification = vi.fn(async () => {})
 
 const mockSingle = vi.fn()
 const mockEq = vi.fn(() => ({ single: mockSingle }))
@@ -25,6 +27,8 @@ vi.mock('@/lib/ratings', () => ({
 
 vi.mock('@/lib/notifications', () => ({
   notifyCustomerRatingPrompt: (...args: unknown[]) => mockNotifyCustomerRatingPrompt(...args),
+  sendPushNotification: (...args: unknown[]) => mockSendPushNotification(...args),
+  createInAppNotification: (...args: unknown[]) => mockCreateInAppNotification(...args),
 }))
 
 vi.mock('@/lib/auth', () => ({
@@ -71,7 +75,7 @@ describe('GET /api/cron/rating-prompts', () => {
       { id: 'b-1', user_id: 'u-1', pro_id: 'p-1', completed_at: '2026-03-23T12:00:00Z' },
     ])
     mockSingle
-      .mockResolvedValueOnce({ data: { line_user_id: 'line-u-1' } })
+      .mockResolvedValueOnce({ data: { line_user_id: 'line-u-1', push_token_expo: null } })
       .mockResolvedValueOnce({ data: { display_name: '小美' } })
 
     const { GET } = await import('../../cron/rating-prompts/route')
@@ -94,7 +98,7 @@ describe('GET /api/cron/rating-prompts', () => {
       { id: 'b-fail', user_id: 'u-1', pro_id: 'p-1', completed_at: '2026-03-23T12:00:00Z' },
       { id: 'b-ok', user_id: 'u-2', pro_id: 'p-2', completed_at: '2026-03-23T12:00:00Z' },
     ])
-    // First booking: customer has no line_user_id → skip notify but still mark sent
+    // First booking: customer row not found → skipped entirely (P1-13 fix)
     // Second booking: succeeds fully
     mockSingle
       .mockResolvedValueOnce({ data: null })                             // b-fail: user not found
@@ -106,9 +110,8 @@ describe('GET /api/cron/rating-prompts', () => {
     const res = await GET(makeRequest(`Bearer ${CRON_SECRET}`))
     expect(res.status).toBe(200)
     const json = await res.json()
-    // Both bookings processed (sent++ happens after markRatingPromptSent)
-    // but only b-ok triggered a notification
-    expect(json.processed).toBe(2)
+    // Only b-ok processed — b-fail skipped because customer is null
+    expect(json.processed).toBe(1)
     expect(mockNotifyCustomerRatingPrompt).toHaveBeenCalledOnce()
     expect(mockNotifyCustomerRatingPrompt).toHaveBeenCalledWith(expect.objectContaining({
       customerLineUserId: 'line-u-2',
