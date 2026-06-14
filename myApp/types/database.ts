@@ -273,6 +273,8 @@ export type Rating = {
   stars: 1 | 2 | 3 | 4 | 5
   comment: string | null  // customer ratings only (public)
   is_public: boolean      // true = customer rates pro. false = pro rates customer.
+  flagged: boolean        // true = flagged for moderation review
+  flagged_reason: string | null  // reason the review was flagged
   created_at: string
 }
 

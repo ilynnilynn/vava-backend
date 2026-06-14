@@ -208,6 +208,7 @@ export type Booking = {
   no_show_reporter: NoShowReporter | null
   customer_late_notified_at: string | null
   reminder_sent_at: string | null
+  reminder_1hr_sent_at: string | null   // 1-hour reminder sent timestamp
   rating_prompt_sent: boolean           // true if rating prompt was sent after completion
   session_ends_at: string               // slot.starts_at + total duration. Set at confirm.
   nail_package_id: string | null        // 套餐 only
@@ -276,6 +277,8 @@ export type Rating = {
   stars: 1 | 2 | 3 | 4 | 5
   comment: string | null  // customer ratings only (public)
   is_public: boolean      // true = customer rates pro. false = pro rates customer.
+  flagged: boolean        // true = flagged for moderation review
+  flagged_reason: string | null  // reason the review was flagged
   created_at: string
 }
 

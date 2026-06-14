@@ -121,6 +121,56 @@ export async function getRatingForBooking(
   return data ?? null
 }
 
+// ── Moderation ───────────────────────────────────────────────
+
+// Flag a review as inappropriate. Called by the ratee (pro) or admin.
+export async function flagRating(
+  ratingId: string,
+  reason: string
+): Promise<Result<null>> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('ratings')
+    .update({
+      flagged: true,
+      flagged_reason: reason.trim().slice(0, 500),
+    })
+    .eq('id', ratingId)
+
+  if (error) return { data: null, error: error.message }
+  return { data: null, error: null }
+}
+
+// Get all flagged reviews for the admin moderation queue.
+export async function getFlaggedRatings(sb?: SupabaseClient): Promise<Rating[]> {
+  const supabase = sb ?? await createClient()
+
+  const { data } = await supabase
+    .from('ratings')
+    .select('*')
+    .eq('flagged', true)
+    .order('created_at', { ascending: false })
+
+  return data ?? []
+}
+
+// Dismiss a flag (admin reviewed and found it acceptable).
+export async function dismissRatingFlag(
+  ratingId: string,
+  sb?: SupabaseClient
+): Promise<Result<null>> {
+  const supabase = sb ?? await createClient()
+
+  const { error } = await supabase
+    .from('ratings')
+    .update({ flagged: false, flagged_reason: null })
+    .eq('id', ratingId)
+
+  if (error) return { data: null, error: error.message }
+  return { data: null, error: null }
+}
+
 // ── Cron helpers ──────────────────────────────────────────────
 
 // Mark rating prompt as sent. Called by cron after notifyCustomerRatingPrompt().

@@ -43,7 +43,7 @@ export default function BookingDetailScreen() {
   if (error || !detail) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap={16}>
-        <Text fontSize={15} color="#626765">{error ?? '找不到預約'}</Text>
+        <Text fontSize={15} color="#8F9391">{error ?? '找不到預約'}</Text>
         <Pressable onPress={() => router.back()}>
           <Text fontSize={14} fontWeight="600" color="#1F2723">返回</Text>
         </Pressable>
@@ -147,37 +147,37 @@ export default function BookingDetailScreen() {
 
           <YStack gap={8}>
             <XStack gap={8} alignItems="center">
-              <AppIcon name="scissors" size={14} color="#626765" />
-              <Text fontSize={15} lineHeight={22} color="#626765">
+              <AppIcon name="scissors" size={14} color="#8F9391" />
+              <Text fontSize={15} lineHeight={22} color="#8F9391">
                 {domainLabel} — {detail.service_label}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <AppIcon name="calendar" size={14} color="#626765" />
-              <Text fontSize={15} lineHeight={22} color="#626765">
+              <AppIcon name="calendar" size={14} color="#8F9391" />
+              <Text fontSize={15} lineHeight={22} color="#8F9391">
                 {formatBookingDate(detail.starts_at)} {formatSlotTime(detail.starts_at)}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <AppIcon name="location" size={14} color="#626765" />
-              <Text fontSize={15} lineHeight={22} color="#626765">
+              <AppIcon name="location" size={14} color="#8F9391" />
+              <Text fontSize={15} lineHeight={22} color="#8F9391">
                 {detail.studio_address}
               </Text>
             </XStack>
 
             <XStack gap={8} alignItems="center">
-              <AppIcon name="dollarSign" size={14} color="#626765" />
-              <Text fontSize={15} lineHeight={22} color="#626765">
+              <AppIcon name="dollarSign" size={14} color="#8F9391" />
+              <Text fontSize={15} lineHeight={22} color="#8F9391">
                 NT${detail.price_min}–{detail.price_max}
               </Text>
             </XStack>
 
             {showPhone && detail.pro_phone && (
               <XStack gap={8} alignItems="center">
-                <AppIcon name="phone" size={14} color="#626765" />
-                <Text fontSize={15} fontWeight="600" color="#626765">
+                <AppIcon name="phone" size={14} color="#8F9391" />
+                <Text fontSize={15} fontWeight="600" color="#8F9391">
                   {detail.pro_phone}
                 </Text>
               </XStack>
@@ -240,7 +240,7 @@ export default function BookingDetailScreen() {
                 opacity: 0.4,
               }}
             >
-              <Text fontSize={16} fontWeight="600" color="#626765">改期（即將推出）</Text>
+              <Text fontSize={16} fontWeight="600" color="#8F9391">改期（即將推出）</Text>
             </Pressable>
           </YStack>
         )}
@@ -266,29 +266,37 @@ export default function BookingDetailScreen() {
           </YStack>
         )}
 
-        {/* Completed — rating (disabled — future scope) */}
+        {/* Completed — rate this booking */}
         {detail.status === 'completed' && (
           <YStack marginTop={24}>
             <Pressable
-              disabled
-              style={{
+              onPress={() => router.push({
+                pathname: '/booking/rate',
+                params: {
+                  bookingId: detail.id,
+                  proId: detail.pro_id,
+                  proName: detail.pro_display_name,
+                },
+              })}
+              accessibilityRole="button"
+              accessibilityLabel="評分"
+              style={({ pressed }) => ({
                 borderRadius: 9999,
                 height: 48,
-                borderWidth: 1,
-                borderColor: '#E8E9E9',
+                backgroundColor: '#1F2723',
                 alignItems: 'center',
                 justifyContent: 'center',
-                opacity: 0.4,
-              }}
+                opacity: pressed ? 0.75 : 1,
+              })}
             >
-              <Text fontSize={16} fontWeight="600" color="#626765">評分（即將推出）</Text>
+              <Text fontSize={16} fontWeight="600" color="#FBFBF8">評分</Text>
             </Pressable>
           </YStack>
         )}
 
         {/* Payment note */}
         {isUpcoming && (
-          <Text fontSize={13} color="#626765" textAlign="center" marginTop={24}>
+          <Text fontSize={13} color="#8F9391" textAlign="center" marginTop={24}>
             實際費用將於服務結束後由設計師確認
           </Text>
         )}

@@ -10,6 +10,7 @@ export type BookingListItem = {
 
 export type BookingDetail = {
   id: string
+  pro_id: string
   pro_display_name: string
   pro_phone: string | null
   service_domain: 'nails' | 'lashes'

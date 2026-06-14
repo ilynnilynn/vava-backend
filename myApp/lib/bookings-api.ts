@@ -61,7 +61,7 @@ export async function fetchBookingDetail(bookingId: string): Promise<BookingDeta
   const { data: b, error } = await supabase
     .from('bookings')
     .select(`
-      id, service_category_ids, session_ends_at,
+      id, pro_id, service_category_ids, session_ends_at,
       price_min, price_max, status, no_show_window_minutes,
       customer_late_notified_at, created_at,
       slots!slot_id(starts_at),
@@ -90,6 +90,7 @@ export async function fetchBookingDetail(bookingId: string): Promise<BookingDeta
 
   return {
     id: b.id,
+    pro_id: (b as any).pro_id,
     pro_display_name: pros.display_name,
     pro_phone: pros.phone ?? null,
     service_domain: firstCat?.domain ?? 'nails',
