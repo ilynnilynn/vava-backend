@@ -1,6 +1,6 @@
 // app/(pro-tabs)/bookings.tsx
 import { useCallback, useState } from 'react'
-import { SectionList, Pressable, RefreshControl, ActivityIndicator, View } from 'react-native'
+import { SectionList, Pressable, RefreshControl, ActivityIndicator, View, StyleSheet } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
@@ -9,8 +9,18 @@ import { BookingCardPro } from '@/components/pro/BookingCardPro'
 import { fetchProBookings } from '@/lib/pro-bookings-api'
 import { splitProBookings } from '@/lib/pro-helpers'
 import type { ProBookingListItem } from '@/types/pro'
+import type { BookingStatus } from '@/types/database'
 
 type Tab = 'upcoming' | 'history'
+
+type StatusFilter = 'all' | 'completed' | 'cancelled' | 'no_show'
+
+const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: '全部' },
+  { key: 'completed', label: '已完成' },
+  { key: 'cancelled', label: '已取消' },
+  { key: 'no_show', label: '未到場' },
+]
 
 const WEEKDAYS_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -41,12 +51,21 @@ function groupByDate(items: ProBookingListItem[]) {
   }))
 }
 
+function matchesStatusFilter(status: BookingStatus, filter: StatusFilter): boolean {
+  if (filter === 'all') return true
+  if (filter === 'completed') return status === 'completed'
+  if (filter === 'cancelled') return status === 'cancelled_pro' || status === 'cancelled_customer' || status === 'cancelled_grace'
+  if (filter === 'no_show') return status === 'no_show_customer' || status === 'no_show_pro'
+  return true
+}
+
 export default function ProBookingsScreen() {
   const insets = useSafeAreaInsets()
   const [bookings, setBookings] = useState<ProBookingListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('upcoming')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 
   const load = useCallback(async () => {
     const data = await fetchProBookings()
@@ -71,7 +90,13 @@ export default function ProBookingsScreen() {
   }
 
   const { upcoming, past } = splitProBookings(bookings)
-  const data = activeTab === 'upcoming' ? upcoming : past
+
+  // Apply status filter only on history tab
+  const filteredPast = activeTab === 'history'
+    ? past.filter(b => matchesStatusFilter(b.status, statusFilter))
+    : past
+
+  const data = activeTab === 'upcoming' ? upcoming : filteredPast
   const sections = groupByDate(data)
 
   return (
@@ -86,16 +111,41 @@ export default function ProBookingsScreen() {
       {/* Tab bar */}
       <XStack
         marginHorizontal={20}
-        marginBottom={12}
+        marginBottom={activeTab === 'history' ? 0 : 12}
       >
         <TabPill label="即將到來" count={upcoming.length} active={activeTab === 'upcoming'} onPress={() => setActiveTab('upcoming')} />
         <TabPill label="歷史紀錄" active={activeTab === 'history'} onPress={() => setActiveTab('history')} />
       </XStack>
 
+      {/* Status filters — only on history tab */}
+      {activeTab === 'history' && (
+        <XStack marginHorizontal={20} marginTop={8} marginBottom={12} gap={8}>
+          {STATUS_FILTERS.map(f => (
+            <Pressable
+              key={f.key}
+              onPress={() => setStatusFilter(f.key)}
+              style={({ pressed }) => [
+                filterStyles.chip,
+                statusFilter === f.key && filterStyles.chipActive,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Text
+                fontSize={13}
+                fontWeight={statusFilter === f.key ? '600' : '400'}
+                color={statusFilter === f.key ? '#FFFFFF' : '#8F9391'}
+              >
+                {f.label}
+              </Text>
+            </Pressable>
+          ))}
+        </XStack>
+      )}
+
       {/* List */}
       {data.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" paddingHorizontal={24} paddingBottom={80}>
-          <Text fontSize={14} color="#626765" textAlign="center">
+          <Text fontSize={14} color="#8F9391" textAlign="center">
             {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
         </YStack>
@@ -145,7 +195,7 @@ function TabPill({ label, count, active, onPress }: { label: string; count?: num
         opacity: !active && pressed ? 0.5 : 1,
       })}
     >
-      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#626765'}>
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#8F9391'}>
         {label}
       </Text>
       {count != null && count > 0 && (
@@ -156,3 +206,18 @@ function TabPill({ label, count, active, onPress }: { label: string; count?: num
     </Pressable>
   )
 }
+
+const filterStyles = StyleSheet.create({
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F6F4EF',
+    borderWidth: 1,
+    borderColor: '#E8E9E9',
+  },
+  chipActive: {
+    backgroundColor: '#1F2723',
+    borderColor: '#1F2723',
+  },
+})

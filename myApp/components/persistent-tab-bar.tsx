@@ -31,13 +31,13 @@ const CUSTOMER_TABS: Tab[] = [
 ]
 
 const PRO_TABS: Tab[] = [
+  { name: 'index',    icon: 'home',     route: '/(pro-tabs)/',         label: '首頁' },
   { name: 'slots',    icon: 'time',     route: '/(pro-tabs)/slots',    label: '時段' },
   { name: 'bookings', icon: 'calendar', route: '/(pro-tabs)/bookings', label: '預約' },
   { name: 'account',  icon: 'user',     route: '/(pro-tabs)/account',  label: '帳號' },
 ]
 
 // Screens where the tab bar should be hidden entirely.
-// 'book' is a fullScreenModal but we hide explicitly for Android safety.
 const HIDE_ON_SEGMENTS = new Set(['book', '(auth)', '(onboarding)'])
 
 // Map current segments to the active tab name.
@@ -47,9 +47,10 @@ function getActiveTabName(segments: string[]): string | null {
   const seg1 = segments[1] as string | undefined
 
   if (seg0 === '(tabs)') return seg1 ?? 'index'
-  if (seg0 === '(pro-tabs)') return seg1 ?? 'slots'
+  if (seg0 === '(pro-tabs)') return seg1 ?? 'index'
 
   // Sub-pages → logical parent tab
+  if (seg0 === 'book') return 'index'
   if (seg0 === 'booking') return 'bookings'
   if (seg0 === 'account') return 'account'
   if (seg0 === 'notifications') return 'account'
@@ -69,6 +70,9 @@ function isExactlyOnTab(tab: Tab, isProMode: boolean, segments: string[]): boole
   return seg1 === tab.name
 }
 
+// Track whether results page is preserved in the navigation stack behind the current tab.
+let pushedFromResults = false
+
 export function PersistentTabBar() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
@@ -79,18 +83,43 @@ export function PersistentTabBar() {
   const tabs = isProMode ? PRO_TABS : CUSTOMER_TABS
   const activeTabName = getActiveTabName(segments)
 
+  const onResults = segments[0] === 'book' && segments[1] === 'results'
+
+  // If user navigated back to results (e.g. via swipe gesture), clear the flag
+  if (onResults) pushedFromResults = false
+
   // Hide on booking flow and any future full-screen flows
-  if (HIDE_ON_SEGMENTS.has(segments[0])) return null
+  // Exception: results page shows tab bar so users can navigate away
+  if (HIDE_ON_SEGMENTS.has(segments[0])) {
+    if (!onResults) return null
+  }
 
   // Hide on root index (splash gate — segments is empty array)
   if (segments.length === 0) return null
 
   function onPress(tab: Tab) {
-    if (isExactlyOnTab(tab, isProMode, segments)) return // already there
+    // On results, home tab is conceptually active — no-op
+    if (onResults && tab.name === 'index') return
+
+    // Already on this exact tab — no-op
+    if (!onResults && isExactlyOnTab(tab, isProMode, segments)) return
+
     if (Platform.OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     }
-    router.replace(tab.route as never)
+
+    if (onResults) {
+      // Leaving results → push so results stays in the stack
+      pushedFromResults = true
+      router.push(tab.route as never)
+    } else if (pushedFromResults && tab.name === 'index') {
+      // Returning to home while results is behind → go back to results
+      pushedFromResults = false
+      router.back()
+    } else {
+      // Normal tab switch
+      router.replace(tab.route as never)
+    }
   }
 
   return (

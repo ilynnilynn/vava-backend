@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import { getProDisplayStatus } from '@/lib/pro-helpers'
 import { markBookingComplete, markBookingNoShow } from '@/lib/pro-bookings-api'
+import { cancelBooking } from '@/lib/pro-dashboard-api'
 import type { ProBookingListItem, ProDisplayStatus } from '@/types/pro'
 
 // ── Client avatar ─────────────────────────────────────────────
@@ -63,10 +64,11 @@ function ProStatusBadge({ displayStatus }: { displayStatus: ProDisplayStatus }) 
 
 type ActionButtonsProps = {
   bookingId: string
+  displayStatus: ProDisplayStatus
   onActionComplete: () => void
 }
 
-function ActionButtons({ bookingId, onActionComplete }: ActionButtonsProps) {
+function ActionButtons({ bookingId, displayStatus, onActionComplete }: ActionButtonsProps) {
   const [loading, setLoading] = useState(false)
 
   async function handleComplete() {
@@ -100,6 +102,30 @@ function ActionButtons({ bookingId, onActionComplete }: ActionButtonsProps) {
     ])
   }
 
+  async function handleCancel() {
+    Alert.alert(
+      '取消預約',
+      '取消後將影響您的排名與接單優先順序，確定取消？',
+      [
+        { text: '返回', style: 'cancel' },
+        {
+          text: '確定取消',
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true)
+            try {
+              await cancelBooking(bookingId)
+            } catch (e) {
+              Alert.alert('操作失敗', String((e as Error)?.message ?? e))
+            }
+            setLoading(false)
+            onActionComplete()
+          },
+        },
+      ]
+    )
+  }
+
   if (loading) {
     return (
       <View style={styles.actionsRow}>
@@ -108,21 +134,37 @@ function ActionButtons({ bookingId, onActionComplete }: ActionButtonsProps) {
     )
   }
 
+  // In-progress: show complete + no-show
+  if (displayStatus === 'in_progress') {
+    return (
+      <YStack gap={7} marginTop={8}>
+        <Pressable
+          onPress={handleComplete}
+          accessibilityLabel="結束服務"
+          style={({ pressed }) => [styles.actionBtn, styles.actionBtnPrimary, { opacity: pressed ? 0.8 : 1 }]}
+        >
+          <Text fontSize={13} fontWeight="600" color="#fff">結束服務</Text>
+        </Pressable>
+        <Pressable
+          onPress={handleNoShow}
+          accessibilityLabel="客戶未到場"
+          style={({ pressed }) => [styles.actionBtn, styles.actionBtnDanger, { opacity: pressed ? 0.8 : 1 }]}
+        >
+          <Text fontSize={13} fontWeight="500" color="#CC3352">客戶未到場</Text>
+        </Pressable>
+      </YStack>
+    )
+  }
+
+  // Awaiting: show cancel only
   return (
     <YStack gap={7} marginTop={8}>
       <Pressable
-        onPress={handleComplete}
-        accessibilityLabel="結束服務"
-        style={({ pressed }) => [styles.actionBtn, styles.actionBtnPrimary, { opacity: pressed ? 0.8 : 1 }]}
-      >
-        <Text fontSize={13} fontWeight="600" color="#fff">✓ 結束服務</Text>
-      </Pressable>
-      <Pressable
-        onPress={handleNoShow}
-        accessibilityLabel="客戶未到場"
+        onPress={handleCancel}
+        accessibilityLabel="取消預約"
         style={({ pressed }) => [styles.actionBtn, styles.actionBtnDanger, { opacity: pressed ? 0.8 : 1 }]}
       >
-        <Text fontSize={13} fontWeight="500" color="#CC3352">客戶未到場</Text>
+        <Text fontSize={13} fontWeight="500" color="#CC3352">取消預約</Text>
       </Pressable>
     </YStack>
   )
@@ -178,10 +220,11 @@ export function BookingCardPro({ booking, onActionComplete }: Props) {
           <Text fontSize={13} fontWeight="500" color="#8F9391">{startTime} — {endTime}</Text>
         </XStack>
 
-        {/* Action buttons — only for in_progress */}
-        {displayStatus === 'in_progress' && (
+        {/* Action buttons — in_progress and awaiting */}
+        {(displayStatus === 'in_progress' || displayStatus === 'awaiting') && (
           <ActionButtons
             bookingId={booking.id}
+            displayStatus={displayStatus}
             onActionComplete={onActionComplete ?? (() => {})}
           />
         )}
