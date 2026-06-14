@@ -4,7 +4,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const NAV_LINKS = [
+  { href: '/admin/dashboard', label: 'Dashboard' },
   { href: '/admin/verification', label: 'Verification' },
+  { href: '/admin/pros', label: 'Pros' },
+  { href: '/admin/bookings', label: 'Bookings' },
+  { href: '/admin/flags', label: 'Flags' },
 ]
 
 export function AdminNav() {
