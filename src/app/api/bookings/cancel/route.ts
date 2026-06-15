@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cancelBooking } from '@/lib/bookings'
 import { getCancellationFlag, createFlag } from '@/lib/flags'
-import { notifyProCustomerCancelled, sendPushNotification, createInAppNotification } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -77,31 +77,32 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Notify pro via LINE + push (best-effort)
+  // Notify pro (in-app + push, best-effort)
   try {
     const { data: pro } = await supabase
       .from('pros')
-      .select('line_user_id, push_token_expo:users!pros_id_fkey(push_token_expo)')
+      .select('user_id')
       .eq('id', booking.pro_id)
       .single()
 
-    if (pro?.line_user_id) {
-      await notifyProCustomerCancelled({
-        proLineUserId: pro.line_user_id,
-        withinGrace: result.data!.status === 'cancelled_grace',
+    if (pro) {
+      const { data: proUser } = await supabase
+        .from('users')
+        .select('push_token_expo')
+        .eq('id', pro.user_id)
+        .single()
+
+      await notify({
+        userId: pro.user_id,
+        pushToken: proUser?.push_token_expo,
+        type: 'booking_cancelled',
+        title: '預約已取消',
+        body: result.data!.status === 'cancelled_grace'
+          ? '客戶已在寬限期內取消預約，該時段已重新開放。'
+          : '客戶已取消預約，該時段已重新開放。',
+        bookingId,
       })
     }
-
-    // In-app notification for pro
-    await createInAppNotification({
-      userId: booking.pro_id,
-      type: 'booking_cancelled',
-      title: '預約已取消',
-      body: result.data!.status === 'cancelled_grace'
-        ? '客戶已在寬限期內取消預約，該時段已重新開放。'
-        : '客戶已取消預約，該時段已重新開放。',
-      bookingId,
-    })
   } catch (err) {
     console.error('[bookings/cancel] notification error:', err)
   }

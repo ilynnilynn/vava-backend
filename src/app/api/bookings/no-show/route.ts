@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { markNoShow } from '@/lib/bookings'
 import { createFlag } from '@/lib/flags'
-import { notifyCustomerProNoShow, sendPushNotification, createInAppNotification } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -58,38 +58,17 @@ export async function POST(req: NextRequest) {
     isSameDay: true,
   })
 
-  // Notify customer with warm handoff (best-effort)
+  // Notify customer (in-app + push, best-effort)
   try {
     const { data: customer } = await supabase
       .from('users')
-      .select('line_user_id, push_token_expo')
+      .select('push_token_expo')
       .eq('id', user.id)
       .single()
 
-    const searchUrl = `${process.env.NEXT_PUBLIC_APP_URL}/search`
-
-    if (customer?.line_user_id) {
-      try {
-        await notifyCustomerProNoShow({
-          customerLineUserId: customer.line_user_id,
-          searchUrl,
-        })
-      } catch (lineErr) {
-        console.error('[bookings/no-show] LINE notification failed:', lineErr)
-      }
-    }
-
-    if (customer?.push_token_expo) {
-      await sendPushNotification({
-        pushToken: customer.push_token_expo,
-        title: '預約出現問題',
-        body: 'VAVA 正在為您尋找其他可用的設計師。',
-        data: { type: 'pro_no_show', bookingId },
-      }).catch(err => console.error('[bookings/no-show] push failed:', err))
-    }
-
-    await createInAppNotification({
+    await notify({
       userId: user.id,
+      pushToken: customer?.push_token_expo,
       type: 'pro_no_show',
       title: '預約出現問題',
       body: '非常抱歉此次預約出現問題。VAVA 正在為您尋找其他可用的設計師。',

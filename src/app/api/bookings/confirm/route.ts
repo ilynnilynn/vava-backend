@@ -2,7 +2,7 @@
 // POST /api/bookings/confirm
 //
 // Instant-confirm a booking: validate → check slot → insert
-// booking → lock slot → notify pro via LINE.
+// booking → lock slot → notify pro + customer.
 //
 // Requires an active customer session (checked via cookie).
 // ============================================================
@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { confirmBooking, getCustomerBookings, type ConfirmBookingParams } from '@/lib/bookings'
-import { notifyProBookingConfirmed, notifyCustomerBookingConfirmed, createInAppNotification, sendPushNotification, logNotificationSend } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 import { hasTimeOverlap } from '@/lib/overlap'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -159,103 +159,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: 500 })
   }
 
-  // ── Notify pro via LINE + in-app fallback ─────────────────
-  // Fetch pro + customer data for the notification (best-effort, don't fail the booking)
+  // ── Notify pro + customer (in-app + push) ─────────────────
   try {
     const [{ data: pro }, { data: customer }] = await Promise.all([
-      supabase.from('pros').select('user_id, line_user_id, display_name, studio_address').eq('id', proId).single(),
-      supabase.from('users').select('display_name, phone').eq('id', user.id).single(),
+      supabase.from('pros').select('user_id, display_name').eq('id', proId).single(),
+      supabase.from('users').select('display_name, push_token_expo').eq('id', user.id).single(),
     ])
 
-    if (!pro || !customer) {
-      console.error('[bookings/confirm] could not fetch pro/customer for notification')
-    } else {
+    if (pro && customer) {
       const dt = new Date(startsAt)
       const dateTime = `${dt.getMonth() + 1}月${dt.getDate()}日 ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
 
       const cats = serviceCategoryIds as string[]
-      const { data: categories } = await supabase
-        .from('service_categories')
-        .select('name_zh')
-        .in('id', cats)
+      const [{ data: categories }, { data: proUser }] = await Promise.all([
+        supabase.from('service_categories').select('name_zh').in('id', cats),
+        supabase.from('users').select('push_token_expo').eq('id', pro.user_id).single(),
+      ])
 
       const serviceSummary = categories?.map(c => c.name_zh).join(' · ') ?? '服務'
 
-      let lineSent = false
-      if (pro.line_user_id) {
-        try {
-          await notifyProBookingConfirmed({
-            proLineUserId: pro.line_user_id,
-            customerName: customer.display_name,
-            customerPhone: customer.phone,
-            dateTime,
-            serviceSummary,
-            studioAddress: pro.studio_address,
-            refPhotoUrl: params.briefingRefPhotoUrl,
-            preferences: params.preference ?? undefined,
-            customerNote: params.customerNote,
-          })
-          lineSent = true
-        } catch (lineErr) {
-          console.error('[bookings/confirm] LINE notification failed, falling back to in-app:', lineErr)
-        }
-      } else {
-        console.warn('[bookings/confirm] pro has no line_user_id, using in-app notification only')
-      }
+      // Notify pro
+      await notify({
+        userId: pro.user_id,
+        pushToken: proUser?.push_token_expo,
+        type: 'booking_confirmed',
+        title: '新預約通知',
+        body: `${dateTime} — ${serviceSummary}\n客戶：${customer.display_name}`,
+        bookingId: result.data?.id,
+      })
 
-      // Always create in-app notification; serves as fallback when LINE fails
-      if (!lineSent) {
-        await createInAppNotification({
-          userId: pro.user_id,
-          type: 'booking_confirmed',
-          title: '新預約通知',
-          body: `${dateTime} — ${serviceSummary}\n客戶：${customer.display_name}`,
-          bookingId: result.data?.id,
-        })
-      }
-
-      // ── Notify customer (LINE + push + in-app) ───────────────
-      const { data: customerFull } = await supabase
-        .from('users')
-        .select('line_user_id, push_token_expo')
-        .eq('id', user.id)
-        .single()
-
-      if (customerFull?.line_user_id) {
-        try {
-          await notifyCustomerBookingConfirmed({
-            customerLineUserId: customerFull.line_user_id,
-            proDisplayName: pro.display_name,
-            dateTime,
-            serviceSummary,
-          })
-          await logNotificationSend({
-            userId: user.id, channel: 'line', type: 'booking_confirmed',
-            bookingId: result.data?.id, success: true,
-          })
-        } catch (custLineErr) {
-          console.error('[bookings/confirm] customer LINE notification failed:', custLineErr)
-          await logNotificationSend({
-            userId: user.id, channel: 'line', type: 'booking_confirmed',
-            bookingId: result.data?.id, success: false,
-            errorMessage: String(custLineErr),
-          })
-        }
-      }
-
-      // Push notification to customer
-      if (customerFull?.push_token_expo) {
-        await sendPushNotification({
-          pushToken: customerFull.push_token_expo,
-          title: '預約確認 ✅',
-          body: `${dateTime} — ${serviceSummary}（${pro.display_name}）`,
-          data: { type: 'booking_confirmed', bookingId: result.data?.id },
-        })
-      }
-
-      // In-app notification for customer
-      await createInAppNotification({
+      // Notify customer
+      await notify({
         userId: user.id,
+        pushToken: customer.push_token_expo,
         type: 'booking_confirmed',
         title: '預約已確認',
         body: `${dateTime} — ${serviceSummary}\n設計師：${pro.display_name}`,

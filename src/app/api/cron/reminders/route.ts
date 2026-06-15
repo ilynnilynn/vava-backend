@@ -1,14 +1,14 @@
 // ============================================================
 // GET /api/cron/reminders
 //
-// Sends -10min LINE reminders to customers with upcoming bookings.
+// Sends -10min push + in-app reminders to customers with upcoming bookings.
 // Runs every 5 minutes via Vercel Cron.
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getBookingsNeedingReminder, markReminderSent } from '@/lib/bookings'
-import { notifyCustomerReminder, sendPushNotification } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 
 export async function GET(req: NextRequest) {
   if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -22,35 +22,25 @@ export async function GET(req: NextRequest) {
 
     for (const booking of bookings) {
       try {
-        // Fetch customer line_user_id and pro details
         const [{ data: customer }, { data: pro }] = await Promise.all([
-          supabase.from('users').select('line_user_id, push_token_expo').eq('id', booking.user_id).single(),
+          supabase.from('users').select('push_token_expo').eq('id', booking.user_id).single(),
           supabase.from('pros').select('display_name, studio_address').eq('id', booking.pro_id).single(),
         ])
 
         if (!pro) continue
 
-        if (customer?.line_user_id) {
-          const dt = new Date(booking.starts_at)
-          const dateTime = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
+        const dt = new Date(booking.starts_at)
+        const dateTime = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
 
-          await notifyCustomerReminder({
-            customerLineUserId: customer.line_user_id,
-            proDisplayName: pro.display_name,
-            dateTime,
-            studioAddress: pro.studio_address,
-          })
-        }
-
-        // Push notification
-        if (customer?.push_token_expo) {
-          await sendPushNotification({
-            pushToken: customer.push_token_expo,
-            title: '預約即將開始 ⏰',
-            body: `10 分鐘後開始（${pro.display_name}）\n📍 ${pro.studio_address}`,
-            data: { type: 'booking_reminder', bookingId: booking.id },
-          }).catch(err => console.error(`[cron/reminders] push failed for ${booking.id}:`, err))
-        }
+        await notify({
+          userId: booking.user_id,
+          pushToken: customer?.push_token_expo,
+          type: 'booking_reminder',
+          title: '預約即將開始 ⏰',
+          body: `10 分鐘後開始（${pro.display_name}）\n📍 ${pro.studio_address}`,
+          bookingId: booking.id,
+          data: { dateTime },
+        })
 
         await markReminderSent(booking.id)
         sent++

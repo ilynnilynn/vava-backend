@@ -2,13 +2,13 @@
 // POST /api/admin/pros/approve
 //
 // Admin-only: approves a pending pro.
-// Sets is_approved = true and sends LINE notification.
+// Sets is_approved = true and sends in-app + push notification.
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { notifyProApproved } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   // ── Auth + admin check ───────────────────────────────────
@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Check admin status from public.users — the single source of truth
   const { data: userRow } = await supabase
     .from('users')
     .select('is_admin')
@@ -31,14 +30,14 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Parse body ───────────────────────────────────────────
-  let body: { proId?: string; proLineUserId?: string }
+  let body: { proId?: string }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { proId, proLineUserId } = body
+  const { proId } = body
   if (!proId) {
     return NextResponse.json({ error: 'proId is required' }, { status: 400 })
   }
@@ -46,7 +45,6 @@ export async function POST(req: NextRequest) {
   // ── Approve ──────────────────────────────────────────────
   const admin = createAdminClient()
 
-  // TODO: Add reviewed_by column to pros table, then store user.id or user.email here
   const { data: updated, error: updateError } = await admin
     .from('pros')
     .update({
@@ -56,7 +54,7 @@ export async function POST(req: NextRequest) {
     })
     .eq('id', proId)
     .eq('verification_status', 'pending')
-    .select('id, user_id, line_user_id')
+    .select('id, user_id')
 
   if (updateError) {
     console.error('[admin/pros/approve] update error:', updateError)
@@ -69,23 +67,23 @@ export async function POST(req: NextRequest) {
 
   const approvedPro = updated[0]
 
-  // ── In-app notification (always) ────────────────────────
-  await admin.from('notifications').insert({
-    user_id: approvedPro.user_id,
-    type: 'pro_application_approved',
-    title: '設計師申請已通過 🎉',
-    body: '恭喜！您的 VAVA 設計師帳號已通過審核。立即前往後台開放時段，開始接受預約。',
-  })
+  // ── Notify pro (in-app + push) ────────────────────────
+  try {
+    const { data: proUser } = await admin
+      .from('users')
+      .select('push_token_expo')
+      .eq('id', approvedPro.user_id)
+      .single()
 
-  // ── LINE notification (best-effort) ────────────────────
-  const lineId = proLineUserId || approvedPro.line_user_id
-  if (lineId) {
-    try {
-      const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/pro/dashboard`
-      await notifyProApproved({ proLineUserId: lineId, dashboardUrl })
-    } catch (err) {
-      console.error('[admin/pros/approve] LINE notification failed:', err)
-    }
+    await notify({
+      userId: approvedPro.user_id,
+      pushToken: proUser?.push_token_expo,
+      type: 'pro_application_approved',
+      title: '設計師申請已通過 🎉',
+      body: '恭喜！您的 VAVA 設計師帳號已通過審核。立即前往後台開放時段，開始接受預約。',
+    })
+  } catch (err) {
+    console.error('[admin/pros/approve] notification error:', err)
   }
 
   return NextResponse.json({ ok: true })

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveReschedule } from '@/lib/bookings'
-import { notifyCustomerRescheduleOutcome } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -57,32 +57,45 @@ export async function POST(req: NextRequest) {
     .eq('id', bookingId)
 
   // Notify customer
-  const { data: customer } = await supabase
-    .from('users')
-    .select('line_user_id')
-    .eq('id', booking.user_id)
-    .single()
+  try {
+    const { data: customer } = await supabase
+      .from('users')
+      .select('push_token_expo')
+      .eq('id', booking.user_id)
+      .single()
 
-  if (customer?.line_user_id) {
-    let newDateTime: string | undefined
-    if (approved && newSlotId) {
-      const { data: slot } = await supabase
-        .from('slots')
-        .select('starts_at')
-        .eq('id', newSlotId)
-        .single()
-      if (slot) {
-        newDateTime = new Date(slot.starts_at).toLocaleString('zh-TW', {
-          month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-        })
+    let bodyText: string
+    if (approved) {
+      let newDateTime = ''
+      if (newSlotId) {
+        const { data: slot } = await supabase
+          .from('slots')
+          .select('starts_at')
+          .eq('id', newSlotId)
+          .single()
+        if (slot) {
+          newDateTime = new Date(slot.starts_at).toLocaleString('zh-TW', {
+            month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
+          })
+        }
       }
+      bodyText = newDateTime
+        ? `設計師已接受更改時間，新時間為 ${newDateTime}。`
+        : '設計師已接受更改時間申請。'
+    } else {
+      bodyText = '設計師無法接受此次更改時間申請，您的原預約維持不變。'
     }
 
-    await notifyCustomerRescheduleOutcome({
-      customerLineUserId: customer.line_user_id,
-      approved,
-      newDateTime,
+    await notify({
+      userId: booking.user_id,
+      pushToken: customer?.push_token_expo,
+      type: 'booking_changed',
+      title: '更改時間結果',
+      body: bodyText,
+      bookingId,
     })
+  } catch (err) {
+    console.error('[bookings/reschedule/resolve] notification error:', err)
   }
 
   return NextResponse.json({ ok: true })

@@ -3,13 +3,14 @@
 //
 // Admin-only: declines a pending pro with reasons.
 // Sets verification_status = 'declined' and stores reasons.
+// In-app notification is handled by database trigger (migration 0042).
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateDeclineReasons } from '@/lib/verification'
-import { notifyProDeclined } from '@/lib/notifications'
+import { sendPushNotification } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   // ── Auth + admin check ───────────────────────────────────
@@ -20,7 +21,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Check admin status from public.users — the single source of truth
   const { data: userRow } = await supabase
     .from('users')
     .select('is_admin')
@@ -57,7 +57,6 @@ export async function POST(req: NextRequest) {
   // ── Decline ────────────────────────────────────────────────
   const admin = createAdminClient()
 
-  // TODO: Add reviewed_by column to pros table, then store user.id or user.email here
   const { data: updated, error: updateError } = await admin
     .from('pros')
     .update({
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
     })
     .eq('id', proId)
     .eq('verification_status', 'pending')
-    .select('id, line_user_id')
+    .select('id, user_id')
 
   if (updateError) {
     console.error('[admin/pros/decline] update error:', updateError)
@@ -80,19 +79,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This pro has already been reviewed.' }, { status: 409 })
   }
 
-  // In-app notification is handled by the database trigger (migration 0042:
-  // trg_pro_application_declined). Send LINE notification here too.
-  const proLineUserId = updated[0].line_user_id
-  if (proLineUserId) {
-    try {
-      await notifyProDeclined({
-        proLineUserId,
-        reasons: reasons!,
-        note: trimmedNote,
+  // In-app notification is handled by database trigger (migration 0042).
+  // Send push notification for the pro (best-effort).
+  try {
+    const { data: proUser } = await admin
+      .from('users')
+      .select('push_token_expo')
+      .eq('id', updated[0].user_id)
+      .single()
+
+    if (proUser?.push_token_expo) {
+      await sendPushNotification({
+        pushToken: proUser.push_token_expo,
+        title: '申請審核結果',
+        body: '您的設計師申請審核結果已出，請查看應用內通知。',
+        data: { type: 'pro_application_declined' },
       })
-    } catch (err) {
-      console.error('[admin/pros/decline] LINE notification failed:', err)
     }
+  } catch (err) {
+    console.error('[admin/pros/decline] push notification error:', err)
   }
 
   return NextResponse.json({ ok: true })
