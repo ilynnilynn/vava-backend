@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import { Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { AppIcon } from '@/components/AppIcon'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -72,7 +73,7 @@ export function ValueCarousel({ pages, onSkip, accentColor = '#FF5A3C' }: Props)
             accessibilityRole="button"
             accessibilityLabel="略過"
           >
-            <Text fontSize={15} color="#8F9391">略過</Text>
+            <AppIcon name="close" size={20} color="#8F9391" weight="regular" />
           </Pressable>
         ) : (
           <View style={styles.skipBtn} />

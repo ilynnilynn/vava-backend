@@ -1,11 +1,15 @@
 // components/onboarding/OnboardingStepLayout.tsx
-import { type ReactNode, useEffect, useState } from 'react'
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { type ReactNode } from 'react'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { AppIcon } from '@/components/AppIcon'
 import { ProgressBar } from '@/components/booking/ProgressBar'
+import { useCTABottom } from '@/lib/useCTABottom'
+
+const CTA_HEIGHT = 52   // button height
+const FOOTER_TOP = 12   // breathing room above button inside the footer
 
 type Props = {
   title: string
@@ -34,19 +38,17 @@ export function OnboardingStepLayout({
 }: Props) {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const [keyboardShown, setKeyboardShown] = useState(false)
-
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-    const show = Keyboard.addListener(showEvent, () => setKeyboardShown(true))
-    const hide = Keyboard.addListener(hideEvent, () => setKeyboardShown(false))
-    return () => { show.remove(); hide.remove() }
-  }, [])
+  const ctaBottom = useCTABottom()
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header: outside KAV so it never shifts with keyboard */}
+    <View
+      style={[styles.container, { paddingTop: insets.top }]}
+      onLayout={(e) => {
+        const { height } = e.nativeEvent.layout
+        console.log(`[B002] step=${step} container_h=${Math.round(height)} insets_bottom=${insets.bottom} ctaBottom=${ctaBottom}`)
+      }}
+    >
+      {/* Header */}
       <View style={styles.header}>
         {(onBack || router.canGoBack()) ? (
           <Pressable
@@ -63,54 +65,65 @@ export function OnboardingStepLayout({
         <View style={{ flex: 1, alignItems: 'center' }}>
           <ProgressBar currentStep={step} totalSteps={totalSteps} />
         </View>
-        <View style={styles.headerBtn} />
+        {onSkip ? (
+          <Pressable
+            onPress={onSkip}
+            style={styles.headerBtn}
+            accessibilityRole="button"
+            accessibilityLabel="略過"
+          >
+            <AppIcon name="close" size={20} color="#8F9391" weight="regular" />
+          </Pressable>
+        ) : (
+          <View style={styles.headerBtn} />
+        )}
       </View>
 
-      {/* KAV only wraps scroll + CTA so its frame is correct */}
-      <KeyboardAvoidingView
+      {/* Scrollable content — paddingBottom keeps last item above the absolute CTA */}
+      <ScrollView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: FOOTER_TOP + CTA_HEIGHT + insets.bottom + 40 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Text fontSize={30} fontWeight="600" lineHeight={38} color="#1F2723">
-            {title}
+        <Text fontSize={30} fontWeight="600" lineHeight={38} color="#1F2723">
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text fontSize={15} lineHeight={22} color="#8F9391" marginTop={6}>
+            {subtitle}
           </Text>
-          {subtitle ? (
-            <Text fontSize={15} lineHeight={22} color="#626765" marginTop={6}>
-              {subtitle}
-            </Text>
-          ) : null}
-          <View style={{ marginTop: 8, flex: 1 }}>
-            {children}
-          </View>
-        </ScrollView>
-
-        {/* CTA — sits just above keyboard */}
-        <View style={[styles.cta, { paddingBottom: keyboardShown ? 12 : insets.bottom + 16 }]}>
-          {onSkip ? (
-            <Pressable onPress={onSkip} accessibilityRole="button" style={styles.skipLink}>
-              <Text fontSize={15} color="#626765">略過</Text>
-            </Pressable>
-          ) : null}
-          <Pressable
-            onPress={onNext}
-            disabled={nextDisabled}
-            accessibilityRole="button"
-            accessibilityLabel={nextLabel}
-            style={({ pressed }) => [
-              styles.nextBtn,
-              { opacity: nextDisabled ? 0.4 : pressed ? 0.75 : 1 },
-            ]}
-          >
-            <Text fontSize={16} fontWeight="600" color="#FBFBF8">{nextLabel}</Text>
-          </Pressable>
+        ) : null}
+        <View style={{ marginTop: 8, flex: 1 }}>
+          {children}
         </View>
-      </KeyboardAvoidingView>
+      </ScrollView>
+
+      {/* CTA footer — anchored to physical bottom, background covers content behind it */}
+      <View
+        style={[styles.ctaFooter, { paddingBottom: ctaBottom }]}
+        onLayout={(e) => {
+          const { y, height } = e.nativeEvent.layout
+          console.log(`[B002] step=${step} ctaBottom=${ctaBottom} footer_y=${Math.round(y)} footer_h=${Math.round(height)}`)
+        }}
+      >
+        <Pressable
+          onPress={onNext}
+          disabled={nextDisabled}
+          accessibilityRole="button"
+          accessibilityLabel={nextLabel}
+          style={({ pressed }) => [
+            styles.nextBtn,
+            { opacity: nextDisabled ? 0.4 : pressed ? 0.75 : 1 },
+          ]}
+        >
+          <Text fontSize={16} fontWeight="600" color="#FBFBF8">{nextLabel}</Text>
+        </Pressable>
+      </View>
     </View>
   )
 }
@@ -128,11 +141,18 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 24,
-    paddingBottom: 16,
     flexGrow: 1,
   },
-  cta: { paddingHorizontal: 20, paddingTop: 12, gap: 12 },
-  skipLink: { alignItems: 'center', paddingVertical: 4 },
+  ctaFooter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: FOOTER_TOP,
+    paddingHorizontal: 20,
+    backgroundColor: '#FBFBF8',
+    zIndex: 10,
+  },
   nextBtn: {
     height: 52,
     backgroundColor: '#1F2723',
