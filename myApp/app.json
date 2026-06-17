@@ -74,7 +74,8 @@
       "expo-apple-authentication",
       "expo-image-picker",
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "./plugins/withModularHeaders"
     ],
     "experiments": {
       "typedRoutes": true,
