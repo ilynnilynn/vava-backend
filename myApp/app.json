@@ -7,11 +7,11 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#FBFBF8",
+    "backgroundColor": "#FF5A3C",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "backgroundColor": "#FBFBF8",
+      "backgroundColor": "#FF5A3C",
       "bundleIdentifier": "com.ilynn.vava",
       "usesAppleSignIn": true,
       "config": {
@@ -19,7 +19,9 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": ["instagram"],
+        "LSApplicationQueriesSchemes": [
+          "instagram"
+        ],
         "NSLocationWhenInUseUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。",
         "NSLocationAlwaysUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。"
       }
@@ -71,7 +73,8 @@
       ],
       "expo-apple-authentication",
       "expo-image-picker",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
