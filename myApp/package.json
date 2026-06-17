@@ -28,6 +28,7 @@
     "@tamagui/animations-react-native": "^2.0.0-rc.40",
     "@tamagui/babel-plugin": "^2.0.0-rc.40",
     "@tamagui/config": "^2.0.0-rc.40",
+    "babel-preset-expo": "~54.0.10",
     "base64-arraybuffer": "^1.0.2",
     "expo": "~54.0.35",
     "expo-apple-authentication": "~8.0.8",
