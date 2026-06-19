@@ -192,7 +192,11 @@ export async function updateSettings(formData: {
       const addressChanged = formData.studio_address !== undefined && formData.studio_address !== current.studio_address
       if (nameChanged || addressChanged) {
         update.is_approved = false
+        update.verification_status = 'pending'
         update.submitted_at = new Date().toISOString()
+        // Clear rejection data on reapply
+        update.rejection_reasons = null
+        update.rejection_note = null
       }
     }
   }

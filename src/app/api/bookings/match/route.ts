@@ -69,6 +69,10 @@ export async function POST(req: NextRequest) {
     ? body.maxDistanceKm
     : undefined
 
+  // Per-scope category IDs for hand+foot combo bookings
+  const handCategoryIds = Array.isArray(body.handCategoryIds) ? body.handCategoryIds as string[] : undefined
+  const footCategoryIds = Array.isArray(body.footCategoryIds) ? body.footCategoryIds as string[] : undefined
+
   // ── Execute matching ───────────────────────────────────────
   try {
     const results = await getMatchingSlots(
@@ -81,6 +85,8 @@ export async function POST(req: NextRequest) {
         dates: dates as string[],
         timeBand: timeBand as TimeBand | null,
         maxDistanceKm,
+        handCategoryIds,
+        footCategoryIds,
       },
       supabase
     )

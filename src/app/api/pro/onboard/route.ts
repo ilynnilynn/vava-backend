@@ -75,6 +75,9 @@ export async function POST(req: NextRequest) {
       id_photo_path:           id_photo_path ?? null,
       submitted_at:            new Date().toISOString(),
       verification_status:     'pending',
+      // Clear rejection data on reapply so old decline reasons don't persist
+      rejection_reasons:       null,
+      rejection_note:          null,
     })
     .eq('id', user.id)
 

@@ -3,14 +3,14 @@
 //
 // Admin-only: declines a pending pro with reasons.
 // Sets verification_status = 'declined' and stores reasons.
-// In-app notification is handled by database trigger (migration 0042).
+// Sends both in-app + push notification via notify().
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateDeclineReasons } from '@/lib/verification'
-import { sendPushNotification } from '@/lib/notifications'
+import { notify } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   // ── Auth + admin check ───────────────────────────────────
@@ -79,25 +79,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This pro has already been reviewed.' }, { status: 409 })
   }
 
-  // In-app notification is handled by database trigger (migration 0042).
-  // Send push notification for the pro (best-effort).
+  // Send both in-app + push notification (dual delivery)
   try {
+    const declinedPro = updated[0]
     const { data: proUser } = await admin
       .from('users')
       .select('push_token_expo')
-      .eq('id', updated[0].user_id)
+      .eq('id', declinedPro.user_id)
       .single()
 
-    if (proUser?.push_token_expo) {
-      await sendPushNotification({
-        pushToken: proUser.push_token_expo,
-        title: '申請審核結果',
-        body: '您的設計師申請審核結果已出，請查看應用內通知。',
-        data: { type: 'pro_application_declined' },
-      })
+    // Build detailed body with rejection reasons
+    let notifBody = '原因：'
+    for (const reason of reasons!) {
+      notifBody += `\n• ${reason}`
     }
+    if (trimmedNote) {
+      notifBody += `\n\n備註：${trimmedNote}`
+    }
+    notifBody += '\n\n請修正後重新申請。'
+
+    await notify({
+      userId: declinedPro.user_id,
+      pushToken: proUser?.push_token_expo,
+      type: 'pro_application_declined',
+      title: '設計師申請未通過',
+      body: notifBody,
+    })
   } catch (err) {
-    console.error('[admin/pros/decline] push notification error:', err)
+    console.error('[admin/pros/decline] notification error:', err)
   }
 
   return NextResponse.json({ ok: true })

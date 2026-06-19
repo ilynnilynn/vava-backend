@@ -421,6 +421,9 @@ export async function getMatchingSlots(
     dates: string[]           // ISO date strings (YYYY-MM-DD)
     timeBand?: TimeBand | null
     maxDistanceKm?: number
+    // Per-scope category IDs for hand+foot combo bookings
+    handCategoryIds?: string[]
+    footCategoryIds?: string[]
   },
   supabase: SupabaseClient
 ): Promise<MatchingSlotResult[]> {
@@ -449,9 +452,17 @@ export async function getMatchingSlots(
   const domainCategoryIds = (domainCategories ?? []).map(c => c.id)
   if (domainCategoryIds.length === 0) return []
 
-  // Filter pro_services by domain categories (and optionally by specific categoryIds)
-  const targetCategoryIds = (criteria.categoryIds && criteria.categoryIds.length > 0)
-    ? criteria.categoryIds.filter(id => domainCategoryIds.includes(id))
+  // Merge all requested category IDs: top-level + hand-specific + foot-specific.
+  // For hand+foot combo bookings, the customer specifies separate categories
+  // for each scope. A matching pro must offer services for ALL requested categories.
+  const allRequestedIds = new Set<string>()
+  if (criteria.categoryIds) criteria.categoryIds.forEach(id => allRequestedIds.add(id))
+  if (criteria.handCategoryIds) criteria.handCategoryIds.forEach(id => allRequestedIds.add(id))
+  if (criteria.footCategoryIds) criteria.footCategoryIds.forEach(id => allRequestedIds.add(id))
+
+  // Filter to only valid domain categories
+  const targetCategoryIds = allRequestedIds.size > 0
+    ? [...allRequestedIds].filter(id => domainCategoryIds.includes(id))
     : domainCategoryIds
 
   if (targetCategoryIds.length === 0) return []
@@ -463,9 +474,23 @@ export async function getMatchingSlots(
     .eq('is_enabled', true)
     .in('category_id', targetCategoryIds)
 
-  // Build set of pro IDs that have matching services
-  const matchingProIds = new Set((proServices ?? []).map(ps => ps.pro_id))
-  const matchingPros = pros.filter(p => matchingProIds.has(p.id))
+  // Build map of pro ID → set of matching category IDs
+  const proServiceMap = new Map<string, Set<string>>()
+  for (const ps of proServices ?? []) {
+    if (!proServiceMap.has(ps.pro_id)) proServiceMap.set(ps.pro_id, new Set())
+    proServiceMap.get(ps.pro_id)!.add(ps.category_id)
+  }
+
+  // For combo bookings, ensure the pro offers ALL requested categories
+  const matchingPros = pros.filter(p => {
+    const offered = proServiceMap.get(p.id)
+    if (!offered) return false
+    // Pro must offer every specifically requested category
+    for (const catId of targetCategoryIds) {
+      if (allRequestedIds.size > 0 && !offered.has(catId)) return false
+    }
+    return true
+  })
 
   if (matchingPros.length === 0) return []
 
