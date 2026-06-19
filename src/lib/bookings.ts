@@ -325,12 +325,17 @@ export async function resolveReschedule(
 
 // ── Reminder ─────────────────────────────────────────────────
 
-// Mark reminder as sent (called by cron job at -10 min).
-export async function markReminderSent(bookingId: string): Promise<Result<null>> {
+type ReminderColumn = 'reminder_sent_at' | 'reminder_1hr_sent_at'
+
+// Mark a reminder column as sent. Called by cron jobs.
+export async function markReminderSent(
+  bookingId: string,
+  column: ReminderColumn = 'reminder_sent_at'
+): Promise<Result<null>> {
   const admin = createAdminClient()
   const { error } = await admin
     .from('bookings')
-    .update({ reminder_sent_at: new Date().toISOString() })
+    .update({ [column]: new Date().toISOString() })
     .eq('id', bookingId)
   return { data: null, error: error?.message ?? null }
 }
@@ -369,40 +374,18 @@ export async function getProBookings(proId: string, sb?: SupabaseClient): Promis
   return enrichWithStartsAt(supabase, data ?? [])
 }
 
-// Bookings that need a -10min reminder (starts in 8–12 min, reminder not yet sent)
+// Bookings that need a reminder at `minutesBefore` minutes out.
+// sentColumn: the column to check for "already sent".
 // Pass admin client from cron routes (no user session available).
-export async function getBookingsNeedingReminder(sb?: SupabaseClient): Promise<Booking[]> {
+export async function getBookingsNeedingReminder(
+  sb?: SupabaseClient,
+  minutesBefore: number = REMINDER_MINS,
+  sentColumn: ReminderColumn = 'reminder_sent_at'
+): Promise<Booking[]> {
   const supabase = sb ?? await createClient()
   const now      = new Date()
-  const from     = new Date(now.getTime() + (REMINDER_MINS - 2) * 60 * 1000).toISOString()
-  const to       = new Date(now.getTime() + (REMINDER_MINS + 2) * 60 * 1000).toISOString()
-
-  // starts_at lives on slots, so find booked slots in the window first
-  const { data: slots } = await supabase
-    .from('slots')
-    .select('id')
-    .eq('is_booked', true)
-    .gte('starts_at', from)
-    .lte('starts_at', to)
-
-  if (!slots?.length) return []
-
-  const { data } = await supabase
-    .from('bookings')
-    .select('*')
-    .eq('status', 'confirmed')
-    .is('reminder_sent_at', null)
-    .in('slot_id', slots.map(s => s.id))
-
-  return enrichWithStartsAt(supabase, data ?? [])
-}
-
-// Bookings that need a 1-hour reminder (starts in 58–62 min, 1hr reminder not yet sent)
-export async function getBookingsNeeding1HourReminder(sb?: SupabaseClient): Promise<Booking[]> {
-  const supabase = sb ?? await createClient()
-  const now      = new Date()
-  const from     = new Date(now.getTime() + (REMINDER_1HR_MINS - 2) * 60 * 1000).toISOString()
-  const to       = new Date(now.getTime() + (REMINDER_1HR_MINS + 2) * 60 * 1000).toISOString()
+  const from     = new Date(now.getTime() + (minutesBefore - 2) * 60 * 1000).toISOString()
+  const to       = new Date(now.getTime() + (minutesBefore + 2) * 60 * 1000).toISOString()
 
   const { data: slots } = await supabase
     .from('slots')
@@ -417,20 +400,10 @@ export async function getBookingsNeeding1HourReminder(sb?: SupabaseClient): Prom
     .from('bookings')
     .select('*')
     .eq('status', 'confirmed')
-    .is('reminder_1hr_sent_at', null)
+    .is(sentColumn, null)
     .in('slot_id', slots.map(s => s.id))
 
   return enrichWithStartsAt(supabase, data ?? [])
-}
-
-// Mark 1-hour reminder as sent
-export async function markReminder1HrSent(bookingId: string): Promise<Result<null>> {
-  const admin = createAdminClient()
-  const { error } = await admin
-    .from('bookings')
-    .update({ reminder_1hr_sent_at: new Date().toISOString() })
-    .eq('id', bookingId)
-  return { data: null, error: error?.message ?? null }
 }
 
 // Bookings where session_ends_at has passed but status is still confirmed

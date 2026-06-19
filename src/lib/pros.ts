@@ -13,20 +13,7 @@ import type { Pro, Result } from '@/types/database'
 
 // ── Read ──────────────────────────────────────────────────────
 
-// Get a pro record by their Supabase auth user id.
-// Use this in pro dashboard routes after getting user from session.
-export async function getProByUserId(userId: string): Promise<Pro | null> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('pros')
-    .select('*')
-    .eq('id', userId)
-    .single()
-  return data ?? null
-}
-
-// Get a pro record by their pros.id (UUID).
-// Use this in customer-facing routes when you have a proId from a booking/slot.
+// Get a pro record by ID (pros.id = auth.users.id).
 export async function getProById(proId: string): Promise<Pro | null> {
   const supabase = await createClient()
   const { data } = await supabase

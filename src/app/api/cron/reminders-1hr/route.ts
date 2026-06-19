@@ -7,8 +7,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getBookingsNeeding1HourReminder, markReminder1HrSent } from '@/lib/bookings'
-import { notify, logNotificationSend } from '@/lib/notifications'
+import { getBookingsNeedingReminder, markReminderSent } from '@/lib/bookings'
+import { notify } from '@/lib/notifications'
 
 export async function GET(req: NextRequest) {
   if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const supabase = createAdminClient()
-    const bookings = await getBookingsNeeding1HourReminder(supabase)
+    const bookings = await getBookingsNeedingReminder(supabase, 60, 'reminder_1hr_sent_at')
     let sent = 0
 
     for (const booking of bookings) {
@@ -44,19 +44,19 @@ export async function GET(req: NextRequest) {
             bookingId: booking.id,
             data: { dateTime },
           })
-          await logNotificationSend({
-            userId: booking.user_id, channel: 'in_app', type: 'booking_reminder_1hr',
-            bookingId: booking.id, success: true,
+          await supabase.from('notification_logs').insert({
+            user_id: booking.user_id, channel: 'in_app', type: 'booking_reminder_1hr',
+            booking_id: booking.id, success: true, error_message: null,
           })
         } catch (notifyErr) {
           console.error(`[cron/reminders-1hr] notify failed for booking ${booking.id}:`, notifyErr)
-          await logNotificationSend({
-            userId: booking.user_id, channel: 'in_app', type: 'booking_reminder_1hr',
-            bookingId: booking.id, success: false, errorMessage: String(notifyErr),
+          await supabase.from('notification_logs').insert({
+            user_id: booking.user_id, channel: 'in_app', type: 'booking_reminder_1hr',
+            booking_id: booking.id, success: false, error_message: String(notifyErr),
           })
         }
 
-        await markReminder1HrSent(booking.id)
+        await markReminderSent(booking.id, 'reminder_1hr_sent_at')
         sent++
       } catch (err) {
         console.error(`[cron/reminders-1hr] failed for booking ${booking.id}:`, err)

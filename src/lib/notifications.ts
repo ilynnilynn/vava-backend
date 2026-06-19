@@ -79,28 +79,6 @@ export async function sendPushNotification(params: {
   }
 }
 
-// Batch send push notifications (Expo supports up to 100 per request)
-export async function sendPushNotificationBatch(
-  messages: ExpoPushMessage[]
-): Promise<void> {
-  if (!messages.length) return
-
-  const res = await fetch(EXPO_PUSH_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Accept-Encoding': 'gzip, deflate',
-    },
-    body: JSON.stringify(messages),
-  })
-
-  if (!res.ok) {
-    const body = await res.text()
-    console.error('[notifications] Expo push batch error:', res.status, body)
-  }
-}
-
 // ── Unified notify helper ────────────────────────────────────
 
 // Sends both in-app + push for a user. Best-effort on both channels.
@@ -139,26 +117,3 @@ export async function notify(params: {
   }
 }
 
-// ── Notification logging ─────────────────────────────────────
-
-export async function logNotificationSend(params: {
-  userId: string
-  channel: 'push' | 'in_app'
-  type: string
-  bookingId?: string | null
-  success: boolean
-  errorMessage?: string | null
-}): Promise<void> {
-  const admin = createAdminClient()
-  const { error } = await admin.from('notification_logs').insert({
-    user_id: params.userId,
-    channel: params.channel,
-    type: params.type,
-    booking_id: params.bookingId ?? null,
-    success: params.success,
-    error_message: params.errorMessage ?? null,
-  })
-  if (error) {
-    console.error('[notifications] Failed to log notification:', error)
-  }
-}

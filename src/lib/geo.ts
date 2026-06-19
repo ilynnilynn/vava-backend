@@ -20,21 +20,3 @@ export function haversineKm(
   return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-export type WithDistance<T> = T & { distanceKm: number }
-
-/** Attach distanceKm to each item and sort closest first. */
-export function sortByDistance<T extends { studio_lat: number | null; studio_lng: number | null }>(
-  items: T[],
-  userLat: number,
-  userLng: number
-): WithDistance<T>[] {
-  return items
-    .map((item) => ({
-      ...item,
-      distanceKm:
-        item.studio_lat != null && item.studio_lng != null
-          ? haversineKm(userLat, userLng, item.studio_lat, item.studio_lng)
-          : Infinity,
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-}

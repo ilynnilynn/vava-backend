@@ -282,25 +282,6 @@ export type Rating = {
   created_at: string
 }
 
-// ── Computed helpers ─────────────────────────────────────────
-// Standing is computed from flags, not stored.
-// Good:      0–1 soft, 0 hard
-// Warning:   2+ soft OR 1 hard
-// At Risk:   3+ soft OR 2+ hard OR 1 same-day
-// Suspended: 2+ same-day OR 1 no_show (pro)
-
-export function computeStanding(flags: Flag[]): ProStanding {
-  const soft     = flags.filter(f => f.flag_type === 'soft').length
-  const hard     = flags.filter(f => f.flag_type === 'hard').length
-  const sameDay  = flags.filter(f => f.is_same_day).length
-  const noShow   = flags.filter(f => f.flag_type === 'no_show').length
-
-  if (sameDay >= 2 || noShow >= 1)              return 'suspended'
-  if (sameDay >= 1 || soft >= 3 || hard >= 2)   return 'at_risk'
-  if (soft >= 2 || hard >= 1)                   return 'warning'
-  return 'good'
-}
-
 // ── Shared response wrapper ───────────────────────────────────
 // Use this for all server action / API route return values.
 
