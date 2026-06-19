@@ -6,14 +6,14 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
+import { requireCron } from '@/lib/cron'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getBookingsNeedingReminder, markReminderSent } from '@/lib/bookings'
 import { notify } from '@/lib/notifications'
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const denied = requireCron(req)
+  if (denied) return denied
 
   try {
     const supabase = createAdminClient()

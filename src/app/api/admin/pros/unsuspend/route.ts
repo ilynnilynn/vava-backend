@@ -6,18 +6,14 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getFlagsForEntity, computeStanding } from '@/lib/flags'
 
 export async function POST(req: NextRequest) {
-  // ── Auth + admin check ───────────────────────────────────
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const auth = await requireAuth()
+  if ('error' in auth) return auth.error
+  const { supabase, user } = auth
 
   const { data: userRow } = await supabase
     .from('users')

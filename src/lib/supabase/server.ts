@@ -6,7 +6,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createBareClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 /** Cookie-based client for Server Components and web API routes */
 export async function createClient() {
@@ -60,4 +60,14 @@ export async function createClientForRequest(req: NextRequest) {
 
   // Web client: fall back to cookie-based auth
   return createClient()
+}
+
+/** Authenticates via cookie session, returns supabase client + user or a 401 response. */
+export async function requireAuth() {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) } as const
+  }
+  return { supabase, user } as const
 }

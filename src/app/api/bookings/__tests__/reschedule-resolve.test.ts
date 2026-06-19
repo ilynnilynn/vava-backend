@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 // ── Mock state ───────────────────────────────────────────────
 
@@ -14,13 +14,10 @@ const mockSingle = vi.fn()
 const mockEq = vi.fn((..._args: unknown[]) => ({ single: mockSingle, eq: mockEq }))
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
 const mockFrom = vi.fn(() => ({ select: mockSelect, update: mockUpdate }))
-const mockGetUser = vi.fn()
+const mockRequireAuth = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: { getUser: mockGetUser },
-    from: mockFrom,
-  })),
+  requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
 }))
 
 vi.mock('@/lib/bookings', () => ({
@@ -54,7 +51,7 @@ describe('POST /api/bookings/reschedule/resolve', () => {
     mockBooking = { pro_id: 'pro-1', user_id: 'user-1', status: 'reschedule_pending', proposed_slot_id: 'slot-new' }
     mockResolveResult = { data: null, error: null }
 
-    mockGetUser.mockResolvedValue({ data: { user: mockUser }, error: null })
+    mockRequireAuth.mockResolvedValue({ supabase: { from: mockFrom }, user: mockUser })
 
     let callCount = 0
     mockSingle.mockImplementation(() => {
@@ -66,7 +63,7 @@ describe('POST /api/bookings/reschedule/resolve', () => {
   })
 
   it('returns 401 when not authenticated', async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'no session' } })
+    mockRequireAuth.mockResolvedValue({ error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) })
 
     const { POST } = await import('../reschedule/resolve/route')
     const res = await POST(makeRequest({ bookingId: 'b-1', approved: true }))
@@ -94,8 +91,7 @@ describe('POST /api/bookings/reschedule/resolve', () => {
   })
 
   it('returns 403 when caller is not the pro', async () => {
-    mockUser = { id: 'other-pro' }
-    mockGetUser.mockResolvedValue({ data: { user: mockUser }, error: null })
+    mockRequireAuth.mockResolvedValue({ supabase: { from: mockFrom }, user: { id: 'other-pro' } })
 
     const { POST } = await import('../reschedule/resolve/route')
     const res = await POST(makeRequest({ bookingId: 'b-1', approved: true }))

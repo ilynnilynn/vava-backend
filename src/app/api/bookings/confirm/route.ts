@@ -8,7 +8,7 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/supabase/server'
 import { confirmBooking, getCustomerBookings, type ConfirmBookingParams } from '@/lib/bookings'
 import { notify } from '@/lib/notifications'
 import { hasTimeOverlap } from '@/lib/overlap'
@@ -24,13 +24,9 @@ function allUUIDs(arr: unknown[]): arr is string[] {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-
-  // ── Auth ──────────────────────────────────────────────────
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const auth = await requireAuth()
+  if ('error' in auth) return auth.error
+  const { supabase, user } = auth
 
   // ── Parse body ────────────────────────────────────────────
   let body: Record<string, unknown>

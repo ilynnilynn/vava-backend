@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 // ── Mock Supabase ─────────────────────────────────────────────
 
@@ -18,13 +18,10 @@ const mockFrom = vi.fn((table: string) => {
   }
   return { select: mockSelect }
 })
-const mockGetUser = vi.fn()
+const mockRequireAuth = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: { getUser: mockGetUser },
-    from: mockFrom,
-  })),
+  requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
 }))
 
 function makeRequest(body: unknown) {
@@ -41,13 +38,13 @@ describe('POST /api/bookings/late', () => {
     mockUser = { id: 'user-1' }
     mockBooking = { user_id: 'user-1', status: 'confirmed' }
     mockUpdateError = null
-    mockGetUser.mockResolvedValue({ data: { user: mockUser }, error: null })
+    mockRequireAuth.mockResolvedValue({ supabase: { from: mockFrom }, user: mockUser })
     mockSingle.mockResolvedValue({ data: mockBooking })
     mockUpdateEq.mockResolvedValue({ error: mockUpdateError })
   })
 
   it('returns 401 when not authenticated', async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'no session' } })
+    mockRequireAuth.mockResolvedValue({ error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) })
 
     const { POST } = await import('../late/route')
     const res = await POST(makeRequest({ bookingId: 'b-1' }))

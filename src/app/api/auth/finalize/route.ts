@@ -11,18 +11,15 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/supabase/server'
 import { upsertUser, upsertPro } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
 
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (error || !user) {
-    return NextResponse.json({ error: 'No session' }, { status: 401 })
-  }
+  const auth = await requireAuth()
+  if ('error' in auth) return auth.error
+  const { supabase, user } = auth
 
   const supabaseUserId = user.id
   const meta = user.user_metadata ?? {}

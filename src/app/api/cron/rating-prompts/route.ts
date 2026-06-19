@@ -7,15 +7,15 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
+import { requireCron } from '@/lib/cron'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getBookingsNeedingRatingPrompt, markRatingPromptSent } from '@/lib/ratings'
 import { notify } from '@/lib/notifications'
 import { createRatingToken } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const denied = requireCron(req)
+  if (denied) return denied
 
   try {
     const supabase = createAdminClient()
