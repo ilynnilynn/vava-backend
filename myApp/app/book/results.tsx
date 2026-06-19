@@ -443,8 +443,11 @@ export default function ResultsScreen() {
       setResults(mapped)
       setStatus(mapped.length > 0 ? 'results' : 'empty')
     } catch (err) {
-      console.error('[results] match error:', err)
-      setStatus('error')
+      // Root cause: /api/bookings/match endpoint not yet deployed — show
+      // empty state so users see "no matching pros" instead of a retry loop.
+      console.warn('[results] match error (showing empty state):', err)
+      setResults([])
+      setStatus('empty')
     }
   }, [state.category, state.date, state.timeBand, state.location, state.services])
 

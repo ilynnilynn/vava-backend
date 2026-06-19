@@ -85,6 +85,7 @@ export default function LocationScreen() {
       setCoords({ lat: latitude, lng: longitude })
 
       let label = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+      let resolved = false
 
       if (PLACES_KEY) {
         try {
@@ -93,17 +94,23 @@ export default function LocationScreen() {
           const data = await res.json()
           if (data.status === 'OK' && data.results?.[0]?.formatted_address) {
             label = data.results[0].formatted_address
+            resolved = true
           }
         } catch {
           // fall through to reverseGeocodeAsync
         }
       }
 
-      if (label.includes(',')) {
-        // Still using coordinates fallback — try expo reverse geocode
-        const [geo] = await Location.reverseGeocodeAsync({ latitude, longitude })
-        if (geo) {
-          label = [geo.city, geo.district, geo.street, geo.name].filter(Boolean).join('')
+      if (!resolved) {
+        // Google geocode unavailable — try Expo reverse geocode
+        try {
+          const [geo] = await Location.reverseGeocodeAsync({ latitude, longitude })
+          if (geo) {
+            const parts = [geo.city, geo.district, geo.street, geo.name].filter(Boolean)
+            if (parts.length) label = parts.join('')
+          }
+        } catch {
+          // keep coordinate label as last resort
         }
       }
 
@@ -151,9 +158,9 @@ export default function LocationScreen() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="輸入地址"
-            placeholderTextColor="#626765"
+            placeholderTextColor="#787D7B"
             style={{
-              backgroundColor: '#FBFBF8',
+              backgroundColor: '#F3F0EA',
               borderRadius: 8,
               height: 56,
               paddingHorizontal: 16,
@@ -196,8 +203,6 @@ export default function LocationScreen() {
           style={{ opacity: loading ? 0.6 : 1 }}
         >
           <XStack
-            backgroundColor="#F0EDE5"
-            borderRadius={8}
             height={56}
             paddingHorizontal={16}
             alignItems="center"
@@ -227,7 +232,7 @@ export default function LocationScreen() {
         {/* Divider + scrollable suggestions fill remaining space */}
         {suggestions.length > 0 && (
           <YStack flex={1}>
-            <View height={1} backgroundColor="#D8D9D2" />
+            <View height={1} backgroundColor="#D2D3D3" />
             <ScrollView flex={1} showsVerticalScrollIndicator={false} bounces={false} keyboardShouldPersistTaps="always">
               {suggestions.map((s, i) => (
                 <Pressable
@@ -237,13 +242,13 @@ export default function LocationScreen() {
                     height: 48,
                     paddingHorizontal: 16,
                     borderBottomWidth: i < suggestions.length - 1 ? 1 : 0,
-                    borderBottomColor: '#D8D9D2',
+                    borderBottomColor: '#D2D3D3',
                     backgroundColor: pressed ? 'rgba(0,0,0,0.03)' : 'transparent',
                     justifyContent: 'center',
                   })}
                 >
                   <XStack gap={10} alignItems="center">
-                    <AppIcon name="location" size={13} color="#626765" />
+                    <AppIcon name="location" size={13} color="#787D7B" />
                     <Text fontSize={14} color="#1F2723" flex={1} numberOfLines={1}>
                       {s.description}
                     </Text>

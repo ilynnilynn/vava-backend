@@ -14,16 +14,22 @@
       "backgroundColor": "#FF5A3C",
       "bundleIdentifier": "com.ilynn.vava",
       "usesAppleSignIn": true,
+      "appleTeamId": "7PAFFWWRVF",
       "config": {
         "googleMapsApiKey": "AIzaSyCmBVHouxfFd2jDSBFOe2ndLo4SPQ9xQB0"
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "zh_TW",
+        "CFBundleLocalizations": ["zh-Hant"],
         "LSApplicationQueriesSchemes": [
           "instagram"
         ],
         "NSLocationWhenInUseUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。",
-        "NSLocationAlwaysUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。"
+        "NSLocationAlwaysUsageDescription": "我們需要您的位置以協助您搜尋附近的美業技師。",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
       }
     },
     "android": {

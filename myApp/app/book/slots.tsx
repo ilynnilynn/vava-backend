@@ -66,8 +66,10 @@ export default function SlotsScreen() {
         setResults(data.results)
         setStatus('results')
       }
-    } catch {
-      setStatus('error')
+    } catch (err) {
+      console.warn('[slots] match error (showing empty state):', err)
+      setResults([])
+      setStatus('empty')
     }
   }, [state])
 
@@ -117,7 +119,7 @@ export default function SlotsScreen() {
         </View>
         <View width={44} />
       </XStack>
-      <Text fontSize={13} color="#626765" textAlign="center" paddingHorizontal={16} paddingBottom={12}>
+      <Text fontSize={13} color="#787D7B" textAlign="center" paddingHorizontal={16} paddingBottom={12}>
         {summary}
       </Text>
     </YStack>
@@ -131,7 +133,7 @@ export default function SlotsScreen() {
         <YStack flex={1} paddingHorizontal={16} paddingTop={16} gap={12}>
           <Spinner size="large" color="#1F2723" />
           {[1, 2, 3].map((i) => (
-            <View key={i} backgroundColor="#F0EDE5" borderRadius={12} height={100} />
+            <View key={i} backgroundColor="#F6F4EF" borderRadius={12} height={100} />
           ))}
         </YStack>
       </YStack>
@@ -200,7 +202,7 @@ export default function SlotsScreen() {
         keyExtractor={(item) => item.pro.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         renderItem={({ item: proResult }) => (
-          <YStack backgroundColor="#F0EDE5" borderRadius={8} padding={16} marginBottom={12} gap={10}>
+          <YStack backgroundColor="#F6F4EF" borderRadius={8} padding={16} marginBottom={12} gap={10}>
             {/* Pro header */}
             <XStack justifyContent="space-between" alignItems="center">
               <YStack gap={2}>
@@ -209,10 +211,10 @@ export default function SlotsScreen() {
                 </Text>
                 <XStack gap={6} alignItems="center">
                   {proResult.pro.district && (
-                    <Text fontSize={13} color="#626765">{proResult.pro.district}</Text>
+                    <Text fontSize={13} color="#787D7B">{proResult.pro.district}</Text>
                   )}
                   {proResult.distanceKm != null && (
-                    <Text fontSize={13} color="#626765">{proResult.distanceKm.toFixed(1)} km</Text>
+                    <Text fontSize={13} color="#787D7B">{proResult.distanceKm.toFixed(1)} km</Text>
                   )}
                 </XStack>
               </YStack>
@@ -236,7 +238,7 @@ export default function SlotsScreen() {
                       width: 64,
                       height: 44,
                       borderRadius: 9999,
-                      backgroundColor: isSelected ? '#1F2723' : '#E7E8E1',
+                      backgroundColor: isSelected ? '#1F2723' : '#E8E9E9',
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: pressed ? 0.7 : 1,
