@@ -12,6 +12,7 @@
 //   - AbortSignal forwarding and propagation
 //   - Idempotency and boundary lengths
 
+import { describe, it, expect, vi } from 'vitest'
 import { checkInstagramHandle, IG_HANDLE_RE } from '../lib/instagram-verify'
 
 // ── Mock helpers ───────────────────────────────────────────────────────────────
@@ -28,11 +29,11 @@ function mockFetch(status: number, body?: unknown): typeof fetch {
     ok: status >= 200 && status < 300,
     json: () => Promise.resolve(body ?? {}),
   }
-  return jest.fn().mockResolvedValue(response)
+  return vi.fn().mockResolvedValue(response)
 }
 
 function mockFetchThrows(message = 'Network request failed'): typeof fetch {
-  return jest.fn().mockRejectedValue(new Error(message))
+  return vi.fn().mockRejectedValue(new Error(message))
 }
 
 function mockFetchBadJson(status = 200): typeof fetch {
@@ -41,7 +42,7 @@ function mockFetchBadJson(status = 200): typeof fetch {
     ok: status >= 200 && status < 300,
     json: () => Promise.reject(new Error('invalid json')),
   }
-  return jest.fn().mockResolvedValue(response)
+  return vi.fn().mockResolvedValue(response)
 }
 
 // ── IG_HANDLE_RE ──────────────────────────────────────────────────────────────
@@ -230,19 +231,19 @@ describe('checkInstagramHandle — AbortSignal', () => {
 
   it('propagates AbortError so caller can detect cancellation', async () => {
     const abortError = Object.assign(new Error('The operation was aborted'), { name: 'AbortError' })
-    const f = jest.fn().mockRejectedValue(abortError)
+    const f = vi.fn().mockRejectedValue(abortError)
     await expect(checkInstagramHandle('alice', f)).rejects.toMatchObject({ name: 'AbortError' })
   })
 
   it('does NOT swallow AbortError as network_error', async () => {
     const abortError = Object.assign(new Error('AbortError'), { name: 'AbortError' })
-    const f = jest.fn().mockRejectedValue(abortError)
+    const f = vi.fn().mockRejectedValue(abortError)
     await expect(checkInstagramHandle('alice', f)).rejects.toBeDefined()
   })
 
   it('plain Error (name=Error, not AbortError) → network_error', async () => {
     const networkErr = new Error('Network request failed')
-    const f = jest.fn().mockRejectedValue(networkErr)
+    const f = vi.fn().mockRejectedValue(networkErr)
     expect(await checkInstagramHandle('alice', f)).toBe('network_error')
   })
 })
