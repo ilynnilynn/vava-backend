@@ -5,9 +5,7 @@ import { NextRequest } from 'next/server'
 
 const mockGetBookingsNeedingRatingPrompt = vi.fn(async () => [])
 const mockMarkRatingPromptSent = vi.fn(async () => ({ data: null, error: null }))
-const mockNotifyCustomerRatingPrompt = vi.fn(async () => {})
-const mockSendPushNotification = vi.fn(async () => {})
-const mockCreateInAppNotification = vi.fn(async () => {})
+const mockNotify = vi.fn(async () => {})
 
 const mockSingle = vi.fn()
 const mockEq = vi.fn(() => ({ single: mockSingle }))
@@ -26,9 +24,7 @@ vi.mock('@/lib/ratings', () => ({
 }))
 
 vi.mock('@/lib/notifications', () => ({
-  notifyCustomerRatingPrompt: (...args: unknown[]) => mockNotifyCustomerRatingPrompt(...args),
-  sendPushNotification: (...args: unknown[]) => mockSendPushNotification(...args),
-  createInAppNotification: (...args: unknown[]) => mockCreateInAppNotification(...args),
+  notify: (...args: unknown[]) => mockNotify(...args),
 }))
 
 vi.mock('@/lib/auth', () => ({
@@ -67,7 +63,7 @@ describe('GET /api/cron/rating-prompts', () => {
     const json = await res.json()
     expect(json.ok).toBe(true)
     expect(json.processed).toBe(0)
-    expect(mockNotifyCustomerRatingPrompt).not.toHaveBeenCalled()
+    expect(mockNotify).not.toHaveBeenCalled()
   })
 
   it('sends rating prompts and marks them sent', async () => {
@@ -75,7 +71,7 @@ describe('GET /api/cron/rating-prompts', () => {
       { id: 'b-1', user_id: 'u-1', pro_id: 'p-1', completed_at: '2026-03-23T12:00:00Z' },
     ])
     mockSingle
-      .mockResolvedValueOnce({ data: { line_user_id: 'line-u-1', push_token_expo: null } })
+      .mockResolvedValueOnce({ data: { push_token_expo: null } })
       .mockResolvedValueOnce({ data: { display_name: '小美' } })
 
     const { GET } = await import('../../cron/rating-prompts/route')
@@ -84,11 +80,11 @@ describe('GET /api/cron/rating-prompts', () => {
     const json = await res.json()
     expect(json.processed).toBe(1)
 
-    expect(mockNotifyCustomerRatingPrompt).toHaveBeenCalledOnce()
-    expect(mockNotifyCustomerRatingPrompt).toHaveBeenCalledWith(expect.objectContaining({
-      customerLineUserId: 'line-u-1',
-      proDisplayName: '小美',
-      ratingUrl: 'http://localhost:3000/bookings/b-1/rate?token=mock-token-b-1-u-1',
+    expect(mockNotify).toHaveBeenCalledOnce()
+    expect(mockNotify).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 'u-1',
+      type: 'review_prompt',
+      bookingId: 'b-1',
     }))
     expect(mockMarkRatingPromptSent).toHaveBeenCalledWith('b-1', expect.objectContaining({ __admin: true }))
   })
@@ -98,24 +94,24 @@ describe('GET /api/cron/rating-prompts', () => {
       { id: 'b-fail', user_id: 'u-1', pro_id: 'p-1', completed_at: '2026-03-23T12:00:00Z' },
       { id: 'b-ok', user_id: 'u-2', pro_id: 'p-2', completed_at: '2026-03-23T12:00:00Z' },
     ])
-    // First booking: customer row not found → skipped entirely (P1-13 fix)
-    // Second booking: succeeds fully
+    // b-fail: customer not found → skipped (continue guard)
+    // b-ok: succeeds
     mockSingle
       .mockResolvedValueOnce({ data: null })                             // b-fail: user not found
       .mockResolvedValueOnce({ data: { display_name: '小美' } })         // b-fail: pro found
-      .mockResolvedValueOnce({ data: { line_user_id: 'line-u-2' } })    // b-ok: user found
+      .mockResolvedValueOnce({ data: { push_token_expo: 'expo-2' } })   // b-ok: user found
       .mockResolvedValueOnce({ data: { display_name: '小華' } })         // b-ok: pro found
 
     const { GET } = await import('../../cron/rating-prompts/route')
     const res = await GET(makeRequest(`Bearer ${CRON_SECRET}`))
     expect(res.status).toBe(200)
     const json = await res.json()
-    // Only b-ok processed — b-fail skipped because customer is null
     expect(json.processed).toBe(1)
-    expect(mockNotifyCustomerRatingPrompt).toHaveBeenCalledOnce()
-    expect(mockNotifyCustomerRatingPrompt).toHaveBeenCalledWith(expect.objectContaining({
-      customerLineUserId: 'line-u-2',
-      proDisplayName: '小華',
+    expect(mockNotify).toHaveBeenCalledOnce()
+    expect(mockNotify).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 'u-2',
+      type: 'review_prompt',
+      bookingId: 'b-ok',
     }))
   })
 

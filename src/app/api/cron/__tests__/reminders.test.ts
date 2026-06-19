@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server'
 
 const mockGetBookingsNeedingReminder = vi.fn(async () => [])
 const mockMarkReminderSent = vi.fn(async () => ({ data: null, error: null }))
-const mockNotifyCustomerReminder = vi.fn(async () => {})
+const mockNotify = vi.fn(async () => {})
 
 const mockSingle = vi.fn()
 const mockEq = vi.fn(() => ({ single: mockSingle }))
@@ -24,7 +24,7 @@ vi.mock('@/lib/bookings', () => ({
 }))
 
 vi.mock('@/lib/notifications', () => ({
-  notifyCustomerReminder: (...args: unknown[]) => mockNotifyCustomerReminder(...args),
+  notify: (...args: unknown[]) => mockNotify(...args),
 }))
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -58,17 +58,15 @@ describe('GET /api/cron/reminders', () => {
     const json = await res.json()
     expect(json.ok).toBe(true)
     expect(json.processed).toBe(0)
-    expect(mockNotifyCustomerReminder).not.toHaveBeenCalled()
+    expect(mockNotify).not.toHaveBeenCalled()
   })
 
   it('sends reminders and marks them sent', async () => {
     mockGetBookingsNeedingReminder.mockResolvedValueOnce([
       { id: 'b-1', user_id: 'u-1', pro_id: 'p-1', starts_at: '2026-03-23T14:30:00Z' },
     ])
-    // First call: users.select → customer
-    // Second call: pros.select → pro
     mockSingle
-      .mockResolvedValueOnce({ data: { line_user_id: 'line-u-1' } })
+      .mockResolvedValueOnce({ data: { push_token_expo: 'expo-token-1' } })
       .mockResolvedValueOnce({ data: { display_name: '小美', studio_address: '台北市大安區' } })
 
     const { GET } = await import('../../cron/reminders/route')
@@ -77,11 +75,11 @@ describe('GET /api/cron/reminders', () => {
     const json = await res.json()
     expect(json.processed).toBe(1)
 
-    expect(mockNotifyCustomerReminder).toHaveBeenCalledOnce()
-    expect(mockNotifyCustomerReminder).toHaveBeenCalledWith(expect.objectContaining({
-      customerLineUserId: 'line-u-1',
-      proDisplayName: '小美',
-      studioAddress: '台北市大安區',
+    expect(mockNotify).toHaveBeenCalledOnce()
+    expect(mockNotify).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 'u-1',
+      type: 'booking_reminder',
+      bookingId: 'b-1',
     }))
     expect(mockMarkReminderSent).toHaveBeenCalledWith('b-1')
   })

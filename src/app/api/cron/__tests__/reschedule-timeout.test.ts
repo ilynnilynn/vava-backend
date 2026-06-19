@@ -4,8 +4,9 @@ import { NextRequest } from 'next/server'
 // ── Mocks ────────────────────────────────────────────────────
 
 const mockGetExpiredReschedulePending = vi.fn(async () => [])
+const mockNotify = vi.fn(async () => {})
 const mockUpdate = vi.fn(() => ({ eq: vi.fn() }))
-const mockSingle = vi.fn(() => ({ data: { line_user_id: 'line-1' } }))
+const mockSingle = vi.fn(() => ({ data: { push_token_expo: 'expo-1' } }))
 const mockEq = vi.fn((..._args: unknown[]) => ({ single: mockSingle, eq: mockEq }))
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
 
@@ -20,9 +21,8 @@ vi.mock('@/lib/bookings', () => ({
   getExpiredReschedulePending: (...args: unknown[]) => mockGetExpiredReschedulePending(...args),
 }))
 
-const mockNotifyCustomerRescheduleOutcome = vi.fn(async () => {})
 vi.mock('@/lib/notifications', () => ({
-  notifyCustomerRescheduleOutcome: (...args: unknown[]) => mockNotifyCustomerRescheduleOutcome(...args),
+  notify: (...args: unknown[]) => mockNotify(...args),
 }))
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -74,7 +74,7 @@ describe('GET /api/cron/reschedule-timeout', () => {
       status: 'confirmed',
       proposed_slot_id: null,
     })
-    expect(mockNotifyCustomerRescheduleOutcome).toHaveBeenCalledTimes(2)
+    expect(mockNotify).toHaveBeenCalledTimes(2)
   })
 
   it('returns 500 when getExpiredReschedulePending throws', async () => {
