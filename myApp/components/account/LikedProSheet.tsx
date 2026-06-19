@@ -74,7 +74,7 @@ export function LikedProSheet({ pro, onClose }: Props) {
             </View>
             <YStack alignItems="center" gap={4}>
               <Text fontSize={20} fontWeight="700" color="#1F2723">{pro.pro_display_name}</Text>
-              <Text fontSize={15} color="#626765">
+              <Text fontSize={15} color="#8F9391">
                 {pro.service_domain === 'nails' ? '美甲師' : '美睫師'}
               </Text>
             </YStack>

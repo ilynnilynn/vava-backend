@@ -39,13 +39,13 @@ function getRowLabel(item: ServiceItem): string {
     const styleName = ci ? (ci.group_zh ? `${ci.group_zh}${ci.name_zh}` : ci.name_zh) : item.style_key
     if (item.body_part) {
       const bpLabel = item.body_part === 'hand' ? '手' : '腳'
-      return `${bpLabel} · ${catName} · ${styleName}`
+      return `${bpLabel} • ${catName} • ${styleName}`
     }
-    return `${catName} · ${styleName}`
+    return `${catName} • ${styleName}`
   }
   if (item.body_part) {
     const bpLabel = item.body_part === 'hand' ? '手' : '腳'
-    return `${bpLabel} · ${catName}`
+    return `${bpLabel} • ${catName}`
   }
   return catName
 }
@@ -356,8 +356,8 @@ export default function ServicesScreen() {
       >
         <YStack flex={1} gap={3}>
           <Text fontSize={15} fontWeight="600" color="#1F2723">{label}</Text>
-          <Text fontSize={13} color="#626765">
-            {item.duration_minutes} 分鐘 · NT${item.price}
+          <Text fontSize={13} color="#8F9391">
+            {item.duration_minutes} 分鐘 • NT${item.price}
           </Text>
         </YStack>
         <Pressable
@@ -366,7 +366,7 @@ export default function ServicesScreen() {
           hitSlop={12}
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
         >
-          <AppIcon name="edit" size={14} color="#626765" />
+          <AppIcon name="edit" size={14} color="#8F9391" />
         </Pressable>
       </XStack>
     )
@@ -405,7 +405,7 @@ export default function ServicesScreen() {
     : lashesGroups.length === 0 && !loading
 
   return (
-    <YStack flex={1} backgroundColor="#FBFBF8">
+    <YStack flex={1} backgroundColor="#F6F4EF">
       {/* Header */}
       <XStack
         paddingTop={insets.top + 16}
@@ -458,7 +458,7 @@ export default function ServicesScreen() {
       {isEmpty && (
         <YStack flex={1} alignItems="center" justifyContent="center" gap={12} paddingBottom={80}>
           <AppIcon name="serviceGeneric" size={48} color="#E8E9E9" />
-          <Text fontSize={16} fontWeight="600" color="#626765" textAlign="center">尚未新增服務項目</Text>
+          <Text fontSize={16} fontWeight="600" color="#8F9391" textAlign="center">尚未新增服務項目</Text>
           <Pressable
             onPress={openAdd}
             style={({ pressed }) => [styles.primaryBtn, { opacity: pressed ? 0.85 : 1 }]}
@@ -472,7 +472,7 @@ export default function ServicesScreen() {
       {!isEmpty && domainEmpty && (
         <YStack flex={1} alignItems="center" justifyContent="center" gap={12} paddingBottom={80}>
           <AppIcon name="serviceGeneric" size={48} color="#E8E9E9" />
-          <Text fontSize={16} fontWeight="600" color="#626765" textAlign="center">
+          <Text fontSize={16} fontWeight="600" color="#8F9391" textAlign="center">
             尚未新增{DOMAINS.find(d => d.key === activeDomain)?.label}服務
           </Text>
           <Pressable
@@ -649,7 +649,7 @@ export default function ServicesScreen() {
                   </Pressable>
                 ))}
                 {getAvailableCategories().length === 0 && (
-                  <Text fontSize={14} color="#626765" paddingHorizontal={20} paddingTop={12}>
+                  <Text fontSize={14} color="#8F9391" paddingHorizontal={20} paddingTop={12}>
                     所有服務項目皆已新增
                   </Text>
                 )}
@@ -668,7 +668,7 @@ export default function ServicesScreen() {
                       <YStack key={row.styleKey ?? 'no-style'} paddingHorizontal={20} paddingTop={12}>
                         <View style={styles.card}>
                           {/* Name + delete */}
-                          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
+                          <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center">
                             <Text fontSize={15} fontWeight="600" color="#1F2723" flex={1}>
                               {row.label}
                             </Text>
@@ -678,7 +678,7 @@ export default function ServicesScreen() {
                               accessibilityLabel={`移除 ${row.label}`}
                               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
                             >
-                              <AppIcon name="close" size={14} color="#626765" />
+                              <AppIcon name="close" size={14} color="#8F9391" />
                             </Pressable>
                           </XStack>
 
@@ -689,7 +689,7 @@ export default function ServicesScreen() {
                             onPress={() => pickAddDuration(index)}
                             style={({ pressed }) => [styles.cardRow, { opacity: pressed ? 0.7 : 1 }]}
                           >
-                            <Text fontSize={15} color="#626765" width={56}>時長</Text>
+                            <Text fontSize={15} color="#8F9391" width={56}>時長</Text>
                             <Text fontSize={15} color="#1F2723" flex={1} textAlign="right" marginRight={6}>
                               {row.duration_minutes} 分鐘
                             </Text>
@@ -699,10 +699,10 @@ export default function ServicesScreen() {
                           <View style={styles.cardDivider} />
 
                           {/* Price */}
-                          <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-                            <Text fontSize={15} color="#626765" width={56}>價格</Text>
+                          <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center">
+                            <Text fontSize={15} color="#8F9391" width={56}>價格</Text>
                             <XStack flex={1} justifyContent="flex-end" alignItems="center" gap={4}>
-                              <Text fontSize={15} color="#626765">NT$</Text>
+                              <Text fontSize={15} color="#8F9391">NT$</Text>
                               <TextInput
                                 value={row.price}
                                 onChangeText={v => updateAddRow(index, 'price', v.replace(/[^0-9]/g, ''))}
@@ -756,7 +756,7 @@ export default function ServicesScreen() {
               onPress={closeEdit}
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
-              <Text fontSize={15} color="#626765">取消</Text>
+              <Text fontSize={15} color="#8F9391">取消</Text>
             </Pressable>
             <Text fontSize={20} fontWeight="700" color="#1F2723" flex={1} textAlign="center">
               編輯服務
@@ -771,10 +771,10 @@ export default function ServicesScreen() {
             {editItem && (
               <YStack paddingTop={8}>
                 <Text style={styles.sheetSectionLabel}>服務資訊</Text>
-                <View style={[styles.card, { marginHorizontal: 20 }]}>
+                <View style={[styles.card, { marginHorizontal: 16 }]}>
                   {/* Service name (read-only) */}
-                  <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-                    <Text fontSize={15} color="#626765" width={56}>名稱</Text>
+                  <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center">
+                    <Text fontSize={15} color="#8F9391" width={56}>名稱</Text>
                     <Text fontSize={15} color="#1F2723" flex={1} textAlign="right">
                       {getRowLabel(editItem)}
                     </Text>
@@ -787,7 +787,7 @@ export default function ServicesScreen() {
                     onPress={pickEditDuration}
                     style={({ pressed }) => [styles.cardRow, { opacity: pressed ? 0.7 : 1 }]}
                   >
-                    <Text fontSize={15} color="#626765" width={56}>時長</Text>
+                    <Text fontSize={15} color="#8F9391" width={56}>時長</Text>
                     <Text fontSize={15} color="#1F2723" flex={1} textAlign="right" marginRight={6}>
                       {editDuration} 分鐘
                     </Text>
@@ -797,10 +797,10 @@ export default function ServicesScreen() {
                   <View style={styles.cardDivider} />
 
                   {/* Price */}
-                  <XStack paddingHorizontal={14} paddingVertical={12} alignItems="center">
-                    <Text fontSize={15} color="#626765" width={56}>價格</Text>
+                  <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center">
+                    <Text fontSize={15} color="#8F9391" width={56}>價格</Text>
                     <XStack flex={1} justifyContent="flex-end" alignItems="center" gap={4}>
-                      <Text fontSize={15} color="#626765">NT$</Text>
+                      <Text fontSize={15} color="#8F9391">NT$</Text>
                       <TextInput
                         value={editPrice}
                         onChangeText={v => setEditPrice(v.replace(/[^0-9]/g, ''))}
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   groupHeader: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#626765',
+    color: '#8F9391',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 4,
@@ -880,7 +880,7 @@ const styles = StyleSheet.create({
   primaryBtn: {
     height: 48,
     backgroundColor: '#1F2723',
-    borderRadius: 12,
+    borderRadius: 9999,
     paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
@@ -888,7 +888,7 @@ const styles = StyleSheet.create({
   sheetSectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#626765',
+    color: '#8F9391',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 8,
@@ -904,14 +904,15 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8E9E9',
   },
   card: {
-    backgroundColor: '#F6F4EF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
+    paddingVertical: 2,
   },
   cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 20,
     paddingVertical: 14,
   },
   cardDivider: {
@@ -928,8 +929,8 @@ const styles = StyleSheet.create({
   saveBtn: {
     height: 48,
     backgroundColor: '#1F2723',
-    borderRadius: 12,
-    marginHorizontal: 20,
+    borderRadius: 9999,
+    marginHorizontal: 16,
     marginTop: 32,
     alignItems: 'center',
     justifyContent: 'center',

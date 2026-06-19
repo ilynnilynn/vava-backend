@@ -75,19 +75,10 @@ export default function HomeScreen() {
           paddingTop={insets.top}
           minHeight={insets.top + 48}
           alignItems="center"
-          justifyContent="space-between"
+          justifyContent="center"
           paddingHorizontal={16}
         >
-          <View width={44} height={44} />
           <VavaLogo size={29} color="#F9583B" />
-          <Pressable
-            onPress={() => Alert.alert('搜尋', '搜尋功能即將推出')}
-            style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-            accessibilityRole="button"
-            accessibilityLabel="搜尋"
-          >
-            <AppIcon name="search" size={20} color="#1F2723" />
-          </Pressable>
         </XStack>
 
         {/* B) Hero Section */}
@@ -104,9 +95,9 @@ export default function HomeScreen() {
           </Text>
           <Text
             fontSize={16}
-            fontWeight="500"
+            fontWeight="400"
             lineHeight={22}
-            color="#626765"
+            color="#8F9391"
             textAlign="center"
           >
             馬上找到有空又符合你需求的設計師
@@ -170,9 +161,9 @@ export default function HomeScreen() {
               <XStack alignItems="center">
                 <Text
                   fontSize={16}
-                  fontWeight="500"
+                  fontWeight="400"
                   lineHeight={24}
-                  color="#626765"
+                  color="#8F9391"
                 >
                   不再一間一間問，讓設計師來找你！
                 </Text>
@@ -181,7 +172,7 @@ export default function HomeScreen() {
               {/* Headline */}
               <YStack flex={1}>
                 <Text fontSize={30} fontWeight="700" color="#1F2723" lineHeight={38}>
-                  1分鐘填需求．不用等待
+                  1分鐘填需求 • 不用等待
                 </Text>
                 <XStack alignItems="flex-start" gap={2}>
                   <Text fontSize={30} fontWeight="700" color="#1F2723" lineHeight={38}>
@@ -222,7 +213,7 @@ export default function HomeScreen() {
                 >
                   填寫需求
                 </Text>
-                <AppIcon name="forward" size={14} color="rgba(251,251,248,0.4)" />
+                <AppIcon name="forward" size={12} color="#FBFBF8" />
               </Pressable>
             </YStack>
           </YStack>
@@ -294,7 +285,7 @@ export default function HomeScreen() {
                       paddingVertical={2}
                     >
                       <Text fontSize={12} color="#A5088C">
-                        New
+                        Coming Soon
                       </Text>
                     </View>
                   </XStack>

@@ -1,8 +1,6 @@
 // app/(onboarding)/customer/phone.tsx
 import { useRef, useState } from 'react'
-import { InputAccessoryView, Platform, Pressable, TextInput, StyleSheet, View } from 'react-native'
-
-const ACCESSORY_ID = 'phone-input-accessory'
+import { Pressable, TextInput, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSession } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
@@ -51,16 +49,10 @@ export default function CustomerPhoneScreen() {
           placeholderTextColor="#AEADA6"
           keyboardType="phone-pad"
           autoFocus
-          inputAccessoryViewID={Platform.OS === 'ios' ? ACCESSORY_ID : undefined}
           onSubmitEditing={handleNext}
           style={styles.input}
         />
       </Pressable>
-      {Platform.OS === 'ios' && (
-        <InputAccessoryView nativeID={ACCESSORY_ID}>
-          <View />
-        </InputAccessoryView>
-      )}
     </OnboardingStepLayout>
   )
 }

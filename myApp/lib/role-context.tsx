@@ -63,6 +63,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function setActiveRole(role: UserRole) {
+    if (!enabledRoles.includes(role)) return
     explicitlySet.current = true
     setActiveRoleState(role)
     await AsyncStorage.setItem(STORAGE_KEY, role)

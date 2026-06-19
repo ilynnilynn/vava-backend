@@ -26,7 +26,7 @@ import { AddressAutocomplete } from '@/components/AddressAutocomplete'
 // ── Types ────────────────────────────────────────────────────
 
 type Step = 2 | 3 | 4 | 5 | 6 | 7 | 8
-type Gender = 'male' | 'female' | 'non-binary'
+type Gender = 'male' | 'female' | 'other' | 'prefer_not'
 type Domain = 'nails' | 'lashes' | 'both'
 type NailScope = 'hands' | 'feet' | 'both'
 
@@ -54,9 +54,10 @@ const STEP_LABELS: Record<Step, string> = {
 }
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'male', label: '男生' },
-  { value: 'female', label: '女生' },
-  { value: 'non-binary', label: '不透露' },
+  { value: 'male', label: '男性' },
+  { value: 'female', label: '女性' },
+  { value: 'other', label: '其他' },
+  { value: 'prefer_not', label: '不便透露' },
 ]
 
 const DOMAIN_OPTIONS: { value: Domain; label: string; desc: string }[] = [

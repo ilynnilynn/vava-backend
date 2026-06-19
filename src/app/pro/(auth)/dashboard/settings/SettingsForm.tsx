@@ -212,7 +212,7 @@ export function SettingsForm({ pro }: Props) {
       <div className="space-y-1">
         <label className="text-sm font-medium">性別</label>
         <p className="text-sm text-muted-foreground">
-          {pro.gender === 'male' ? '男' : pro.gender === 'female' ? '女' : '非二元'}
+          {pro.gender === 'male' ? '男性' : pro.gender === 'female' ? '女性' : pro.gender === 'other' ? '其他' : '不便透露'}
           <span className="text-xs ml-2">（如需修改請聯繫客服）</span>
         </p>
       </div>

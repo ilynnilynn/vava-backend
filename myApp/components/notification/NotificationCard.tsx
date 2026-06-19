@@ -10,6 +10,7 @@ const ICON_CONFIG: Record<NotificationType, { icon: AppIconName; bg: string }> =
   booking_cancelled: { icon: 'calendarCancel', bg: '#FF5A3C' },
   booking_reminder: { icon: 'time', bg: '#DFF5AD' },
   review_prompt: { icon: 'rating', bg: '#ECF0E4' },
+  pro_application_declined: { icon: 'user', bg: '#CC3352' },
 }
 
 function formatRelativeTime(isoString: string): string {

@@ -48,6 +48,11 @@ function AuthCallbackInner() {
       // We only need it here for error redirect path.
       const loginPath = '/login'
 
+      // Capture the code at effect-start before any navigation changes the URL.
+      // Read from Next.js searchParams (stable at first render) rather than
+      // window.location.search which may already be stale after router.replace().
+      const pkceCode = searchParams.get('code')
+
       // 1. Try getSession() first (works if PKCE code was already exchanged)
       let { data: { session } } = await supabase.auth.getSession()
 
@@ -68,13 +73,13 @@ function AuthCallbackInner() {
         }
       }
 
-      // 3. If still no session, check for PKCE code in query params
-      if (!session) {
-        const code = new URLSearchParams(window.location.search).get('code')
-        if (code) {
-          const { data } = await supabase.auth.exchangeCodeForSession(code)
-          session = data.session
+      // 3. If still no session, exchange the PKCE code captured before navigation
+      if (!session && pkceCode) {
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(pkceCode)
+        if (exchangeError) {
+          console.error('[auth/callback] exchangeCodeForSession error:', exchangeError.message)
         }
+        session = data.session
       }
 
       if (!session) {
@@ -105,7 +110,9 @@ function AuthCallbackInner() {
     }
 
     handleAuth()
-  }, [router, searchParams])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally empty — must run exactly once on mount; re-running after
+         // router.replace() changes the URL would retry with no code and fail.
 
   return (
     <main className="flex min-h-screen items-center justify-center">

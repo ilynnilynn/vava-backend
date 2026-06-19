@@ -1,6 +1,6 @@
 // app/(pro-tabs)/slots.tsx
-import { useCallback, useState } from 'react'
-import { ScrollView, Pressable, RefreshControl, ActivityIndicator, StyleSheet, View } from 'react-native'
+import { useCallback, useRef, useState } from 'react'
+import { Alert, ScrollView, Pressable, RefreshControl, ActivityIndicator, StyleSheet, View } from 'react-native'
 import { YStack, XStack, Text } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
@@ -88,17 +88,43 @@ export default function ProSlotsScreen() {
     1: { start: DEFAULT_START_HOUR, end: DEFAULT_END_HOUR },
     2: { start: DEFAULT_START_HOUR, end: DEFAULT_END_HOUR },
   })
+  // Version guard: only the latest load() result may call setSlots
+  const loadVersionRef = useRef(0)
+  // Tracks which slot starts_at values have a pending mutation in flight
+  const [pendingSlots, setPendingSlots] = useState<Set<string>>(new Set())
 
   const startHour = dayHours[activeDay].start
   const endHour = dayHours[activeDay].end
   const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i)
 
   const load = useCallback(async () => {
-    const [b, s] = await Promise.all([fetchProBookings(), fetchSlots()])
-    setBookings(b)
-    setSlots(s)
-    setLoading(false)
-    setRefreshing(false)
+    // Capture version at start — only apply result if no newer load has started
+    const version = ++loadVersionRef.current
+    try {
+      const [b, s] = await Promise.all([fetchProBookings(), fetchSlots()])
+      if (version !== loadVersionRef.current) {
+        console.log('[slots] load v' + version + ' superseded by v' + loadVersionRef.current + ', discarding')
+        return
+      }
+      const openCount = s.filter(x => x.state === 'open').length
+      console.log('[slots] load v' + version + ': total=' + s.length + ' open=' + openCount,
+        s.filter(x => x.state === 'open').map(x => x.starts_at))
+      setBookings(b)
+      setSlots(s)
+    } catch (e) {
+      console.warn('[slots] load failed:', e)
+      Alert.alert(
+        '載入失敗',
+        '無法讀取時段資料，請檢查網路後重試。',
+        [
+          { text: '重試', onPress: () => load() },
+          { text: '取消', style: 'cancel' },
+        ]
+      )
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
   }, [])
 
   useFocusEffect(useCallback(() => {
@@ -144,34 +170,81 @@ export default function ProSlotsScreen() {
   const gridHeight = (endHour - startHour) * HOUR_HEIGHT + SLOT_HEIGHT
 
   async function handleToggle(startsAt: string) {
+    // Block double-tap while mutation is pending
+    if (pendingSlots.has(startsAt)) return
+
     const slot = slots.find(s => s.starts_at === startsAt)
       ?? daySlots.find(s => s.starts_at === startsAt)
-    if (!slot) return
+    if (!slot) { console.warn('[slots] slot not found', startsAt); return }
+    if (slot.state !== 'open' && slot.state !== 'available') return
+
+    console.log('[slots] handleToggle', startsAt, 'state:', slot.state)
+
+    // 1. Optimistic update — instant visual feedback
+    const optimisticState: SlotState = slot.state === 'open' ? 'available' : 'open'
+    setSlots(prev => {
+      const idx = prev.findIndex(s => s.starts_at === startsAt)
+      if (idx >= 0) return prev.map(s => s.starts_at === startsAt ? { ...s, state: optimisticState } : s)
+      return [...prev, { starts_at: startsAt, state: optimisticState }]
+    })
+
+    // 2. Mark pending to block double-tap
+    setPendingSlots(prev => new Set([...prev, startsAt]))
+
     try {
-      if (slot.state === 'open') await closeSlot(startsAt)
-      else if (slot.state === 'available') await openSlot(startsAt)
+      if (slot.state === 'open') {
+        await closeSlot(startsAt)
+      } else {
+        await openSlot(startsAt)
+      }
     } catch (e) {
       console.warn('[slots] toggle failed:', e)
+      Alert.alert('操作失敗', String((e as Error)?.message ?? e))
+    } finally {
+      // 3. Always clear pending and confirm DB state
+      // Version guard in load() ensures the latest call wins if multiple are racing
+      setPendingSlots(prev => { const n = new Set(prev); n.delete(startsAt); return n })
+      load()
     }
-    load()
   }
 
   async function handleOpenAll() {
-    try {
-      const toOpen = daySlots.filter(s => s.state === 'available')
-      for (const s of toOpen) await openSlot(s.starts_at)
-    } catch (e) {
-      console.warn('[slots] openAll failed:', e)
+    const toOpen = daySlots.filter(s => s.state === 'available')
+    if (toOpen.length === 0) return
+    console.log('[slots] openAll, count:', toOpen.length)
+
+    // Optimistic: mark all as open immediately
+    setSlots(prev => {
+      const existing = new Map(prev.map(s => [s.starts_at, s]))
+      for (const s of toOpen) existing.set(s.starts_at, { starts_at: s.starts_at, state: 'open' })
+      return Array.from(existing.values())
+    })
+
+    // Fire all writes in parallel; wait for all to settle before confirming
+    const results = await Promise.allSettled(toOpen.map(s => openSlot(s.starts_at)))
+    const failures = results.filter(r => r.status === 'rejected')
+    if (failures.length > 0) {
+      const msg = (failures[0] as PromiseRejectedResult).reason?.message ?? '未知錯誤'
+      Alert.alert('部分操作失敗', `${failures.length} 個時段未能開放：${msg}`)
     }
     load()
   }
 
   async function handleCloseAll() {
-    try {
-      const toClose = daySlots.filter(s => s.state === 'open')
-      for (const s of toClose) await closeSlot(s.starts_at)
-    } catch (e) {
-      console.warn('[slots] closeAll failed:', e)
+    const toClose = daySlots.filter(s => s.state === 'open')
+    if (toClose.length === 0) return
+    console.log('[slots] closeAll, count:', toClose.length)
+
+    // Optimistic: mark all as available immediately
+    const starts = new Set(toClose.map(s => s.starts_at))
+    setSlots(prev => prev.map(s => starts.has(s.starts_at) ? { ...s, state: 'available' as SlotState } : s))
+
+    // Fire all deletes in parallel; wait for all to settle before confirming
+    const results = await Promise.allSettled(toClose.map(s => closeSlot(s.starts_at)))
+    const failures = results.filter(r => r.status === 'rejected')
+    if (failures.length > 0) {
+      const msg = (failures[0] as PromiseRejectedResult).reason?.message ?? '未知錯誤'
+      Alert.alert('部分操作失敗', `${failures.length} 個時段未能關閉：${msg}`)
     }
     load()
   }
@@ -203,7 +276,7 @@ export default function ProSlotsScreen() {
       <XStack paddingTop={insets.top + 20} paddingHorizontal={20} paddingBottom={12} alignItems="center">
         <YStack flex={1}>
           <Text fontSize={24} fontWeight="700" color="#1F2723" lineHeight={32}>時段管理</Text>
-          <Text fontSize={14} color="#626765" marginTop={2}>
+          <Text fontSize={14} color="#8F9391" marginTop={2}>
             {now.getFullYear()} {now.getMonth() + 1}月{now.getDate()}-{new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2).getDate()}
           </Text>
         </YStack>
@@ -215,7 +288,7 @@ export default function ProSlotsScreen() {
             editMode && styles.editBtnActive,
           ]}
         >
-          <AppIcon name="edit" size={18} color="#626765" weight="regular" />
+          <AppIcon name="edit" size={18} color="#8F9391" weight="regular" />
         </Pressable>
       </XStack>
 
@@ -235,7 +308,7 @@ export default function ProSlotsScreen() {
               accessibilityState={{ selected: active }}
               style={[styles.dayTab, active && styles.dayTabActive]}
             >
-              <Text fontSize={18} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#626765'}>
+              <Text fontSize={18} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#8F9391'}>
                 {dateNum}
               </Text>
               <Text fontSize={12} color={active ? '#1F2723' : '#A5A8A7'}>
@@ -265,8 +338,8 @@ export default function ProSlotsScreen() {
           </Text>
           <XStack alignItems="center" gap={6}>
             <View style={[styles.statusDot, isDayOpen && styles.statusDotOpen]} />
-            <Text fontSize={13} color="#626765">
-              {dayStatusLabel}{dayTimeRange !== '' ? `．${dayTimeRange}` : ''}
+            <Text fontSize={13} color="#8F9391">
+              {dayStatusLabel}{dayTimeRange !== '' ? ` • ${dayTimeRange}` : ''}
             </Text>
           </XStack>
         </YStack>
@@ -323,7 +396,7 @@ export default function ProSlotsScreen() {
                     {formatTime(b.starts_at)}  {b.client_display_name}
                   </Text>
                   {height > 40 && (
-                    <Text fontSize={13} color="#626765" numberOfLines={1} lineHeight={20} marginTop={1}>
+                    <Text fontSize={13} color="#8F9391" numberOfLines={1} lineHeight={20} marginTop={1}>
                       {b.service_label}
                     </Text>
                   )}
@@ -335,7 +408,8 @@ export default function ProSlotsScreen() {
             {editMode && daySlots.map(s => {
               const cfg = SLOT_CONFIG[s.state]
               const top = timeToY(s.starts_at, startHour)
-              const isLocked = s.state === 'booked' || s.state === 'expired'
+              const isPending = pendingSlots.has(s.starts_at)
+              const isLocked = s.state === 'booked' || s.state === 'expired' || isPending
               const booking = s.state === 'booked'
                 ? dayBookings.find(b => {
                     const bStart = new Date(b.starts_at).getTime()
@@ -347,7 +421,7 @@ export default function ProSlotsScreen() {
               return (
                 <Pressable
                   key={s.starts_at}
-                  onPress={() => !isLocked && handleToggle(s.starts_at)}
+                  onPress={() => { if (!isLocked) handleToggle(s.starts_at) }}
                   disabled={isLocked}
                   style={({ pressed }) => [
                     styles.slotBlock,
@@ -362,12 +436,15 @@ export default function ProSlotsScreen() {
                 >
                   <XStack flex={1} alignItems="center">
                     <Text fontSize={13} fontWeight="500" color={cfg.text} numberOfLines={1}>{cfg.label}</Text>
-                    {s.state === 'available' && (
+                    {isPending && (
+                      <ActivityIndicator size="small" color={cfg.text} style={{ marginLeft: 'auto' }} />
+                    )}
+                    {!isPending && s.state === 'available' && (
                       <View style={{ marginLeft: 'auto' }}>
                         <AppIcon name="add" size={14} color="#A5A8A7" />
                       </View>
                     )}
-                    {booking && (
+                    {!isPending && booking && (
                       <Text fontSize={12} fontWeight="400" color="#7D85E7" style={{ marginLeft: 'auto' }}>
                         {formatTime(booking.starts_at)}-{formatTime(booking.ends_at)}
                       </Text>

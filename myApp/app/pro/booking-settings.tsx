@@ -38,7 +38,7 @@ function PickerRow({ label, value, options, onChange, disabled }: {
       style={({ pressed }) => [styles.row, { opacity: !disabled && pressed ? 0.7 : 1 }]}
     >
       <Text fontSize={15} color="#1F2723" flex={1}>{label}</Text>
-      <Text fontSize={15} color="#626765" marginRight={6}>{value}</Text>
+      <Text fontSize={15} color="#8F9391" marginRight={6}>{value}</Text>
       {!disabled && <AppIcon name="forward" size={12} color="#BBBEBD" />}
     </Pressable>
   )
@@ -77,7 +77,7 @@ export default function BookingSettingsScreen() {
   }
 
   return (
-    <YStack flex={1} backgroundColor="#FBFBF8">
+    <YStack flex={1} backgroundColor="#F6F4EF">
       <XStack
         paddingTop={insets.top + 16}
         paddingHorizontal={20}
@@ -94,7 +94,7 @@ export default function BookingSettingsScreen() {
         <Text fontSize={20} fontWeight="700" color="#1F2723" flex={1}>預約設定</Text>
         {isEditing ? (
           <Pressable onPress={handleCancel} style={({ pressed }) => ({ padding: 10, opacity: pressed ? 0.5 : 1 })}>
-            <Text fontSize={15} color="#626765">取消</Text>
+            <Text fontSize={15} color="#8F9391">取消</Text>
           </Pressable>
         ) : (
           <Pressable
@@ -102,7 +102,7 @@ export default function BookingSettingsScreen() {
             style={({ pressed }) => ({ padding: 10, borderRadius: 8, opacity: pressed ? 0.5 : 1 })}
             accessibilityLabel="編輯"
           >
-            <AppIcon name="edit" size={18} color="#626765" weight="regular" />
+            <AppIcon name="edit" size={18} color="#8F9391" weight="regular" />
           </Pressable>
         )}
       </XStack>
@@ -137,7 +137,7 @@ export default function BookingSettingsScreen() {
 
         <Text style={styles.sectionLabel}>確認方式</Text>
         <View style={styles.card}>
-          <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center">
+          <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center">
             <Text fontSize={15} color="#1F2723" flex={1}>自動確認預約</Text>
             <Switch
               value={settings.autoConfirm}
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#626765',
+    color: '#8F9391',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 8,
@@ -183,15 +183,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   card: {
-    marginHorizontal: 20,
-    backgroundColor: '#F6F4EF',
+    marginHorizontal: 16,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
+    paddingVertical: 2,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 20,
     paddingVertical: 14,
   },
   divider: {
@@ -202,8 +203,8 @@ const styles = StyleSheet.create({
   saveBtn: {
     height: 48,
     backgroundColor: '#1F2723',
-    borderRadius: 12,
-    marginHorizontal: 20,
+    borderRadius: 9999,
+    marginHorizontal: 16,
     marginTop: 32,
     alignItems: 'center',
     justifyContent: 'center',

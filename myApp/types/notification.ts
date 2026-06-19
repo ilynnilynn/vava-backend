@@ -4,6 +4,7 @@ export type NotificationType =
   | 'booking_cancelled'
   | 'booking_reminder'
   | 'review_prompt'
+  | 'pro_application_declined'
 
 export type NotificationListItem = {
   id: string

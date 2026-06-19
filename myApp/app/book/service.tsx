@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { YStack, XStack, Text } from 'tamagui'
+import { YStack, XStack, Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
 
 import { StepLayout } from '@/components/booking/StepLayout'
@@ -8,8 +8,8 @@ import { SectionExpander } from '@/components/booking/SectionExpander'
 import { useBookingRequest } from '@/lib/booking-context'
 
 // ── Nails options ──
-const NAIL_SERVICES = ['凝膠', '卸甲', '修補', '保養'] as const
-const NAIL_STYLES = ['單色', '設計款', '貓眼', '法式', '漸層', '鏡面'] as const
+const NAIL_SERVICES = ['凝膠', '卸甲', '修補', '保養', '矯正'] as const
+const NAIL_STYLES = ['單色', '跳色', '法式', '漸層', '貓眼', '鏡面', '手繪', '海莉', '不挑款/設計款'] as const
 const TREATMENT_TIERS = ['基本', '深層'] as const
 const NAIL_SCOPES = ['手', '腳', '手+腳'] as const
 
@@ -25,7 +25,7 @@ export default function ServiceScreen() {
   const { state, dispatch } = useBookingRequest()
   const category = state.category
 
-  // ── Nails state ──
+  // ── Nails state (single scope: 手 or 腳) ──
   const [nailServices, setNailServices] = useState<string[]>(
     state.services?.categoryIds ?? [],
   )
@@ -37,6 +37,26 @@ export default function ServiceScreen() {
   )
   const [nailScope, setNailScope] = useState<string | null>(
     state.services?.nailScope ?? null,
+  )
+
+  // ── Nails state (手+腳 split) ──
+  const [handServices, setHandServices] = useState<string[]>(
+    state.services?.handCategoryIds ?? [],
+  )
+  const [handStyle, setHandStyle] = useState<string | null>(
+    state.services?.handStyleId ?? null,
+  )
+  const [handTreatmentTier, setHandTreatmentTier] = useState<string | null>(
+    state.services?.handTreatmentTier ?? null,
+  )
+  const [footServices, setFootServices] = useState<string[]>(
+    state.services?.footCategoryIds ?? [],
+  )
+  const [footStyle, setFootStyle] = useState<string | null>(
+    state.services?.footStyleId ?? null,
+  )
+  const [footTreatmentTier, setFootTreatmentTier] = useState<string | null>(
+    state.services?.footTreatmentTier ?? null,
   )
 
   // ── Lash state ──
@@ -57,27 +77,42 @@ export default function ServiceScreen() {
   )
 
   // ── Nail helpers ──
-  function toggleNailService(s: string) {
-    setNailServices((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
-    )
-  }
+  const isSplit = nailScope === '手+腳'
 
-  const showNailStyle = nailServices.includes('凝膠')
-  const showTreatmentTier = nailServices.includes('保養')
+  function makeToggle(setter: React.Dispatch<React.SetStateAction<string[]>>) {
+    return (s: string) =>
+      setter((prev) =>
+        prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+      )
+  }
+  const toggleNailServiceRaw = makeToggle(setNailServices)
+  const toggleNailService = (s: string) => {
+    toggleNailServiceRaw(s)
+    if (s === '保養' && !nailServices.includes(s)) setTreatmentTier('基本')
+    if (s === '保養' && nailServices.includes(s)) setTreatmentTier(null)
+  }
+  const toggleHandServiceRaw = makeToggle(setHandServices)
+  const toggleHandService = (s: string) => {
+    toggleHandServiceRaw(s)
+    if (s === '保養' && !handServices.includes(s)) setHandTreatmentTier('基本')
+    if (s === '保養' && handServices.includes(s)) setHandTreatmentTier(null)
+  }
+  const toggleFootServiceRaw = makeToggle(setFootServices)
+  const toggleFootService = (s: string) => {
+    toggleFootServiceRaw(s)
+    if (s === '保養' && !footServices.includes(s)) setFootTreatmentTier('基本')
+    if (s === '保養' && footServices.includes(s)) setFootTreatmentTier(null)
+  }
 
   // ── Lash helpers ──
   function toggleLashService(s: string) {
     setLashServices((prev) => {
-      // 卸睫 can be multi-selected with 嫁接
-      // Other main services are single-select among themselves
       if (s === '卸睫') {
         return prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
       }
       if (s === '睫毛管理') {
         return prev.includes(s) ? prev.filter((x) => x !== s) : [s, ...prev.filter((x) => x === '卸睫')]
       }
-      // 嫁接: replace any existing main (non-卸睫) selection
       const withoutMain = prev.filter((x) => x === '卸睫')
       return prev.includes(s) ? prev.filter((x) => x !== s) : [...withoutMain, s]
     })
@@ -90,9 +125,12 @@ export default function ServiceScreen() {
 
   // ── Validation ──
   function canProceedNails(): boolean {
-    if (nailServices.length === 0) return false
-    if (showTreatmentTier && !treatmentTier) return false
     if (!nailScope) return false
+    if (isSplit) {
+      if (handServices.length === 0 || footServices.length === 0) return false
+    } else {
+      if (nailServices.length === 0) return false
+    }
     return true
   }
 
@@ -100,21 +138,57 @@ export default function ServiceScreen() {
     return lashServices.length > 0
   }
 
+  function deriveRemovalType(cats: string[]): string | null {
+    if (!cats.includes('卸甲')) return null
+    return cats.includes('凝膠') ? '續做' : '不續做'
+  }
+
   function handleConfirm() {
     if (category === 'nails') {
-      dispatch({
-        type: 'SET_SERVICES',
-        payload: {
-          categoryIds: nailServices,
-          styleId: nailStyle,
-          nailScope,
-          lashDensity: null,
-          treatmentTier,
-          fillInDays: null,
-          fiberTagId: null,
-          styleTags: [],
-        },
-      })
+      if (isSplit) {
+        const allCategoryIds = [...new Set([...handServices, ...footServices])]
+        dispatch({
+          type: 'SET_SERVICES',
+          payload: {
+            categoryIds: allCategoryIds,
+            styleId: null,
+            nailScope,
+            lashDensity: null,
+            treatmentTier: null,
+            removalType: deriveRemovalType(allCategoryIds),
+            fillInDays: null,
+            fiberTagId: null,
+            styleTags: [],
+            handCategoryIds: handServices,
+            handStyleId: handStyle,
+            handTreatmentTier,
+            footCategoryIds: footServices,
+            footStyleId: footStyle,
+            footTreatmentTier,
+          },
+        })
+      } else {
+        dispatch({
+          type: 'SET_SERVICES',
+          payload: {
+            categoryIds: nailServices,
+            styleId: nailStyle,
+            nailScope,
+            lashDensity: null,
+            treatmentTier,
+            removalType: deriveRemovalType(nailServices),
+            fillInDays: null,
+            fiberTagId: null,
+            styleTags: [],
+            handCategoryIds: null,
+            handStyleId: null,
+            handTreatmentTier: null,
+            footCategoryIds: null,
+            footStyleId: null,
+            footTreatmentTier: null,
+          },
+        })
+      }
     } else {
       dispatch({
         type: 'SET_SERVICES',
@@ -124,9 +198,16 @@ export default function ServiceScreen() {
           nailScope: null,
           lashDensity: lashDensity,
           treatmentTier: null,
+          removalType: null,
           fillInDays: null,
           fiberTagId: fiberTag,
           styleTags: selectedStyleTags,
+          handCategoryIds: null,
+          handStyleId: null,
+          handTreatmentTier: null,
+          footCategoryIds: null,
+          footStyleId: null,
+          footTreatmentTier: null,
         },
       })
     }
@@ -142,20 +223,30 @@ export default function ServiceScreen() {
       totalSteps={6}
       onNext={handleConfirm}
       nextDisabled={!canProceed}
-      noScroll
     >
       {category === 'nails' ? (
         <NailsUI
-          nailServices={nailServices}
-          toggleNailService={toggleNailService}
-          showNailStyle={showNailStyle}
-          nailStyle={nailStyle}
-          setNailStyle={setNailStyle}
-          showTreatmentTier={showTreatmentTier}
-          treatmentTier={treatmentTier}
-          setTreatmentTier={setTreatmentTier}
           nailScope={nailScope}
           setNailScope={setNailScope}
+          isSplit={isSplit}
+          nailServices={nailServices}
+          toggleNailService={toggleNailService}
+          nailStyle={nailStyle}
+          setNailStyle={setNailStyle}
+          treatmentTier={treatmentTier}
+          setTreatmentTier={setTreatmentTier}
+          handServices={handServices}
+          toggleHandService={toggleHandService}
+          handStyle={handStyle}
+          setHandStyle={setHandStyle}
+          handTreatmentTier={handTreatmentTier}
+          setHandTreatmentTier={setHandTreatmentTier}
+          footServices={footServices}
+          toggleFootService={toggleFootService}
+          footStyle={footStyle}
+          setFootStyle={setFootStyle}
+          footTreatmentTier={footTreatmentTier}
+          setFootTreatmentTier={setFootTreatmentTier}
         />
       ) : (
         <LashesUI
@@ -179,33 +270,134 @@ export default function ServiceScreen() {
   )
 }
 
+// ── Reusable nail service section (service chips + style + tier) ──
+function NailServiceSection({
+  label,
+  services,
+  onToggle,
+  style,
+  onStyleChange,
+  tier,
+  onTierChange,
+}: {
+  label: string
+  services: string[]
+  onToggle: (s: string) => void
+  style: string | null
+  onStyleChange: (s: string | null) => void
+  tier: string | null
+  onTierChange: (s: string | null) => void
+}) {
+  const showStyle = services.includes('凝膠')
+  // 保養類型 hidden — default to '基本', customer decides at store
+  const showTier = false
+
+  return (
+    <YStack gap={16}>
+      <YStack gap={12}>
+        <Text fontSize={16} fontWeight="700" color="#1F2723">
+          {label}
+        </Text>
+        <XStack flexWrap="wrap" gap={8}>
+          {NAIL_SERVICES.map((s) => (
+            <SelectionChip
+              key={s}
+              label={s}
+              selected={services.includes(s)}
+              onPress={() => onToggle(s)}
+            />
+          ))}
+        </XStack>
+      </YStack>
+
+      <SectionExpander visible={showStyle}>
+        <YStack gap={12}>
+          <Text fontSize={16} fontWeight="700" color="#1F2723">
+            選擇款式（可選）
+          </Text>
+          <XStack flexWrap="wrap" gap={8}>
+            {NAIL_STYLES.map((s) => (
+              <SelectionChip
+                key={s}
+                label={s}
+                selected={style === s}
+                onPress={() => onStyleChange(style === s ? null : s)}
+              />
+            ))}
+          </XStack>
+        </YStack>
+      </SectionExpander>
+
+      <SectionExpander visible={showTier}>
+        <YStack gap={12}>
+          <Text fontSize={16} fontWeight="700" color="#1F2723">
+            保養類型
+          </Text>
+          <XStack flexWrap="wrap" gap={8}>
+            {TREATMENT_TIERS.map((s) => (
+              <SelectionChip
+                key={s}
+                label={s}
+                selected={tier === s}
+                onPress={() => onTierChange(s)}
+              />
+            ))}
+          </XStack>
+        </YStack>
+      </SectionExpander>
+    </YStack>
+  )
+}
+
 // ── Nails sub-UI ──
 function NailsUI({
-  nailServices,
-  toggleNailService,
-  showNailStyle,
-  nailStyle,
-  setNailStyle,
-  showTreatmentTier,
-  treatmentTier,
-  setTreatmentTier,
   nailScope,
   setNailScope,
+  isSplit,
+  nailServices,
+  toggleNailService,
+  nailStyle,
+  setNailStyle,
+  treatmentTier,
+  setTreatmentTier,
+  handServices,
+  toggleHandService,
+  handStyle,
+  setHandStyle,
+  handTreatmentTier,
+  setHandTreatmentTier,
+  footServices,
+  toggleFootService,
+  footStyle,
+  setFootStyle,
+  footTreatmentTier,
+  setFootTreatmentTier,
 }: {
-  nailServices: string[]
-  toggleNailService: (s: string) => void
-  showNailStyle: boolean
-  nailStyle: string | null
-  setNailStyle: (s: string | null) => void
-  showTreatmentTier: boolean
-  treatmentTier: string | null
-  setTreatmentTier: (s: string | null) => void
   nailScope: string | null
   setNailScope: (s: string | null) => void
+  isSplit: boolean
+  nailServices: string[]
+  toggleNailService: (s: string) => void
+  nailStyle: string | null
+  setNailStyle: (s: string | null) => void
+  treatmentTier: string | null
+  setTreatmentTier: (s: string | null) => void
+  handServices: string[]
+  toggleHandService: (s: string) => void
+  handStyle: string | null
+  setHandStyle: (s: string | null) => void
+  handTreatmentTier: string | null
+  setHandTreatmentTier: (s: string | null) => void
+  footServices: string[]
+  toggleFootService: (s: string) => void
+  footStyle: string | null
+  setFootStyle: (s: string | null) => void
+  footTreatmentTier: string | null
+  setFootTreatmentTier: (s: string | null) => void
 }) {
   return (
     <YStack flex={1} gap={24} paddingTop={16}>
-      {/* Scope — always, now first */}
+      {/* Scope — always first */}
       <YStack gap={12}>
         <Text fontSize={16} fontWeight="700" color="#1F2723">
           手/腳
@@ -222,60 +414,40 @@ function NailsUI({
         </XStack>
       </YStack>
 
-      {/* Service type — multi-select */}
-      <YStack gap={12}>
-        <Text fontSize={16} fontWeight="700" color="#1F2723">
-          服務類型
-        </Text>
-        <XStack flexWrap="wrap" gap={8}>
-          {NAIL_SERVICES.map((s) => (
-            <SelectionChip
-              key={s}
-              label={s}
-              selected={nailServices.includes(s)}
-              onPress={() => toggleNailService(s)}
-            />
-          ))}
-        </XStack>
-      </YStack>
-
-      {/* Style — only if 凝膠 */}
-      <SectionExpander visible={showNailStyle}>
-        <YStack gap={12}>
-          <Text fontSize={16} fontWeight="700" color="#1F2723">
-            選擇款式（可選）
-          </Text>
-          <XStack flexWrap="wrap" gap={8}>
-            {NAIL_STYLES.map((s) => (
-              <SelectionChip
-                key={s}
-                label={s}
-                selected={nailStyle === s}
-                onPress={() => setNailStyle(nailStyle === s ? null : s)}
-              />
-            ))}
-          </XStack>
-        </YStack>
-      </SectionExpander>
-
-      {/* Treatment tier — only if 保養 */}
-      <SectionExpander visible={showTreatmentTier}>
-        <YStack gap={12}>
-          <Text fontSize={16} fontWeight="700" color="#1F2723">
-            保養類型
-          </Text>
-          <XStack flexWrap="wrap" gap={8}>
-            {TREATMENT_TIERS.map((s) => (
-              <SelectionChip
-                key={s}
-                label={s}
-                selected={treatmentTier === s}
-                onPress={() => setTreatmentTier(s)}
-              />
-            ))}
-          </XStack>
-        </YStack>
-      </SectionExpander>
+      {/* Service sections */}
+      {isSplit ? (
+        <>
+          <NailServiceSection
+            label="手部服務"
+            services={handServices}
+            onToggle={toggleHandService}
+            style={handStyle}
+            onStyleChange={setHandStyle}
+            tier={handTreatmentTier}
+            onTierChange={setHandTreatmentTier}
+          />
+          <View height={1} backgroundColor="#F3F0EA" />
+          <NailServiceSection
+            label="腳部服務"
+            services={footServices}
+            onToggle={toggleFootService}
+            style={footStyle}
+            onStyleChange={setFootStyle}
+            tier={footTreatmentTier}
+            onTierChange={setFootTreatmentTier}
+          />
+        </>
+      ) : (
+        <NailServiceSection
+          label="服務類型"
+          services={nailServices}
+          onToggle={toggleNailService}
+          style={nailStyle}
+          onStyleChange={setNailStyle}
+          tier={treatmentTier}
+          onTierChange={setTreatmentTier}
+        />
+      )}
     </YStack>
   )
 }

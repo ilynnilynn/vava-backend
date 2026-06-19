@@ -58,7 +58,7 @@ export default function IntroScreen() {
             <Text fontSize={30} fontWeight="700" lineHeight={38} color="#1F2723" textAlign="center">
               {item.headline}
             </Text>
-            <Text fontSize={16} lineHeight={24} color="#626765" textAlign="center" marginTop={12}>
+            <Text fontSize={16} lineHeight={24} color="#8F9391" textAlign="center" marginTop={12}>
               {item.sub}
             </Text>
           </View>

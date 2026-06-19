@@ -1,8 +1,6 @@
 // app/(onboarding)/customer/birthday.tsx
 import { useRef, useState } from 'react'
-import { InputAccessoryView, Platform, Pressable, TextInput, StyleSheet, View } from 'react-native'
-
-const ACCESSORY_ID = 'birthday-input-accessory'
+import { Pressable, TextInput, StyleSheet } from 'react-native'
 import { Text } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { useSession } from '@/lib/auth-context'
@@ -62,16 +60,10 @@ export default function CustomerBirthdayScreen() {
           keyboardType="number-pad"
           maxLength={10}
           autoFocus
-          inputAccessoryViewID={Platform.OS === 'ios' ? ACCESSORY_ID : undefined}
           onSubmitEditing={handleNext}
           onBlur={() => setTouched(true)}
           style={styles.input}
         />
-        {Platform.OS === 'ios' && (
-          <InputAccessoryView nativeID={ACCESSORY_ID}>
-            <View />
-          </InputAccessoryView>
-        )}
         {touched && birthday.length > 0 && !isValid && (
           <Text fontSize={13} color="#CC3352" marginTop={8}>
             請輸入正確日期（年月日）

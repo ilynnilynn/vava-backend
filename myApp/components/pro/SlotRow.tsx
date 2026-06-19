@@ -6,7 +6,7 @@ import type { SlotItem, SlotState } from '@/types/pro'
 const STATE_CONFIG: Record<SlotState, { bg: string; border: string; text: string; label: string }> = {
   expired:   { bg: '#f0f0f0', border: 'transparent', text: '#bbb',     label: '過期' },
   available: { bg: '#fff',    border: '#ddd',         text: '#666',     label: '+ 點擊開放' },
-  open:      { bg: '#ede9fe', border: '#c4b5fd',      text: '#7c3aed',  label: '開放中 · 移除' },
+  open:      { bg: '#ede9fe', border: '#c4b5fd',      text: '#7c3aed',  label: '開放中 • 移除' },
   booked:    { bg: '#dcfce7', border: '#86efac',      text: '#15803d',  label: '已預約 🔒' },
 }
 

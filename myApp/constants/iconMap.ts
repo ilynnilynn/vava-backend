@@ -14,7 +14,10 @@ export const iconMap = {
   editSquare: 'pen-to-square',
   ellipsis: 'ellipsis',
   filter: 'sliders',
+  sort: 'angles-up-down',
+  check: 'check',
   logout: 'arrow-right-from-bracket',
+  externalLink: 'arrow-up-right-from-square',
 
   // Booking / Services
   serviceNails: 'hand-sparkles',
@@ -22,6 +25,7 @@ export const iconMap = {
   serviceMakeup: 'wand-magic-sparkles',
   serviceGeneric: 'flower',
   calendar: 'calendar',
+  alarmExclamation: 'alarm-exclamation',
   calendarDays: 'calendar-days',
   calendarCancel: 'calendar-xmark',
   calendarConfirm: 'calendar-check',
@@ -29,6 +33,7 @@ export const iconMap = {
   location: 'location-dot',
   locateMe: 'location-arrow',
   price: 'tag',
+  receipt: 'receipt',
   dollarSign: 'dollar-sign',
 
   // Status
@@ -40,9 +45,12 @@ export const iconMap = {
 
   // Profile / Account
   user: 'user',
+  venusMars: 'venus-mars',
   notification: 'bell',
 
   // Communication
+  info: 'circle-info',
+  bug: 'bug',
   comment: 'comment',
   message: 'message',
   phone: 'phone',
@@ -56,6 +64,7 @@ export const iconMap = {
   // Content / Display
   image: 'image',
   imageRef: 'image-polaroid',
+  language: 'earth-americas',
   website: 'globe',
   store: 'store',
   list: 'list',
@@ -76,6 +85,9 @@ export const iconMap = {
   avatarOlive: 'olive',
   avatarWheat: 'wheat',
   avatarPretzel: 'pretzel',
+
+  // Onboarding / Pro
+  bookSparkles: 'book-sparkles',
 
   // Onboarding / special
   faceShush: 'face-shush',

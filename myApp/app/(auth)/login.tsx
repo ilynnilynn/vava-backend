@@ -47,7 +47,7 @@ export default function LoginScreen() {
     if (!isLoading && session) {
       const route = deriveRoute(
         true,
-        user?.display_name ?? null,
+        user,
         pro ? pro.is_approved : null
       )
       router.replace(route as never)
@@ -120,7 +120,7 @@ export default function LoginScreen() {
         <Text fontSize={20} fontWeight="700" lineHeight={28} color="#1F2723" marginTop={16}>
           VAVA
         </Text>
-        <Text fontSize={15} lineHeight={22} color="#626765" marginTop={8} textAlign="center">
+        <Text fontSize={15} lineHeight={22} color="#8F9391" marginTop={8} textAlign="center">
           即時美業預約，隨時出發
         </Text>
       </View>

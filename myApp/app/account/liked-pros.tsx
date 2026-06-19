@@ -52,7 +52,7 @@ export default function LikedProsScreen() {
           >
             <AppIcon name="back" size={20} color="#1F2723" />
           </Pressable>
-          <Text flex={1} fontSize={20} fontWeight="700" color="#1F2723" textAlign="center">
+          <Text flex={1} fontSize={16} fontWeight="700" color="#1F2723" textAlign="center">
             喜愛的設計師
           </Text>
           <View width={44} />
@@ -69,7 +69,7 @@ export default function LikedProsScreen() {
       {/* Error */}
       {!loading && error && (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24} paddingBottom={80}>
-          <Text fontSize={15} color="#626765" textAlign="center">{error}</Text>
+          <Text fontSize={15} color="#8F9391" textAlign="center">{error}</Text>
           <Pressable
             onPress={() => { setLoading(true); load() }}
             style={{
@@ -90,8 +90,8 @@ export default function LikedProsScreen() {
       {!loading && !error && pros.length === 0 && (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={12} paddingHorizontal={24} paddingBottom={80}>
           <AppIcon name="favorite" size={40} color="#E8E9E9" />
-          <Text fontSize={16} fontWeight="600" color="#626765" textAlign="center">還沒有喜愛的設計師</Text>
-          <Text fontSize={14} color="#626765" textAlign="center">
+          <Text fontSize={16} fontWeight="600" color="#8F9391" textAlign="center">還沒有喜愛的設計師</Text>
+          <Text fontSize={14} color="#8F9391" textAlign="center">
             在搜尋結果中點擊愛心，即可收藏設計師
           </Text>
         </YStack>

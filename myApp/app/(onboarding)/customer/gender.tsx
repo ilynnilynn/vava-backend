@@ -8,9 +8,10 @@ import { supabase } from '@/lib/supabase'
 import { OnboardingStepLayout } from '@/components/onboarding/OnboardingStepLayout'
 
 const OPTIONS = [
-  { value: 'female', label: '女性' },
-  { value: 'male',   label: '男性' },
-  { value: 'other',  label: '其他' },
+  { value: 'male',       label: '男性' },
+  { value: 'female',     label: '女性' },
+  { value: 'other',      label: '其他' },
+  { value: 'prefer_not', label: '不便透露' },
 ] as const
 
 type GenderValue = typeof OPTIONS[number]['value']

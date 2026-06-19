@@ -5,11 +5,11 @@
 // accepting pros that match service domain, dates, time, and
 // distance criteria.
 //
-// Requires an active customer session (checked via cookie).
+// Requires an active customer session (cookie or Bearer token).
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClientForRequest } from '@/lib/supabase/server'
 import { getMatchingSlots } from '@/lib/slots'
 import type { TimeBand } from '@/lib/slots'
 
@@ -17,7 +17,7 @@ const VALID_DOMAINS = ['nails', 'lashes'] as const
 const VALID_TIME_BANDS: TimeBand[] = ['morning', 'afternoon', 'evening']
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
+  const supabase = await createClientForRequest(req)
 
   // ── Auth ──────────────────────────────────────────────────
   const { data: { user }, error: authError } = await supabase.auth.getUser()

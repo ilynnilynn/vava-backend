@@ -79,7 +79,7 @@ export function ProfileHeader({ displayName, email, hasUnread = false }: Props) 
             {email ? (
               <Text
                 fontSize={12}
-                color="#626765"
+                color="#8F9391"
                 lineHeight={16}
                 numberOfLines={1}
                 ellipsizeMode="tail"
@@ -106,7 +106,7 @@ export function ProfileHeader({ displayName, email, hasUnread = false }: Props) 
           style={{ paddingHorizontal: 8 }}
         >
           <RNView style={{ width: 24, height: 24 }}>
-            <AppIcon name="notification" size={22} color="#787D7B" weight="regular" />
+            <AppIcon name="notification" size={22} color="#1F2723" weight="regular" />
             {hasUnread && (
               <RNView
                 style={{

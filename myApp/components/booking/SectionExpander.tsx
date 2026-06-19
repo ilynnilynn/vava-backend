@@ -1,27 +1,16 @@
-import { useEffect, useRef, type ReactNode } from 'react'
-import { LayoutAnimation, UIManager, Platform, View } from 'react-native'
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true)
-}
+import type { ReactNode } from 'react'
+import { View } from 'react-native'
 
 type Props = {
   visible: boolean
   children: ReactNode
 }
 
+/**
+ * Show/hide children without unmounting.
+ * Uses display:'none' to keep layout stable for animations.
+ */
 export function SectionExpander({ visible, children }: Props) {
-  const didMount = useRef(false)
-
-  useEffect(() => {
-    if (didMount.current) {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-    } else {
-      didMount.current = true
-    }
-  }, [visible])
-
   if (!visible) return null
-
   return <View>{children}</View>
 }

@@ -11,9 +11,17 @@ export type BookingRequestState = {
     nailScope: string | null
     lashDensity: string | null
     treatmentTier: string | null
+    removalType: string | null
     fillInDays: number | null
     fiberTagId: string | null
     styleTags: string[]
+    // Per-scope fields for 手+腳 split
+    handCategoryIds: string[] | null
+    handStyleId: string | null
+    handTreatmentTier: string | null
+    footCategoryIds: string[] | null
+    footStyleId: string | null
+    footTreatmentTier: string | null
   } | null
   addons: string[]
   preferences: string[]

@@ -56,14 +56,14 @@ export default function NotificationsScreen() {
   // Show spinner while checking permission on first load
   if (permStatus === null) {
     return (
-      <YStack flex={1} backgroundColor="#FBFBF8" justifyContent="center" alignItems="center">
+      <YStack flex={1} backgroundColor="#F6F4EF" justifyContent="center" alignItems="center">
         <ActivityIndicator size="large" color="#1F2723" />
       </YStack>
     )
   }
 
   return (
-    <YStack flex={1} backgroundColor="#FBFBF8">
+    <YStack flex={1} backgroundColor="#F6F4EF">
       <XStack
         paddingTop={insets.top + 16}
         paddingHorizontal={20}
@@ -82,107 +82,108 @@ export default function NotificationsScreen() {
 
       <ScrollView
         contentContainerStyle={{
-          paddingHorizontal: 20,
+          paddingHorizontal: 16,
           paddingTop: 16,
           paddingBottom: insets.bottom + 40,
-          gap: 16,
         }}
       >
-        {!pushEnabled ? (
-          <View style={styles.emptyCard}>
-            <AppIcon name="notification" size={28} color="#626765" weight="regular" />
-            <Text fontSize={16} fontWeight="700" color="#1F2723" marginTop={12} marginBottom={6}>
-              推播通知已關閉
-            </Text>
-            <Text
-              fontSize={13}
-              color="#626765"
-              textAlign="center"
-              lineHeight={20}
-              marginBottom={16}
-            >
-              開啟後，即可收到新預約、取消及提醒通知
-            </Text>
-            <Pressable
-              onPress={handleEnablePush}
-              accessibilityLabel="開啟通知"
-              style={({ pressed }) => [styles.ctaButton, { opacity: pressed ? 0.8 : 1 }]}
-            >
-              <Text fontSize={14} fontWeight="600" color="#fff">開啟通知 →</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <>
-            {/* Toggle rows */}
-            <View style={styles.card}>
-              <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center" gap={12}>
-                <YStack flex={1} gap={2}>
-                  <Text fontSize={15} color="#1F2723">新預約</Text>
-                  <Text fontSize={12} lineHeight={18} color="#8F9391">有客人完成預約時通知你</Text>
-                </YStack>
-                <Switch
-                  value={newBooking}
-                  onValueChange={setNewBooking}
-                  trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
-                  thumbColor="#fff"
-                />
-              </XStack>
-              <View style={styles.divider} />
-              <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center" gap={12}>
-                <YStack flex={1} gap={2}>
-                  <Text fontSize={15} color="#1F2723">更改通知</Text>
-                  <Text fontSize={12} lineHeight={18} color="#8F9391">客人更改或取消預約時立即通知你</Text>
-                </YStack>
-                <Switch
-                  value={cancellation}
-                  onValueChange={setCancellation}
-                  trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
-                  thumbColor="#fff"
-                />
-              </XStack>
-              <View style={styles.divider} />
-              <XStack paddingHorizontal={14} paddingVertical={14} alignItems="center" gap={12}>
-                <YStack flex={1} gap={2}>
-                  <Text fontSize={15} color="#1F2723">服務提醒</Text>
-                  <Text fontSize={12} lineHeight={18} color="#8F9391">服務開始前 30 分鐘提醒你準備</Text>
-                </YStack>
-                <Switch
-                  value={reminder}
-                  onValueChange={setReminder}
-                  trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
-                  thumbColor="#fff"
-                />
-              </XStack>
+        <YStack gap={16}>
+          {!pushEnabled ? (
+            <View style={styles.emptyCard}>
+              <AppIcon name="notification" size={28} color="#8F9391" weight="regular" />
+              <Text fontSize={16} fontWeight="700" color="#1F2723" marginTop={12} marginBottom={6}>
+                推播通知已關閉
+              </Text>
+              <Text
+                fontSize={13}
+                color="#8F9391"
+                textAlign="center"
+                lineHeight={20}
+                marginBottom={16}
+              >
+                開啟後，即可收到新預約、取消及提醒通知
+              </Text>
+              <Pressable
+                onPress={handleEnablePush}
+                accessibilityLabel="開啟通知"
+                style={({ pressed }) => [styles.ctaButton, { opacity: pressed ? 0.8 : 1 }]}
+              >
+                <Text fontSize={14} fontWeight="600" color="#fff">開啟通知</Text>
+              </Pressable>
             </View>
-
-            {/* Test push notification */}
-            <Pressable
-              onPress={handleTestNotification}
-              disabled={testLoading || testSent}
-              accessibilityLabel="測試推播通知"
-              style={({ pressed }) => [
-                styles.testButton,
-                { opacity: pressed || testLoading || testSent ? 0.7 : 1 },
-              ]}
-            >
-              {testLoading ? (
-                <ActivityIndicator size="small" color="#1F2723" />
-              ) : (
-                <XStack alignItems="center" gap={8}>
-                  <AppIcon
-                    name={testSent ? 'check' : 'notification'}
-                    size={16}
-                    color="#1F2723"
-                    weight={testSent ? 'solid' : 'regular'}
+          ) : (
+            <>
+              {/* Toggle rows */}
+              <View style={styles.card}>
+                <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center" gap={12}>
+                  <YStack flex={1} gap={2}>
+                    <Text fontSize={15} color="#1F2723">新預約</Text>
+                    <Text fontSize={12} lineHeight={18} color="#8F9391">有客人完成預約時通知你</Text>
+                  </YStack>
+                  <Switch
+                    value={newBooking}
+                    onValueChange={setNewBooking}
+                    trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
+                    thumbColor="#fff"
                   />
-                  <Text fontSize={14} fontWeight="600" color="#1F2723">
-                    {testSent ? '已傳送' : '傳送測試通知'}
-                  </Text>
                 </XStack>
-              )}
-            </Pressable>
-          </>
-        )}
+                <View style={styles.divider} />
+                <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center" gap={12}>
+                  <YStack flex={1} gap={2}>
+                    <Text fontSize={15} color="#1F2723">更改通知</Text>
+                    <Text fontSize={12} lineHeight={18} color="#8F9391">客人更改或取消預約時立即通知你</Text>
+                  </YStack>
+                  <Switch
+                    value={cancellation}
+                    onValueChange={setCancellation}
+                    trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
+                    thumbColor="#fff"
+                  />
+                </XStack>
+                <View style={styles.divider} />
+                <XStack paddingHorizontal={20} paddingVertical={14} alignItems="center" gap={12}>
+                  <YStack flex={1} gap={2}>
+                    <Text fontSize={15} color="#1F2723">服務提醒</Text>
+                    <Text fontSize={12} lineHeight={18} color="#8F9391">服務開始前 30 分鐘提醒你準備</Text>
+                  </YStack>
+                  <Switch
+                    value={reminder}
+                    onValueChange={setReminder}
+                    trackColor={{ false: '#D2D3D3', true: '#1F2723' }}
+                    thumbColor="#fff"
+                  />
+                </XStack>
+              </View>
+
+              {/* Test push notification */}
+              <Pressable
+                onPress={handleTestNotification}
+                disabled={testLoading || testSent}
+                accessibilityLabel="測試推播通知"
+                style={({ pressed }) => [
+                  styles.testButton,
+                  { opacity: pressed || testLoading || testSent ? 0.7 : 1 },
+                ]}
+              >
+                {testLoading ? (
+                  <ActivityIndicator size="small" color="#1F2723" />
+                ) : (
+                  <XStack alignItems="center" gap={8}>
+                    <AppIcon
+                      name={testSent ? 'check' : 'notification'}
+                      size={16}
+                      color="#1F2723"
+                      weight={testSent ? 'solid' : 'regular'}
+                    />
+                    <Text fontSize={14} fontWeight="600" color="#1F2723">
+                      {testSent ? '已傳送' : '傳送測試通知'}
+                    </Text>
+                  </XStack>
+                )}
+              </Pressable>
+            </>
+          )}
+        </YStack>
       </ScrollView>
     </YStack>
   )
@@ -190,15 +191,16 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   emptyCard: {
-    backgroundColor: '#F6F4EF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 28,
     alignItems: 'center',
   },
   card: {
-    backgroundColor: '#F6F4EF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
+    paddingVertical: 2,
   },
   divider: {
     height: 1,
@@ -207,12 +209,12 @@ const styles = StyleSheet.create({
   },
   ctaButton: {
     backgroundColor: '#1F2723',
-    borderRadius: 10,
+    borderRadius: 9999,
     paddingHorizontal: 24,
     paddingVertical: 13,
   },
   testButton: {
-    backgroundColor: '#F6F4EF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

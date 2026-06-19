@@ -3,8 +3,9 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import type { User, Pro } from '@/types/database'
-
-export type ProStatus = 'none' | 'pending' | 'approved'
+import { deriveProStatus, type ProStatus } from './derive-pro-status'
+export type { ProStatus } from './derive-pro-status'
+export { deriveProStatus } from './derive-pro-status'
 
 type AuthContextType = {
   session: Session | null
@@ -78,9 +79,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (current?.user) await fetchUserData(current.user.id)
   }
 
-  const onboardingComplete = !!user?.display_name
-  const proStatus: ProStatus =
-    pro === null ? 'none' : pro.is_approved ? 'approved' : 'pending'
+  const onboardingComplete = !!user?.display_name && !!user?.phone && !!user?.birthday && !!user?.gender
+  const proStatus = deriveProStatus(pro)
 
   return (
     <AuthContext.Provider value={{ session, isLoading, user, pro, onboardingComplete, proStatus, signOut, refreshUser }}>

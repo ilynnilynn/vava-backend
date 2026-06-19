@@ -29,8 +29,8 @@ export default function ProDisplayNameScreen() {
     <OnboardingStepLayout
       title="希望客戶怎麼稱呼你？"
       subtitle="顯示在你的設計師主頁"
-      step={4}
-      totalSteps={6}
+      step={5}
+      totalSteps={7}
       onNext={handleNext}
       nextDisabled={!name.trim()}
     >

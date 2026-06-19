@@ -56,7 +56,7 @@ const PRO_PROFILES = [
   { name: '李凝膠', address: '台北市中正區羅斯福路一段20號', ig: 'li_gel', scope: 'both' as const, gender: 'female', domain: 'nails' as const },
   { name: '黃嫁接', address: '台北市大同區承德路二段15號', ig: 'huang_lash', scope: null, gender: 'female', domain: 'lashes' as const },
   { name: '吳法式', address: '台北市萬華區西園路一段60號', ig: 'wu_french', scope: 'hands' as const, gender: 'female', domain: 'nails' as const },
-  { name: '趙美業', address: '台北市內湖區成功路四段25號', ig: 'zhao_beauty', scope: 'both' as const, gender: 'non-binary', domain: 'nails' as const },
+  { name: '趙美業', address: '台北市內湖區成功路四段25號', ig: 'zhao_beauty', scope: 'both' as const, gender: 'other', domain: 'nails' as const },
   { name: '周光療', address: '台北市士林區中正路200號', ig: 'zhou_uv', scope: 'feet' as const, gender: 'female', domain: 'nails' as const },
   { name: '鄭全能', address: '台北市北投區中和街10號', ig: 'zheng_all', scope: 'both' as const, gender: 'male', domain: 'nails' as const },
 ]

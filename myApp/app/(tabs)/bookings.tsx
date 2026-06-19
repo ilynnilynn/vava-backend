@@ -115,7 +115,7 @@ export default function BookingsScreen() {
     if (error) {
       return (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24} paddingBottom={80}>
-          <Text fontSize={15} color="#626765" textAlign="center">{error}</Text>
+          <Text fontSize={15} color="#8F9391" textAlign="center">{error}</Text>
           <Pressable
             onPress={() => { setLoading(true); load() }}
             style={{
@@ -136,12 +136,12 @@ export default function BookingsScreen() {
       return (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24} paddingBottom={80}>
           <AppIcon name="calendarCancel" size={48} color="#E8E9E9" />
-          <Text fontSize={16} fontWeight="600" color="#626765" textAlign="center">還沒有預約紀錄</Text>
+          <Text fontSize={16} fontWeight="600" color="#8F9391" textAlign="center">還沒有預約紀錄</Text>
           <Pressable
             onPress={() => router.push('/book/category')}
             style={{
               borderRadius: 9999,
-              height: 48,
+              height: 40,
               paddingHorizontal: 24,
               backgroundColor: '#1F2723',
               flexDirection: 'row',
@@ -150,8 +150,7 @@ export default function BookingsScreen() {
               gap: 8,
             }}
           >
-            <Text fontSize={16} fontWeight="700" color="#FBFBF8">開始預約</Text>
-            <AppIcon name="forward" size={14} color="rgba(251,251,248,0.4)" />
+            <Text fontSize={14} fontWeight="700" color="#FBFBF8">馬上預約</Text>
           </Pressable>
         </YStack>
       )
@@ -159,7 +158,7 @@ export default function BookingsScreen() {
     if (data.length === 0) {
       return (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={8} paddingHorizontal={24} paddingBottom={80}>
-          <Text fontSize={14} color="#626765" textAlign="center">
+          <Text fontSize={14} color="#8F9391" textAlign="center">
             {activeTab === 'upcoming' ? '目前沒有即將到來的預約' : '還沒有歷史紀錄'}
           </Text>
         </YStack>
@@ -249,7 +248,7 @@ function TabPill({
         opacity: !active && pressed ? 0.5 : 1,
       })}
     >
-      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#626765'}>
+      <Text fontSize={16} fontWeight={active ? '700' : '500'} color={active ? '#1F2723' : '#8F9391'}>
         {label}
       </Text>
     </Pressable>

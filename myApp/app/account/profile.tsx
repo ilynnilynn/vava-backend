@@ -1,18 +1,18 @@
 // app/account/profile.tsx
 import { useState } from 'react'
-import { Alert, Pressable, TextInput, ActivityIndicator } from 'react-native'
+import { Alert, Pressable, TextInput, ActivityIndicator, StyleSheet } from 'react-native'
 import { YStack, XStack, Text, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { AppIcon } from '@/components/AppIcon'
 import { supabase } from '@/lib/supabase'
-import { useSession } from '@/lib/auth-context'
+import { useProfile } from '@/lib/useProfile'
 
 const GENDER_LABELS: Record<string, string> = {
-  female: '女性',
   male: '男性',
+  female: '女性',
   other: '其他',
-  prefer_not: '不想透露',
+  prefer_not: '不便透露',
 }
 
 function formatPhone(raw: string | null | undefined): string {
@@ -26,40 +26,40 @@ function formatPhone(raw: string | null | undefined): string {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { session, user, refreshUser } = useSession()
+  const { profile, displayName, visibleEmail, isApplePrivateRelay, userId, refreshProfile } = useProfile()
 
   const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(user?.display_name ?? '')
+  const [name, setName] = useState(profile?.display_name ?? '')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     const trimmed = name.trim()
     if (!trimmed) { Alert.alert('請輸入姓名'); return }
-    if (!session) return
+    if (!userId) return
     setSaving(true)
     const { error } = await supabase
       .from('users')
-      .upsert({ id: session.user.id, display_name: trimmed }, { onConflict: 'id' })
+      .upsert({ id: userId, display_name: trimmed }, { onConflict: 'id' })
     setSaving(false)
     if (error) {
       Alert.alert('儲存失敗', error.message)
     } else {
-      await refreshUser()
+      await refreshProfile()
       setEditing(false)
     }
   }
 
   function handleCancel() {
-    setName(user?.display_name ?? '')
+    setName(profile?.display_name ?? '')
     setEditing(false)
   }
 
-  const divider = <View height={1} backgroundColor="#F0EDE5" marginLeft={52} />
+  const divider = <View height={1} backgroundColor="#E8E9E9" marginHorizontal={14} />
 
   return (
     <YStack flex={1} backgroundColor="#FBFBF8">
       {/* Nav bar */}
-      <YStack paddingTop={insets.top} backgroundColor="#FBFBF8">
+      <YStack paddingTop={insets.top} paddingBottom={0.5}>
         <XStack height={48} alignItems="center" paddingHorizontal={20}>
           <Pressable
             onPress={editing ? handleCancel : () => router.back()}
@@ -68,12 +68,12 @@ export default function ProfileScreen() {
             accessibilityRole="button"
           >
             {editing
-              ? <Text fontSize={15} color="#626765">取消</Text>
+              ? <Text fontSize={15} color="#8F9391">取消</Text>
               : <AppIcon name="back" size={20} color="#1F2723" />
             }
           </Pressable>
 
-          <Text flex={1} fontSize={20} fontWeight="700" color="#1F2723" textAlign="center">
+          <Text flex={1} fontSize={16} fontWeight="700" color="#1F2723" textAlign="center">
             基本資料
           </Text>
 
@@ -82,12 +82,12 @@ export default function ProfileScreen() {
               onPress={saving ? undefined : handleSave}
               disabled={saving}
               style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-              accessibilityLabel="儲存"
+              accessibilityLabel="完成"
               accessibilityRole="button"
             >
               {saving
                 ? <ActivityIndicator size="small" color="#1F2723" />
-                : <Text fontSize={15} fontWeight="600" color="#1F2723">儲存</Text>
+                : <Text fontSize={15} fontWeight="600" color="#1F2723">完成</Text>
               }
             </Pressable>
           ) : (
@@ -97,27 +97,18 @@ export default function ProfileScreen() {
               accessibilityLabel="編輯"
               accessibilityRole="button"
             >
-              <AppIcon name="edit" size={18} color="#626765" weight="regular" />
+              <AppIcon name="edit" size={18} color="#1F2723" weight="regular" />
             </Pressable>
           )}
         </XStack>
       </YStack>
 
-      {/* Fields */}
-      <YStack
-        marginTop={24}
-        backgroundColor="#FBFBF8"
-        borderTopWidth={1}
-        borderBottomWidth={1}
-        borderColor="#F0EDE5"
-      >
+      {/* Card 1: 姓名, 手機號碼, 生日, 性別 */}
+      <View style={styles.card}>
         {/* Display name */}
-        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
-          <View width={20} alignItems="center">
-            <AppIcon name="user" size={14} color="#626765" />
-          </View>
+        <XStack height={56} paddingHorizontal={20} alignItems="center">
           <YStack flex={1}>
-            <Text fontSize={12} color="#626765" marginBottom={2}>姓名</Text>
+            <Text fontSize={12} color="#8F9391" marginBottom={2}>姓名</Text>
             {editing ? (
               <TextInput
                 value={name}
@@ -128,8 +119,8 @@ export default function ProfileScreen() {
                 style={{ fontSize: 15, color: '#1F2723', padding: 0, margin: 0 }}
               />
             ) : (
-              <Text fontSize={15} color={user?.display_name ? '#1F2723' : '#b0aea5'}>
-                {user?.display_name ?? '未設定'}
+              <Text fontSize={15} color={profile?.display_name ? '#1F2723' : '#b0aea5'}>
+                {displayName}
               </Text>
             )}
           </YStack>
@@ -138,14 +129,11 @@ export default function ProfileScreen() {
         {divider}
 
         {/* Phone */}
-        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
-          <View width={20} alignItems="center">
-            <AppIcon name="phone" size={14} color="#626765" />
-          </View>
+        <XStack height={56} paddingHorizontal={20} alignItems="center">
           <YStack flex={1}>
-            <Text fontSize={12} color="#626765" marginBottom={2}>手機號碼</Text>
-            <Text fontSize={15} color={user?.phone ? '#1F2723' : '#b0aea5'}>
-              {user?.phone ? formatPhone(user.phone) : '未設定'}
+            <Text fontSize={12} color="#8F9391" marginBottom={2}>手機號碼</Text>
+            <Text fontSize={15} color={profile?.phone ? '#1F2723' : '#b0aea5'}>
+              {profile?.phone ? formatPhone(profile.phone) : '未設定'}
             </Text>
           </YStack>
         </XStack>
@@ -153,14 +141,11 @@ export default function ProfileScreen() {
         {divider}
 
         {/* Birthday */}
-        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
-          <View width={20} alignItems="center">
-            <AppIcon name="calendar" size={14} color="#626765" />
-          </View>
+        <XStack height={56} paddingHorizontal={20} alignItems="center">
           <YStack flex={1}>
-            <Text fontSize={12} color="#626765" marginBottom={2}>生日</Text>
-            <Text fontSize={15} color={user?.birthday ? '#1F2723' : '#b0aea5'}>
-              {user?.birthday ?? '未設定'}
+            <Text fontSize={12} color="#8F9391" marginBottom={2}>生日</Text>
+            <Text fontSize={15} color={profile?.birthday ? '#1F2723' : '#b0aea5'}>
+              {profile?.birthday ?? '未設定'}
             </Text>
           </YStack>
         </XStack>
@@ -168,34 +153,42 @@ export default function ProfileScreen() {
         {divider}
 
         {/* Gender */}
-        <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
-          <View width={20} alignItems="center">
-            <AppIcon name="user" size={14} color="#626765" />
-          </View>
+        <XStack height={56} paddingHorizontal={20} alignItems="center">
           <YStack flex={1}>
-            <Text fontSize={12} color="#626765" marginBottom={2}>性別</Text>
-            <Text fontSize={15} color={user?.gender ? '#1F2723' : '#b0aea5'}>
-              {user?.gender ? (GENDER_LABELS[user.gender] ?? user.gender) : '未設定'}
+            <Text fontSize={12} color="#8F9391" marginBottom={2}>性別</Text>
+            <Text fontSize={15} color={profile?.gender ? '#1F2723' : '#b0aea5'}>
+              {profile?.gender ? (GENDER_LABELS[profile.gender] ?? profile.gender) : '未設定'}
             </Text>
           </YStack>
         </XStack>
+      </View>
 
-        {/* Email (from auth, read-only) */}
-        {session?.user?.email && (
-          <>
-            {divider}
-            <XStack height={52} paddingHorizontal={20} alignItems="center" gap={12}>
-              <View width={20} alignItems="center">
-                <AppIcon name="email" size={14} color="#626765" />
-              </View>
-              <YStack flex={1}>
-                <Text fontSize={12} color="#626765" marginBottom={2}>電子郵件</Text>
-                <Text fontSize={15} color="#1F2723">{session.user.email}</Text>
-              </YStack>
-            </XStack>
-          </>
-        )}
-      </YStack>
+      {/* Card 2: 電子郵件 */}
+      {(visibleEmail || isApplePrivateRelay) && (
+        <View style={[styles.card, { marginTop: 16 }]}>
+          <XStack height={56} paddingHorizontal={20} alignItems="center">
+            <YStack flex={1}>
+              <Text fontSize={12} color="#8F9391" marginBottom={2}>電子郵件</Text>
+              {isApplePrivateRelay ? (
+                <Text fontSize={15} color="#8F9391">使用 Apple 登入（已隱藏 Email）</Text>
+              ) : (
+                <Text fontSize={15} color="#1F2723">{visibleEmail}</Text>
+              )}
+            </YStack>
+          </XStack>
+        </View>
+      )}
     </YStack>
   )
 }
+
+const styles = StyleSheet.create({
+  card: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    paddingVertical: 2,
+  },
+})

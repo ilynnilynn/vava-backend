@@ -38,7 +38,7 @@ export default function ProNailScopeScreen() {
       title="美甲服務範圍？"
       subtitle="可複選"
       step={2}
-      totalSteps={6}
+      totalSteps={7}
       onNext={handleNext}
       nextDisabled={selected.length === 0}
     >

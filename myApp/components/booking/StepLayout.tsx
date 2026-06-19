@@ -1,13 +1,17 @@
 import { type ReactNode } from 'react'
-import { Pressable } from 'react-native'
-import { YStack, XStack, Text, ScrollView, View } from 'tamagui'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { YStack, XStack, Text, ScrollView } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useNavigation } from '@react-navigation/native'
 import { AppIcon } from '@/components/AppIcon'
-
 import { ProgressBar } from './ProgressBar'
 import { useBookingRequest } from '@/lib/booking-context'
+import { useCTABottom } from '@/lib/useCTABottom'
+import { useKeyboardHeight } from '@/lib/useKeyboardHeight'
+
+const CTA_HEIGHT = 48   // button height
+const FOOTER_TOP = 12   // breathing room above button inside the footer
 
 type Props = {
   title: string
@@ -18,6 +22,7 @@ type Props = {
   nextLabel?: string
   nextDisabled?: boolean
   noScroll?: boolean
+  scrollEnabled?: boolean
   hideBack?: boolean
   children: ReactNode
 }
@@ -31,6 +36,7 @@ export function StepLayout({
   nextLabel = '下一步',
   nextDisabled = false,
   noScroll = false,
+  scrollEnabled = true,
   hideBack = false,
   children,
 }: Props) {
@@ -38,6 +44,8 @@ export function StepLayout({
   const router = useRouter()
   const rootNav = useNavigation().getParent()
   const { state, dispatch } = useBookingRequest()
+  const ctaBottom = useCTABottom()
+  const keyboardHeight = useKeyboardHeight()
 
   function handleClose() {
     if (state.isEditing) {
@@ -49,13 +57,19 @@ export function StepLayout({
     }
   }
 
+  // scrollPaddingBottom must clear the full footer (FOOTER_TOP + CTA + gap/safe-area)
+  // so the last content item can always scroll above the footer background.
+  const scrollPaddingBottom = keyboardHeight > 0
+    ? FOOTER_TOP + CTA_HEIGHT + 28   // footer visible height above keyboard + buffer
+    : FOOTER_TOP + CTA_HEIGHT + insets.bottom + 40  // footer height + buffer
+
   return (
-    <YStack flex={1} backgroundColor="#F0EDE5">
-      {/* Header zone: back button + progress dots + spacer */}
+    <YStack flex={1} backgroundColor="#FBFBF8">
+      {/* Header */}
       <YStack paddingTop={insets.top}>
         <XStack height={48} alignItems="center" paddingLeft={12} paddingRight={16}>
           {hideBack ? (
-            <View width={44} />
+            <View style={{ width: 44 }} />
           ) : (
             <Pressable
               onPress={() => router.back()}
@@ -66,9 +80,9 @@ export function StepLayout({
               <AppIcon name="back" size={20} color="#1F2723" />
             </Pressable>
           )}
-          <View flex={1} alignItems="center">
+          <YStack flex={1} alignItems="center">
             <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
-          </View>
+          </YStack>
           <Pressable
             onPress={handleClose}
             style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
@@ -80,13 +94,13 @@ export function StepLayout({
         </XStack>
       </YStack>
 
-      {/* Question heading */}
+      {/* Title */}
       <YStack paddingLeft={20} paddingRight={16} paddingTop={24} paddingBottom={8} gap={8}>
         <Text fontSize={30} fontWeight="600" lineHeight={38} color="#1F2723">
           {title}
         </Text>
         {subtitle && (
-          <Text fontSize={15} lineHeight={22} color="#626765">
+          <Text fontSize={15} lineHeight={22} color="#787D7B">
             {subtitle}
           </Text>
         )}
@@ -94,32 +108,30 @@ export function StepLayout({
 
       {/* Content */}
       {noScroll ? (
-        <YStack flex={1} paddingHorizontal={16} paddingBottom={24}>
+        <YStack flex={1} paddingHorizontal={16} paddingBottom={scrollPaddingBottom}>
           {children}
         </YStack>
       ) : (
         <ScrollView
           flex={1}
+          scrollEnabled={scrollEnabled}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          automaticallyAdjustKeyboardInsets
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: 'center',
             paddingHorizontal: 16,
-            paddingBottom: 24,
+            paddingBottom: scrollPaddingBottom,
           }}
         >
           {children}
         </ScrollView>
       )}
 
-      {/* Bottom CTA */}
+      {/* CTA footer — anchored to physical bottom, background covers content behind it */}
       {onNext && (
-        <YStack
-          paddingHorizontal={16}
-          paddingTop={12}
-          paddingBottom={insets.bottom + 12}
-          backgroundColor="#F0EDE5"
-        >
+        <View style={[styles.ctaFooter, { paddingBottom: ctaBottom }]}>
           <Pressable
             onPress={onNext}
             disabled={nextDisabled}
@@ -127,7 +139,7 @@ export function StepLayout({
             accessibilityLabel={nextLabel}
             style={({ pressed }) => ({
               borderRadius: 9999,
-              height: 48,
+              height: CTA_HEIGHT,
               backgroundColor: '#1F2723',
               alignItems: 'center',
               justifyContent: 'center',
@@ -138,8 +150,21 @@ export function StepLayout({
               {nextLabel}
             </Text>
           </Pressable>
-        </YStack>
+        </View>
       )}
     </YStack>
   )
 }
+
+const styles = StyleSheet.create({
+  ctaFooter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: FOOTER_TOP,
+    paddingHorizontal: 20,
+    backgroundColor: '#FBFBF8',
+    zIndex: 10,
+  },
+})

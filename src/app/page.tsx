@@ -2,10 +2,8 @@
 // ROOT PAGE — /
 //
 // Redirect based on session state:
-//   - No session     → /login (customer entry)
-//   - Has session    → /home  (customer home)
-//
-// Pro entry is at /pro/login — separate flow.
+//   - No session     → /login (unified Google login)
+//   - Has session    → /home
 // ============================================================
 
 import { redirect } from 'next/navigation'

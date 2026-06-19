@@ -197,7 +197,7 @@ export function SlotActionsSheet({
                     accessibilityRole="button"
                     style={({ pressed }) => [styles.arrowBtn, { opacity: pressed ? 0.5 : 1 }]}
                   >
-                    <AppIcon name="back" size={14} color="#626765" />
+                    <AppIcon name="back" size={14} color="#8F9391" />
                   </Pressable>
                   <View style={styles.timeChip}>
                     <Text fontSize={16} fontWeight="600" color="#1F2723" style={styles.hourText}>
@@ -210,7 +210,7 @@ export function SlotActionsSheet({
                     accessibilityRole="button"
                     style={({ pressed }) => [styles.arrowBtn, { opacity: pressed ? 0.5 : 1 }]}
                   >
-                    <AppIcon name="forward" size={14} color="#626765" />
+                    <AppIcon name="forward" size={14} color="#8F9391" />
                   </Pressable>
                 </XStack>
 
@@ -224,7 +224,7 @@ export function SlotActionsSheet({
                     accessibilityRole="button"
                     style={({ pressed }) => [styles.arrowBtn, { opacity: pressed ? 0.5 : 1 }]}
                   >
-                    <AppIcon name="back" size={14} color="#626765" />
+                    <AppIcon name="back" size={14} color="#8F9391" />
                   </Pressable>
                   <View style={styles.timeChip}>
                     <Text fontSize={16} fontWeight="600" color="#1F2723" style={styles.hourText}>
@@ -237,7 +237,7 @@ export function SlotActionsSheet({
                     accessibilityRole="button"
                     style={({ pressed }) => [styles.arrowBtn, { opacity: pressed ? 0.5 : 1 }]}
                   >
-                    <AppIcon name="forward" size={14} color="#626765" />
+                    <AppIcon name="forward" size={14} color="#8F9391" />
                   </Pressable>
                 </XStack>
               </XStack>

@@ -21,7 +21,7 @@ ALTER TABLE pros
 -- gender: set by admin during review. Not editable self-serve.
 ALTER TABLE pros
   ADD COLUMN IF NOT EXISTS gender         TEXT
-    CHECK (gender IN ('male', 'female', 'non-binary'));
+    CHECK (gender IN ('male', 'female', 'other', 'prefer_not'));
 
 -- ig_handle: required at onboarding. Used on pro profile page.
 ALTER TABLE pros

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { View, Linking } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { TamaguiProvider } from 'tamagui'
-import { Stack, useRouter } from 'expo-router'
+import { Stack, usePathname, useSegments, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFonts } from 'expo-font'
@@ -53,9 +53,16 @@ function resolveDeepLink(url: string): string | null {
   return null
 }
 
+const SPLASH_BG = '#FF5A3C'
+
 export default function RootLayout() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const pathname = usePathname()
+  const segments = useSegments()
+  // The splash screen is app/index.tsx — segments is [] (root index, no group).
+  // (tabs)/index.tsx has segments ['(tabs)'].
+  const isSplash = segments.length === 0
 
   // Handle deep links that open the app (cold start or background tap)
   useEffect(() => {
@@ -113,9 +120,11 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* Solid bar behind the iOS status bar — must not intercept touches */}
-      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top - 2, backgroundColor: BG, zIndex: 10 }} />
+      <View style={{ flex: 1, backgroundColor: isSplash ? SPLASH_BG : BG }}>
+      {/* Solid bar behind the iOS status bar — only on splash (other screens handle their own bg) */}
+      {isSplash && (
+        <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top - 2, backgroundColor: SPLASH_BG, zIndex: 10 }} />
+      )}
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <SessionProvider>
           <RoleProvider>
@@ -127,14 +136,14 @@ export default function RootLayout() {
                 <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none', gestureEnabled: false }} />
                 <Stack.Screen name="(pro-tabs)" options={{ headerShown: false, animation: 'none', gestureEnabled: false }} />
                 <Stack.Screen name="pro" options={{ headerShown: false }} />
-                <Stack.Screen name="book" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+                <Stack.Screen name="book" options={{ headerShown: false }} />
                 <Stack.Screen name="booking" options={{ headerShown: false }} />
                 <Stack.Screen name="account" options={{ headerShown: false }} />
                 <Stack.Screen name="notifications" options={{ headerShown: false }} />
               </Stack>
               {/* Persistent tab bar — sits above all Stack screens, below system modals */}
               <PersistentTabBar />
-              <StatusBar style="dark" />
+              <StatusBar style={isSplash ? 'light' : 'dark'} />
             </BookingProvider>
           </RoleProvider>
         </SessionProvider>

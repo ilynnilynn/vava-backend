@@ -6,10 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { VavaLogo } from '@/components/vava-logo'
 import { useBookingRequest } from '@/lib/booking-context'
+import { apiPost } from '@/lib/api'
 
-const DURATION = 7000
+const DURATION = 6000
 const RADAR_SIZE = Math.min(Dimensions.get('window').width * 0.72, 280)
-const TARGET_COUNT = 23 // TODO: replace with live match count from API
+const FALLBACK_COUNT = 8 // shown if API fails
+
+function toYMD(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   nails: '美甲師',
@@ -66,9 +71,40 @@ export default function SearchingScreen() {
   useEffect(() => {
     let cancelled = false
     let current = 0
+    let targetCount = FALLBACK_COUNT
+
+    // Fire match API to get real count
+    ;(async () => {
+      try {
+        const dates: string[] = []
+        if (state.date === 'now') {
+          for (let i = 0; i < 3; i++) {
+            const d = new Date()
+            d.setDate(d.getDate() + i)
+            dates.push(toYMD(d))
+          }
+        } else if (state.date) {
+          const [y, m, d] = state.date.split('-').map(Number)
+          for (let i = 0; i < 3; i++) {
+            dates.push(toYMD(new Date(y, m - 1, d + i)))
+          }
+        }
+
+        const body: Record<string, unknown> = { domain: state.category, dates }
+        if (state.location) { body.lat = state.location.lat; body.lng = state.location.lng }
+        if (state.timeBand && state.timeBand !== 'any') body.timeBand = state.timeBand
+        if (state.services?.categoryIds?.length) body.categoryIds = state.services.categoryIds
+        if (state.services?.styleId) body.styleId = state.services.styleId
+
+        const res = await apiPost<{ results: unknown[]; total: number }>('/api/bookings/match', body)
+        if (!cancelled) targetCount = res.total || res.results.length
+      } catch {
+        // keep fallback count
+      }
+    })()
 
     function scheduleNext() {
-      if (cancelled || current >= TARGET_COUNT) return
+      if (cancelled || current >= targetCount) return
       const delay = Math.random() * 500 + 80
       setTimeout(() => {
         if (cancelled) return
@@ -81,7 +117,7 @@ export default function SearchingScreen() {
 
     const timer = setTimeout(() => {
       cancelled = true
-      setCount(TARGET_COUNT)
+      setCount(c => c || targetCount)
       router.replace('/book/results')
     }, DURATION)
 
@@ -94,7 +130,7 @@ export default function SearchingScreen() {
   return (
     <YStack
       flex={1}
-      backgroundColor="#f5f4ed"
+      backgroundColor="#FBFBF8"
       alignItems="center"
       justifyContent="center"
       gap={44}
@@ -111,7 +147,7 @@ export default function SearchingScreen() {
 
       {/* Text */}
       <YStack alignItems="center" gap={8}>
-        <Text fontSize={16} color="#5e5d59">
+        <Text fontSize={16} color="#626765">
           正在尋找{categoryLabel}…
         </Text>
         <XStack alignItems="baseline" gap={4}>

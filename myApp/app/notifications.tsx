@@ -121,7 +121,7 @@ export default function NotificationsScreen() {
             accessibilityLabel="全部已讀"
             style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
           >
-            <Text fontSize={15} fontWeight="500" color="#626765">全部已讀</Text>
+            <Text fontSize={15} fontWeight="500" color="#8F9391">全部已讀</Text>
           </Pressable>
         </XStack>
       </YStack>
@@ -130,7 +130,7 @@ export default function NotificationsScreen() {
       {notifications.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" gap={16} paddingHorizontal={24} paddingBottom={80}>
           <AppIcon name="notification" size={48} color="#E8E9E9" />
-          <Text fontSize={16} fontWeight="600" color="#626765" textAlign="center">
+          <Text fontSize={16} fontWeight="600" color="#8F9391" textAlign="center">
             目前沒有通知
           </Text>
         </YStack>

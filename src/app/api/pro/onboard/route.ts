@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
   if (!display_name) return NextResponse.json({ error: '請輸入名稱' }, { status: 400 })
   if (!PHONE_REGEX.test(phone)) return NextResponse.json({ error: '手機號碼格式錯誤' }, { status: 400 })
-  if (!['male','female','non-binary'].includes(gender ?? '')) return NextResponse.json({ error: '請選擇性別' }, { status: 400 })
+  if (!['male','female','other','prefer_not'].includes(gender ?? '')) return NextResponse.json({ error: '請選擇性別' }, { status: 400 })
   if (!studio_address) return NextResponse.json({ error: '請輸入工作室地址' }, { status: 400 })
   if (!['nails','lashes','both'].includes(domain ?? '')) return NextResponse.json({ error: '請選擇服務類型' }, { status: 400 })
   if (portfolio_urls.length < 3) return NextResponse.json({ error: '至少需要 3 張作品照' }, { status: 400 })
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       portfolio_photos:         portfolio_urls,
       id_photo_path:           id_photo_path ?? null,
       submitted_at:            new Date().toISOString(),
+      verification_status:     'pending',
     })
     .eq('id', user.id)
 

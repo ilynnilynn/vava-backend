@@ -93,26 +93,27 @@ export default function WhenScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8 }}
           >
-            {dateOptions.map((opt) => (
-              <SelectionChip
-                key={opt.key}
-                label={opt.label}
-                subtitle={opt.subtitle}
-                selected={selectedDate === opt.key}
-                borderRadius={15}
-                onPress={() => {
-                  setSelectedDate(opt.key)
-                  if (opt.key === 'now') {
-                    setSelectedTimeBand(null)
-                  } else if (opt.key === todayKey && selectedTimeBand) {
-                    const tb = TIME_BANDS.find(t => t.key === selectedTimeBand)
-                    if (tb && currentHour >= tb.endsAt) setSelectedTimeBand(null)
-                  }
-                }}
-              />
-            ))}
+            <XStack gap={8}>
+              {dateOptions.map((opt) => (
+                <SelectionChip
+                  key={opt.key}
+                  label={opt.label}
+                  subtitle={opt.subtitle}
+                  selected={selectedDate === opt.key}
+                  borderRadius={15}
+                  onPress={() => {
+                    setSelectedDate(opt.key)
+                    if (opt.key === 'now') {
+                      setSelectedTimeBand(null)
+                    } else if (opt.key === todayKey && selectedTimeBand) {
+                      const tb = TIME_BANDS.find(t => t.key === selectedTimeBand)
+                      if (tb && currentHour >= tb.endsAt) setSelectedTimeBand(null)
+                    }
+                  }}
+                />
+              ))}
+            </XStack>
           </ScrollView>
         </YStack>
 
@@ -141,7 +142,7 @@ export default function WhenScreen() {
 
         {/* Hint when "now" selected */}
         {isNow && (
-          <Text fontSize={13} color="#626765">
+          <Text fontSize={13} color="#787D7B">
             選擇「現在」表示你希望在 2 小時內開始服務
           </Text>
         )}

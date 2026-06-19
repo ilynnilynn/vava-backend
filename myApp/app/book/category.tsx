@@ -44,7 +44,7 @@ export default function CategoryScreen() {
       totalSteps={6}
       hideBack
     >
-      <YStack gap={24} marginTop={-52}>
+      <YStack gap={24} flex={1} justifyContent="center">
         {CATEGORIES.map((cat) => {
           const isSelected = state.category === cat.key
           return (
@@ -57,7 +57,7 @@ export default function CategoryScreen() {
               style={({ pressed }) => ({ opacity: cat.disabled ? 0.5 : pressed ? 0.75 : 1 })}
             >
               <XStack
-                backgroundColor={isSelected ? '#1F2723' : '#FBFBF8'}
+                backgroundColor={isSelected ? '#1F2723' : '#F3F0EA'}
                 borderRadius={8}
                 height={100}
                 paddingHorizontal={20}
@@ -69,13 +69,12 @@ export default function CategoryScreen() {
                   width={48}
                   height={48}
                   borderRadius={12}
-                  backgroundColor={isSelected ? 'rgba(251,251,248,0.1)' : 'rgba(31,39,35,0.06)'}
                   alignItems="center"
                   justifyContent="center"
                 >
                   <AppIcon
                     name={cat.icon}
-                    size={22}
+                    size={24}
                     color={isSelected ? '#FBFBF8' : '#1F2723'}
                   />
                 </View>
@@ -90,7 +89,7 @@ export default function CategoryScreen() {
                     </Text>
                     {cat.badge && (
                       <View
-                        backgroundColor="#F9583B"
+                        backgroundColor="#FF5A3C"
                         borderRadius={5}
                         paddingHorizontal={6}
                         paddingVertical={2}
@@ -103,7 +102,7 @@ export default function CategoryScreen() {
                   </XStack>
                   <Text
                     fontSize={13}
-                    color={isSelected ? 'rgba(251,251,248,0.7)' : '#626765'}
+                    color={isSelected ? 'rgba(251,251,248,0.7)' : '#787D7B'}
                   >
                     {cat.subtitle}
                   </Text>
