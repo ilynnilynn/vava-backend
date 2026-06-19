@@ -31,6 +31,7 @@ function makePro(overrides: Partial<Pro> = {}): Pro {
     rejection_reasons: null,
     rejection_note: null,
     reviewed_at: null,
+    application_count: 1,
     subscription_status: 'free',
     confirmed_booking_count: 0,
     standing: 'good',
@@ -94,14 +95,15 @@ describe('deriveProStatus', () => {
   })
 
   // ── Reapply scenario: after re-submission, status returns to pending ──
-  it('returns "pending" after a rejected user reapplies', () => {
+  // Rejection data is preserved on reapply (not cleared) so admin can see history
+  it('returns "pending" after a rejected user reapplies (rejection data preserved)', () => {
     const pro = makePro({
       submitted_at: '2026-04-10T00:00:00Z', // fresh timestamp
       verification_status: 'pending',
       is_approved: false,
-      rejection_reasons: null, // cleared on reapply
-      rejection_note: null,
-      reviewed_at: null,
+      rejection_reasons: ['ID photo is unclear'], // preserved from previous decline
+      rejection_note: 'Please resubmit',          // preserved from previous decline
+      reviewed_at: '2026-04-05T00:00:00Z',        // preserved from previous review
     })
     expect(deriveProStatus(pro)).toBe('pending')
   })

@@ -101,6 +101,7 @@ export type Pro = {
   rejection_reasons: string[] | null   // admin decline reasons
   rejection_note: string | null        // admin notes on decline
   reviewed_at: string | null           // timestamp of admin review
+  application_count: number            // how many times pro has submitted. Starts at 1, incremented on reapply.
   subscription_status: SubscriptionStatus
   confirmed_booking_count: number  // counter. Triggers paywall at 10.
   standing: ProStanding            // computed from flags — stored for fast querying

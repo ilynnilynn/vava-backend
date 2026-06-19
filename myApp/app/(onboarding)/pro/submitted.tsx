@@ -51,6 +51,7 @@ export default function ProSubmittedScreen() {
 
     console.log(`[QA:Submit] id_photo_path=${draft.id_photo_path}`)
 
+    // Preserve rejection data on reapply — admin sees previous rejection reasons + application count
     const { error } = await supabase.from('pros').upsert({
       user_id: session.user.id,
       display_name: draft.display_name,
@@ -65,9 +66,6 @@ export default function ProSubmittedScreen() {
       is_approved: false,
       submitted_at: new Date().toISOString(),
       verification_status: 'pending',
-      rejection_reasons: null,
-      rejection_note: null,
-      reviewed_at: null,
     }, { onConflict: 'user_id' })
 
     if (error) {

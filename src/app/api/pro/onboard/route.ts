@@ -60,6 +60,13 @@ export async function POST(req: NextRequest) {
   // before the Phase 2 user_id fix.
   const admin = createAdminClient()
 
+  // Fetch current application_count to increment on reapply
+  const { data: currentPro } = await admin
+    .from('pros')
+    .select('application_count')
+    .eq('id', user.id)
+    .single()
+
   const { error: proError } = await admin
     .from('pros')
     .update({
@@ -75,9 +82,8 @@ export async function POST(req: NextRequest) {
       id_photo_path:           id_photo_path ?? null,
       submitted_at:            new Date().toISOString(),
       verification_status:     'pending',
-      // Clear rejection data on reapply so old decline reasons don't persist
-      rejection_reasons:       null,
-      rejection_note:          null,
+      // Preserve rejection data on reapply — admin sees previous rejection reasons + application count
+      application_count:       (currentPro?.application_count ?? 1) + 1,
     })
     .eq('id', user.id)
 

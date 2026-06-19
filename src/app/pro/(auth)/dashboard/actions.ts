@@ -194,9 +194,7 @@ export async function updateSettings(formData: {
         update.is_approved = false
         update.verification_status = 'pending'
         update.submitted_at = new Date().toISOString()
-        // Clear rejection data on reapply
-        update.rejection_reasons = null
-        update.rejection_note = null
+        // Preserve rejection data on re-review — admin sees previous rejection reasons + application count
       }
     }
   }

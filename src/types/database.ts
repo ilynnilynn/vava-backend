@@ -103,6 +103,7 @@ export type Pro = {
   rejection_reasons: string[] | null
   rejection_note: string | null
   reviewed_at: string | null
+  application_count: number         // how many times pro has submitted. Starts at 1, incremented on reapply.
   created_at: string
   updated_at: string
 }
